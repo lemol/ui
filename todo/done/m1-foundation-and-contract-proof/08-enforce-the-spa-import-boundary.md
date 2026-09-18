@@ -2,6 +2,8 @@
 title: Enforce the SPA import boundary
 tags: [test]
 depends_on: [6]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T04:16:14Z
 ---
 `test/boundaries.test.ts` — the allow and deny import lists for the three
 packages. It lands before any feature code so that it gates everything after it,

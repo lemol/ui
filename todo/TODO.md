@@ -2,7 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [08 - Enforce the SPA import boundary](./m1-foundation-and-contract-proof/08-enforce-the-spa-import-boundary.md)
 - [ ] [09 - Register the ui packages in the workspace composition root](./m1-foundation-and-contract-proof/09-register-the-ui-packages-in-the-workspace-composition-root.md)
 - [ ] [10 - ui-design: token schema, theme composition and v()](./m1-foundation-and-contract-proof/10-ui-design-token-schema-theme-composition-and-v.md)
 - [ ] [11 - ui-design/css: emitter, layers, reset and boot script](./m1-foundation-and-contract-proof/11-ui-design-css-emitter-layers-reset-and-boot-script.md)

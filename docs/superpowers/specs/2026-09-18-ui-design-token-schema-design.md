@@ -249,21 +249,25 @@ export interface Theme<C extends string = never> {
   readonly compact: Readonly<Partial<PrimitiveTokens & Record<C, string>>> | undefined
 }
 
-export function defineTheme<C extends string = never>(input: {
-  readonly base:     PrimitiveTokens & Readonly<Partial<Record<C, string>>>
-  readonly dark?:    Readonly<Partial<PrimitiveTokens & Record<C, string>>>
-  readonly compact?: Readonly<Partial<PrimitiveTokens & Record<C, string>>>
-}): Theme<C>
+export function defineTheme<C extends string = never>(
+  input: ThemeInput<NoInfer<C>>,
+): Theme<C>
 
 export function extendTheme<C extends string = never>(
   theme: Theme<C>,
-  overrides: {
-    readonly base?:    Readonly<Partial<PrimitiveTokens & Record<C, string>>>
-    readonly dark?:    Readonly<Partial<PrimitiveTokens & Record<C, string>>>
-    readonly compact?: Readonly<Partial<PrimitiveTokens & Record<C, string>>>
-  },
+  overrides: ThemeOverrides<NoInfer<C>>,
 ): Theme<C>
 ```
+
+**`NoInfer<C>` is load-bearing, not decoration.** Without it, TypeScript infers
+`C` from the argument, so `defineTheme({ base, dark: { nope: "x" } })` simply
+infers `C = "nope"` and accepts the garbage. The seam has to be supplied
+explicitly by `mini` or default to `never`; `NoInfer` is what forces that.
+`extendTheme` wraps only its `overrides` parameter, because `C` must still be
+inferred from the `theme` argument.
+
+This was caught by compiling the design, not by reading it — see "Already
+verified".
 
 - **`base` is total, `dark` and `compact` are partial.** A theme omitting `dark`
   typechecks — that is task 10's stated "done when", and it is what mionso's
@@ -332,11 +336,11 @@ change — this task adds no imports.
 
 ### Already verified
 
-The type expressions above were compiled against TypeScript 7 with this repo's
-flags (`--strict --exactOptionalPropertyTypes --noUncheckedIndexedAccess
---verbatimModuleSyntax`) on a cut-down three-group schema. Four assertions
-passed, the two negative ones via `@ts-expect-error`, which `tsc` reports as an
-error when the directive is unused:
+The whole design was written out against the real `tsconfig.json` and run
+before this spec was finalised: `bun run check` — lint, typecheck and test —
+came back green on all 93 tokens, and the files were then removed. Four type
+assertions hold, the two negative ones via `@ts-expect-error`, which `tsc`
+reports as an error when the directive is unused:
 
 1. A theme omitting `dark` compiles.
 2. A theme missing one primitive does not.
@@ -344,9 +348,20 @@ error when the directive is unused:
 4. A key in `dark` that is neither a primitive nor a component token does not
    compile.
 
-So `(typeof schema)[TokenGroup][number]` survives `as const` tuples and
-`noUncheckedIndexedAccess`, and the generic seam behaves. The risk left in
-implementation is the inventory itself, not the types.
+Two things were wrong on paper and are corrected above:
+
+- **Assertion 4 failed on the first attempt.** `C` was inferred from the
+  argument, so an unknown key just widened `C` instead of erroring. Fixed with
+  `NoInfer<C>`.
+- **`Object.freeze({ ...a, ...b })` does not typecheck under
+  `exactOptionalPropertyTypes`.** Spreading two partials produces optional
+  properties that include `undefined`, which the target rejects. The merge
+  helper carries one localised cast.
+
+`(typeof schema)[TokenGroup][number]` survives `as const` tuples and
+`noUncheckedIndexedAccess`. Biome reports no lint violations; it does reformat
+the schema arrays to one name per line, which makes `tokens.ts` about 112
+lines. The risk left in implementation is the inventory itself, not the types.
 
 ## Documents to correct
 

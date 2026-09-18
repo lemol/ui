@@ -46,8 +46,10 @@ describe("the reset", () => {
   })
 
   it("sizes every bare heading from the scale", () => {
-    // Derived from the same map the component's tokens default from, so this
-    // fails if either side is edited alone.
+    // Both this test and resetCss derive from headingScale, so editing the
+    // scale updates both and this stays green — it is not a drift check across
+    // packages. What it catches is reset.ts being rewritten to emit these rules
+    // by hand, or with a template that no longer matches the scale.
     for (const [level, name] of Object.entries(headingScale)) {
       expect(resetCss).toMatch(
         new RegExp(`:where\\(h${level}\\)\\s*\\{[^}]*font-size:\\s*var\\(--${name}\\)`),

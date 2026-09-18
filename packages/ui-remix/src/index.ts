@@ -1,3 +1,4 @@
+export type { HeadingLevel } from "@lemol/ui-design"
 export type { Align } from "./align.ts"
 export {
   Button,

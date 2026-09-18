@@ -26,7 +26,7 @@ export function HeadingDemo() {
     <>
       <p mix={label}>heading: one size per level, and a level that keeps its own</p>
       {demoLevels.map((level) => (
-        <div mix={row}>
+        <div key={level} mix={row}>
           <Heading level={level}>The quick brown fox jumps over the lazy dog</Heading>
         </div>
       ))}

@@ -37,14 +37,24 @@ describe("Eyebrow", () => {
     )
   })
 
-  it("keeps its own css() blocks property-disjoint", async () => {
+  it("renders a single block, so there is no order to get wrong", async () => {
+    // The disjointness check is the invariant a second block would need, and on
+    // its own it cannot fail here: one block has no second block to collide
+    // with, and sharedProperties de-dupes within a block. The count is what
+    // states Eyebrow's actual position — it declares everything in one place —
+    // and it is what breaks the day a second block appears, at which point the
+    // disjointness assertion below starts doing real work.
     const blocks = styleBlocksOf(await renderToHtml(<Eyebrow>Case study</Eyebrow>))
+    expect(blocks).toHaveLength(1)
     expect(sharedProperties(blocks)).toEqual([])
   })
 
   it("adds through mix a property it does not declare itself", async () => {
     const spaced = css({ marginBlockEnd: "var(--sp-2)" })
     const blocks = styleBlocksOf(await renderToHtml(<Eyebrow mix={spaced}>Case study</Eyebrow>))
+    expect(blocks.filter((block) => block.includes("margin-block-end: var(--sp-2)"))).toHaveLength(
+      1,
+    )
     expect(blocks.filter((block) => block.includes("margin-block-end:"))).toHaveLength(1)
   })
 })

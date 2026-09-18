@@ -1,5 +1,5 @@
 import { css } from "remix/ui"
-import { Text, type TextSize, type TextTone } from "./text.tsx"
+import { sizeStyles, Text, toneStyles } from "./text.tsx"
 
 /** Primitives, not tokens: a demo is a page, not a component. */
 const label = css({
@@ -17,8 +17,13 @@ const group = css({
   marginBlockEnd: "var(--sp-6)",
 })
 
-const sizes: TextSize[] = ["sm", "md", "lg"]
-const tones: TextTone[] = ["default", "muted", "subtle"]
+/**
+ * Derived from the Records text.tsx already exports. Exported so
+ * text.test.tsx asserts against what is rendered instead of a second copy of
+ * the list.
+ */
+export const sizes = Object.keys(sizeStyles) as (keyof typeof sizeStyles)[]
+export const tones = Object.keys(toneStyles) as (keyof typeof toneStyles)[]
 
 export function TextDemo() {
   return () => (
@@ -26,13 +31,17 @@ export function TextDemo() {
       <p mix={label}>text: three sizes</p>
       <div mix={group}>
         {sizes.map((size) => (
-          <Text size={size}>size {size}: the quick brown fox jumps over the lazy dog</Text>
+          <Text key={size} size={size}>
+            size {size}: the quick brown fox jumps over the lazy dog
+          </Text>
         ))}
       </div>
       <p mix={label}>text: three tones</p>
       <div mix={group}>
         {tones.map((tone) => (
-          <Text tone={tone}>tone {tone}: the quick brown fox jumps over the lazy dog</Text>
+          <Text key={tone} tone={tone}>
+            tone {tone}: the quick brown fox jumps over the lazy dog
+          </Text>
         ))}
       </div>
       <p mix={label}>text: inline, inside a sentence</p>

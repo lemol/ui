@@ -8,8 +8,12 @@ export type TextTone = "default" | "muted" | "subtle"
  * nothing an assistive technology reports, which is why this is not the
  * polymorphism question Container's spec deferred — one that could reach
  * `section` or `main` would be.
+ *
+ * The type comes from the list, not the other way around: a fourth tag added
+ * only to the union would compile, ship, and be covered by no test and no demo.
  */
-export type TextTag = "p" | "span" | "div"
+export const textTags = ["p", "span", "div"] as const
+export type TextTag = (typeof textTags)[number]
 
 /**
  * Leading only. font-size belongs to the size block and color to the tone
@@ -22,13 +26,13 @@ const textBase = css({
   lineHeight: "var(--ui-text-leading)",
 })
 
-const sizeStyles: Record<TextSize, CSSMixinDescriptor> = {
+export const sizeStyles: Record<TextSize, CSSMixinDescriptor> = {
   sm: css({ fontSize: "var(--ui-text-size-sm)" }),
   md: css({ fontSize: "var(--ui-text-size-md)" }),
   lg: css({ fontSize: "var(--ui-text-size-lg)" }),
 }
 
-const toneStyles: Record<TextTone, CSSMixinDescriptor> = {
+export const toneStyles: Record<TextTone, CSSMixinDescriptor> = {
   default: css({ color: "var(--ui-text-ink)" }),
   muted: css({ color: "var(--ui-text-ink-muted)" }),
   subtle: css({ color: "var(--ui-text-ink-subtle)" }),

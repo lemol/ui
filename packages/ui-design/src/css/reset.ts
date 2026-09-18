@@ -2,6 +2,17 @@ import { headingScale, schema } from "../tokens.ts"
 import { base } from "./layers.ts"
 
 /**
+ * One rule per heading element, derived rather than written out.
+ *
+ * Flat and separate, not a grouped :where() list, because each element takes a
+ * different size — and flat because a nested rule arrives at the browser broken
+ * when the sheet ships as style-element text.
+ */
+const headingSizeRules = Object.entries(headingScale)
+  .map(([level, name]) => `  :where(h${level}) {\n    font-size: var(--${name});\n  }`)
+  .join("\n\n")
+
+/**
  * Element defaults, in @layer base.
  *
  * A rule is admitted here only if it is cross-browser normalization with no
@@ -15,18 +26,6 @@ import { base } from "./layers.ts"
  * grouped selectors below are flat :where() lists for that reason, and the
  * same rule bans the child combinator.
  */
-
-/**
- * One rule per heading element, derived rather than written out.
- *
- * Flat and separate, not a grouped :where() list, because each element takes a
- * different size — and flat because a nested rule arrives at the browser broken
- * when the sheet ships as style-element text.
- */
-const headingSizeRules = Object.entries(headingScale)
-  .map(([level, name]) => `  :where(h${level}) {\n    font-size: var(--${name});\n  }`)
-  .join("\n\n")
-
 export const resetCss = base(`  *,
   *::before,
   *::after {

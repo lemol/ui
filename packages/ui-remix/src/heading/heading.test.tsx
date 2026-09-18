@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { type HeadingLevel, headingScale } from "@lemol/ui-design"
+import { resetCss } from "@lemol/ui-design/css"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../../test/styles.ts"
@@ -32,11 +33,14 @@ describe("Heading", () => {
     }
   })
 
-  it("declares a token for every size it reads", async () => {
-    // heading.tsx composes the size token name from a number, so this is what
-    // stops a level from reading a name the record does not hold.
-    const missing = levels.filter((level) => !(`ui-heading-${level}-size` in headingTokens))
-    expect(missing).toEqual([])
+  it("gives every level the size token headingScale names for it", () => {
+    // Tautological given today's derivation — sizeTokens in tokens.ts is built
+    // by Object.fromEntries over headingScale, so a level cannot be missing —
+    // but it starts working the day that derivation is replaced by a literal
+    // record, which is why it asserts the value and not just the key's presence.
+    for (const level of levels) {
+      expect(headingTokens[`ui-heading-${level}-size`]).toBe(`var(--${headingScale[level]})`)
+    }
   })
 
   it("emits exactly one font-size block, default included", async () => {
@@ -91,6 +95,21 @@ describe("Heading", () => {
       ),
     )
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
+    expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
+  })
+
+  it("gives a wrapped heading the same weight, tracking and leading as a bare one", () => {
+    // font-size derives from headingScale on both sides, which is prevention:
+    // one map, so a level cannot drift. weight, tracking and leading cannot be
+    // derived the same way — the reset rule is a grouped selector list, not
+    // data — so this test is detection standing in for the prevention that
+    // isn't available here.
+    for (const [token, property] of [
+      ["ui-heading-weight", "font-weight"],
+      ["ui-heading-tracking", "letter-spacing"],
+      ["ui-heading-leading", "line-height"],
+    ] as const)
+      expect(resetCss).toContain(`${property}: ${headingTokens[token]}`)
   })
 })
 

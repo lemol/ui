@@ -2,12 +2,11 @@ import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../../test/styles.ts"
-import { TextDemo } from "./text.demo.tsx"
-import { Text, type TextSize, type TextTag, type TextTone } from "./text.tsx"
+import { sizes, TextDemo, tones } from "./text.demo.tsx"
+import { Text, textTags } from "./text.tsx"
 
-const sizes: TextSize[] = ["sm", "md", "lg"]
-const tones: TextTone[] = ["default", "muted", "subtle"]
-const tags: TextTag[] = ["p", "span", "div"]
+/** Derived, not restated: a tag textTags gains is a tag this loop covers. */
+const tags = textTags
 
 describe("Text", () => {
   it("renders a p by default, carrying its children", async () => {

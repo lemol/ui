@@ -2,6 +2,8 @@
 title: 'Layout: Stack, Row, Grid and Container'
 tags: [ui-remix]
 depends_on: [12]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T20:43:42Z
 ---
 `Stack`, `Row`, `Grid`, `Container` — and the point of this task is that they
 declare **no tokens of their own**. They stress the contract from the opposite

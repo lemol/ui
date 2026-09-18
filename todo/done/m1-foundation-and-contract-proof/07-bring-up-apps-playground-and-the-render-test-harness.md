@@ -2,6 +2,8 @@
 title: Bring up apps/playground and the render-test harness
 tags: [playground, remix]
 depends_on: [6]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T04:11:24Z
 ---
 `apps/playground` as a Remix 3 app with one server-rendered route, plus the
 `remix/ui/server` test harness every component test will copy.

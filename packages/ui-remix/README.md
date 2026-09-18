@@ -20,8 +20,48 @@ the bundle pulls the component library in behind it.
 
 ## Catalogue
 
-Documented here as components land, so that this section describes components
-that exist rather than components that are planned.
+### `Button` / `LinkButton`
+
+`Button` renders a `<button>`, defaulting `type` to `"button"` because a bare
+button inside a form submits it. `LinkButton` renders an `<a>` and requires
+`href`: `aria-disabled` on an anchor does not prevent navigation, so a disabled
+link is a broken link.
+
+Two axes, thirty-one tokens in `button/tokens.ts`:
+
+| Axis | Values | Comes from |
+| --- | --- | --- |
+| `tone` | `primary`, `neutral`, `ghost`, `danger` | `--ui-btn-<tone>-{bg,ink,border,bg-hover}` |
+| `size` | `md`, `sm` | `--control-h` and `--control-h-sm`, so density reaches it |
+
+Neither component styles focus. The reset owns the ring, and it applies because
+nothing in the component competes with it. `:active` reuses the hover
+background. Disabled is three tone-independent tokens rather than an opacity
+ratio, and its override sits inside each tone's own `css()` block rather than
+in the shared base block — see
+[design-system.md](../../docs/design-system.md#cascade-layers) for why a
+`css()` call's sub-layer, not just its specificity, decides which declaration
+wins.
+
+Tone backgrounds use the `background` shorthand, so a skin may set
+`--ui-btn-<tone>-bg` to a gradient — `background-color` would drop a gradient
+as invalid. Gradients do not interpolate, so a gradient skin swaps instantly on
+hover while the flat default transitions.
+
+### `ThemeStyle`
+
+Renders `emitTokensCss()`'s string into the document, defaulting to this
+package's aggregate:
+
+```tsx
+<ThemeStyle theme={miniTheme} />
+```
+
+**It belongs in `<head>`.** `remix/ui` splices its own component styles in
+immediately before `</head>`, so a `ThemeStyle` in the body is evaluated after
+the `rmx` layer exists — and `@layer base, rmx;` then registers `base` after
+it, inverting the order with no error. See
+[design-system.md](../../docs/design-system.md#delivery).
 
 ## Limits
 
@@ -65,5 +105,7 @@ transitions.
 
 ## Status
 
-Scaffold. `src/` holds stubs; the components arrive across M1 tasks 12–17,
-which also fill in the catalogue above.
+`Button`, `LinkButton` and `ThemeStyle` ship. `src/tokens.ts` aggregates the
+component records and exports `ComponentTokenName`; `src/demos.ts` registers
+one demo. `runtime.ts` and `compat.ts` are still stubs — nothing here needs
+client JavaScript yet.

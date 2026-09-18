@@ -41,6 +41,13 @@ one token and never touching the component:
   "linear-gradient(180deg, var(--accent-highlight), var(--accent) 65%, var(--accent-bronze))",
 ```
 
+A default that cannot name a primitive is an exception, not a pattern.
+`--ui-btn-border-width: 1px` is the only one at present: `hairline` is a
+colour, there is no border-width primitive, and one property does not justify
+widening a schema every theme has to satisfy. The exception is allow-listed in
+`ui-remix/src/tokens.test.ts` rather than tolerated, so adding a second one
+means editing a list and arguing for it.
+
 **Naming.** Ramps you do arithmetic on are numeric, and the number is a
 multiplier: `sp-4` is four 4px units. Sets you choose from are t-shirt sized:
 `r-md`, `fs-lg`, `dur-fast`. Space is the only ramp, so this is one rule with
@@ -58,6 +65,12 @@ mix ratio, it would move it into the component, where a literal `12%` is the
 same kind of bug as a literal `200ms`: correct today, and impossible to retune
 centrally. A theme that wants derived values may compute them itself; that is
 a theme's business.
+
+**Interactive colours get a `-hover`; status colours do not.** `accent`, `link`
+and `danger` are the colours something hovers, so each names its own hover
+value. `success`, `warning` and `info` are read on static elements — a badge,
+not a button — and get none until something needs one. A component deriving a
+hover from a fill is the same violation as deriving a subtle from a tone.
 
 ## Emission order
 
@@ -136,16 +149,31 @@ selector-precedence story for combinations that do not yet exist.
 
 ## Delivery
 
-`ThemeStyle` renders the emitted sheet:
+`ThemeStyle` renders the emitted sheet, and it belongs in `<head>`:
 
 ```tsx
-<ThemeStyle theme={miniTheme} componentTokens={componentTokens} />
+<ThemeStyle theme={miniTheme} />
 ```
 
-A `<style>` element is valid in the body and applies document-wide, so this
-works in server mode and inside the SPA tree with no special casing.
-`emitTokensCss()` stays exported for anyone who prefers to write a static file
-and link it.
+**The placement is load-bearing.** `remix/ui` collects every `css({...})` rule
+and splices the resulting `<style>` elements in immediately before `</head>` —
+after all authored head content, before anything in the body. A `ThemeStyle` in
+the body is therefore evaluated after `@layer rmx.*` already exists, and
+`@layer base, rmx;` then registers `base` at the *end* of the order rather than
+the front, because a layer statement cannot move a layer that exists. Element
+defaults start beating components, with no error at all.
+
+A `<style>` element in the body is valid CSS and does apply document-wide; it
+is the layer order, not the stylesheet, that body placement breaks.
+
+A runtime assertion cannot catch it. `ThemeStyle` renders during the tree walk
+and remix injects its style elements afterwards, so at render time there is no
+remix style element to detect. The guard is a render test asserting that
+`@layer base, rmx;` precedes the first `data-rmx-style` in the document.
+
+`emitTokensCss()` stays exported for anyone who prefers a static file, and
+`layerStatement` is exported separately for an SPA that wants the statement in
+`index.html` and the token blocks in the app tree.
 
 This also avoids two traps `@mionso/design` carries from injecting a template
 literal as `<style>` text, both pinned by tests there: no backticks anywhere in
@@ -201,6 +229,25 @@ remix's stylesheet is evaluated before the emitted sheet, `rmx` already exists
 and our statement appends `base` after it — inverting the order with no error,
 so element defaults start beating components. The emitted sheet has to reach
 the document first.
+
+**`rmx` is not one layer; every `css({...})` call gets its own sub-layer.**
+The emitted style element reads `@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }`,
+one such block per call site. Within cascade layers, layer order beats
+specificity — a rule in an earlier sub-layer loses to a rule in a later one no
+matter how specific it is. A `&:disabled` override sitting in one `css()`
+block can therefore lose to a plain `color` declaration in a different
+`css()` block, if that block's sub-layer happens to register second, even
+though `:disabled` is the more specific selector. **When one `css()` block
+must override another on the same element, put both declarations in the same
+block** — relying on specificity across two `css()` calls does not work, no
+matter which one is written second.
+
+Sub-layer order follows render order, not source order, and reordering the
+component's `mix` array does not fix it: registration happens the first time
+a given `css()` call is encountered during the render, so a page whose first
+button happens to be disabled registers the disabled block before any tone
+block, and the bug reappears on every other page regardless of how `mix` is
+written.
 
 **When you add a global element default, put it in `@layer base`.** Reach for
 unlayered only when a rule must override a component, and say why in a comment.

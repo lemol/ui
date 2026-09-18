@@ -18,6 +18,11 @@ growing its own.
 `/css` is a separate subpath so that taking the schema does not mean taking the
 stylesheet with it.
 
+Interactive colours name their own hover value — `accent-hover`, `link-hover`,
+`danger-hover`. Status colours do not: `success`, `warning` and `info` are read
+on static elements, and a component deriving a hover from a fill is the
+violation the two-tier split exists to prevent.
+
 ## Limits
 
 - **No components, and no JSX.** The component that puts an emitted sheet into
@@ -38,7 +43,7 @@ order, typing, themes and the cascade layers.
 
 ## Status
 
-`@lemol/ui-design` holds 95 primitive names across seven groups, and no values.
+`@lemol/ui-design` holds 96 primitive names across seven groups, and no values.
 `@lemol/ui-design/css` emits the stylesheet: the layer statement, a block per
 variant axis, the element defaults, the one unlayered rule, and the
 reduced-motion reset.

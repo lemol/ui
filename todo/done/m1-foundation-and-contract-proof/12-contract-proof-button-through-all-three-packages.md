@@ -2,6 +2,7 @@
 title: 'Contract proof: Button through all three packages'
 tags: [ui-remix, contract]
 depends_on: [7, 11]
+completed_at: 2026-09-18T17:04:07Z
 ---
 The load-bearing task of M1: `Button` / `LinkButton` styled only through
 `--ui-btn-*`, the aggregator, `ThemeStyle`, `mini`'s theme, the cross-package

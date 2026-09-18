@@ -128,6 +128,41 @@ opposite of a buried one, because a skin can still change it.
 non-`var()` values rather than rejecting all of them. The allow-list is short
 and every entry has to be argued for in review, which is the point.
 
+### 5. `remix/ui` sub-layers every `css()` call, and layer order beats specificity within them
+
+Found by manual browser check during task closeout, after thirteen
+`button.test.tsx` tests had already passed. `remix/ui` gives every `css({...})`
+call its own cascade sub-layer — the emitted style element reads
+`@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }`, one block per call site — and
+within cascade layers, layer order beats specificity regardless of how
+specific either rule is.
+
+`Button`'s `&:disabled` override originally lived in `buttonBase`, and the
+tone colours lived in a separate per-tone `css()` block. `buttonBase`'s
+sub-layer registers before the tone's, so `.tone { color: … }` beat
+`.base:disabled { color: … }` and a disabled button rendered in its tone's
+colours instead of the disabled ones — a real, user-visible bug that every
+existing render test missed, because they only asserted the disabled
+declarations were present *somewhere* in the document, not which sub-layer
+they landed in relative to the tone. Fixed in commit `4a3b0ea` by moving the
+`:disabled` override into each tone's own `css()` block, so both sit in one
+sub-layer where ordinary specificity decides.
+
+The trap this leaves behind: reordering the `mix` array does not fix it.
+Sub-layer registration order follows render order, not `mix` order — a page
+whose first rendered button happens to be disabled registers a trailing
+disabled block ahead of any tone block, and the bug returns regardless of how
+`mix` is written. The rule that generalizes, now recorded in
+`docs/design-system.md`'s "Cascade layers" section: when one `css()` block
+must override another on the same element, put both declarations in the same
+block. Two new tests in `button.test.tsx` pin the fix: one asserts the
+disabled declarations live in the same block as the tone's, the other asserts
+`buttonBase`'s own block does not carry `:disabled` at all.
+
+So "writing it found four things that were wrong" is now five, and the fifth
+is the highest-value one — it is a document-worthy fact about `remix/ui`
+itself, not something specific to Button.
+
 ## Button's surface
 
 ### Sizes are `sm` and `md`, because the schema says so
@@ -319,6 +354,22 @@ thing it guarded against are separate changes.
 is still structurally assignable to `Theme<ComponentTokenName>`, because the
 component-token half of `Base<C>` is `Partial`, so an app with extra tokens
 passes its theme in and supplies the wider record through `componentTokens`.
+
+**Correction to this spec's original test description.** This spec and the
+plan (`theme-style.test.tsx`, step 1) originally described a test asserting the
+rendered HTML "carries the emitter's string verbatim" as the check that
+escaping is not happening. During implementation that test was found unable to
+distinguish `innerHTML` from text children: `emitTokensCss()` already bans `&`,
+`<` and `>`, so a sheet with neither `innerHTML` nor a text-child rewrite would
+render byte-identical HTML either way, and the "verbatim" test would pass
+regardless of which one shipped. It was checking the output string, not the
+choice this section argues for. Two stronger tests were added in commit
+`c4548b5` instead: one inspects the `RemixElement` `ThemeStyle` builds directly
+and asserts `innerHTML` is set with no `children`, and one pins the escaping
+asymmetry itself — that remix escapes `&`, `<` and `>` in text children but not
+in `innerHTML` — using a literal string carrying those characters rather than
+`emitTokensCss()`'s output. The plan is left as written; this is the record of
+where the shipped test diverged from it.
 
 ## mini's theme
 

@@ -30,6 +30,12 @@ One subpath, deliberately.
 - **It adds no component tokens of its own.** A design here is a set of values
   for the contract `@lemol/ui-remix` already declares. If something cannot be
   expressed that way, the missing token belongs in the component, not here.
+- **Write every `ui-*` override as a literal key in the `defineTheme` call.**
+  Excess property checking only fires on object literals, so an override moved
+  behind a spread or a referenced object is not checked at all — and the rename
+  check then passes on a token name that no longer exists, surfacing as an
+  unstyled control instead of a compiler error. `theme.test.ts` pins this with a
+  `@ts-expect-error` whose directive goes unused the day it stops working.
 - **No build step, and `remix` is the only peer.**
 
 ## Reading
@@ -40,4 +46,9 @@ theme composes.
 
 ## Status
 
-Scaffold. `src/` holds stubs; the theme and the shell land with M1 task 18.
+`miniTheme` ships: ninety-six primitives, a `dark` axis and the four-token
+`compact` swap. Warm-grey neutrals, a deep teal accent, and a focus hue
+deliberately unlike the accent so the ring reads on an accent-filled button.
+
+The shell — `Document`, `AppShell`, `Nav`, `EmptyState`, `ErrorState` — is not
+written yet.

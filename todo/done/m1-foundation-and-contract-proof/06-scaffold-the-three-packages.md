@@ -1,6 +1,8 @@
 ---
 title: Scaffold the three packages
 tags: [scaffold]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T03:43:47Z
 ---
 Create the three package skeletons: `package.json`, a per-package `tsconfig.json`,
 and an empty `src/index.ts`. No bundler and no build step — the packages ship

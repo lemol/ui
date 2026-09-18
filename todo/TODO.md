@@ -2,7 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [06 - Scaffold the three packages](./m1-foundation-and-contract-proof/06-scaffold-the-three-packages.md)
 - [ ] [07 - Bring up apps/playground and the render-test harness](./m1-foundation-and-contract-proof/07-bring-up-apps-playground-and-the-render-test-harness.md)
 - [ ] [08 - Enforce the SPA import boundary](./m1-foundation-and-contract-proof/08-enforce-the-spa-import-boundary.md)
 - [ ] [09 - Register the ui packages in the workspace composition root](./m1-foundation-and-contract-proof/09-register-the-ui-packages-in-the-workspace-composition-root.md)

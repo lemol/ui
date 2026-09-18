@@ -2,7 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [11 - ui-design/css: emitter, layers, reset and boot script](./m1-foundation-and-contract-proof/11-ui-design-css-emitter-layers-reset-and-boot-script.md)
 - [ ] [12 - Contract proof: Button through all three packages](./m1-foundation-and-contract-proof/12-contract-proof-button-through-all-three-packages.md)
 - [ ] [13 - Layout: Stack, Row, Grid and Container](./m1-foundation-and-contract-proof/13-layout-stack-row-grid-and-container.md)
 - [ ] [14 - Typography: Heading, Text, Eyebrow and the type scale](./m1-foundation-and-contract-proof/14-typography-heading-text-eyebrow-and-the-type-scale.md)

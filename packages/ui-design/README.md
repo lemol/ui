@@ -13,7 +13,7 @@ growing its own.
 | Import | Holds |
 | --- | --- |
 | `@lemol/ui-design` | The primitive token schema, `defineTheme` / `extendTheme`, and `v()` — the typed token reference. |
-| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer base, rmx` setup, element defaults, and `bootScript`. |
+| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer base, rmx` setup, the element defaults, the reduced-motion reset, and `schemeBootScript`. |
 
 `/css` is a separate subpath so that taking the schema does not mean taking the
 stylesheet with it.
@@ -38,9 +38,12 @@ order, typing, themes and the cascade layers.
 
 ## Status
 
-`@lemol/ui-design` is implemented: 93 primitive names across seven groups, and
-no values.
+`@lemol/ui-design` holds 95 primitive names across seven groups, and no values.
+`@lemol/ui-design/css` emits the stylesheet: the layer statement, a block per
+variant axis, the element defaults, the one unlayered rule, and the
+reduced-motion reset.
 
-`@lemol/ui-design/css` is not. `emitTokensCss()`, the cascade layers, the reset
-and `bootScript` are stubs, so the entry-point table above describes the
-contract that subpath will hold rather than what it currently does.
+Two things the entry table above deliberately does not hold: the component that
+puts an emitted sheet into a document, and the boot script that also stamps the
+JS-enhanced marker. Both need to know what a component is, so both live in
+`@lemol/ui-remix`.

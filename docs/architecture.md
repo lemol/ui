@@ -32,8 +32,8 @@ packages/
     src/ref.ts              v() -- typed token reference
     src/css/emit.ts         emitTokensCss() -> string
     src/css/layers.ts       @layer base, rmx
-    src/css/boot.ts         bootScript (no-flash scheme and density restore)
-    src/css/reset.ts        element defaults, in @layer base
+    src/css/boot.ts         schemeBootScript (no-flash scheme and density restore)
+    src/css/reset.ts        element defaults in @layer base, and the reduced-motion reset
   ui-remix/
     src/button/             button.tsx + tokens.ts + button.demo.tsx + test
     src/dialog/             …one directory per component

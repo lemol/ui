@@ -2,6 +2,8 @@
 title: 'ui-design/css: emitter, layers, reset and boot script'
 tags: [ui-design, css]
 depends_on: [10]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T15:03:39Z
 ---
 `src/css/emit.ts`, `layers.ts`, `reset.ts`, `boot.ts` — the opt-in `/css`
 subpath. `emitTokensCss()` returns CSS text, never a component.

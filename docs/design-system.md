@@ -92,10 +92,14 @@ The engine knows exactly two variant axes.
 ```ts
 export const miniTheme = defineTheme({
   base: {
+    "scheme-mode": "light",
     canvas: "#FBFBFA", surface: "#FFFFFF", ink: "#111111", hairline: "#EAEAEA",
-    // … and the other 89 primitives
+    // … and the other 90 primitives
   },
-  dark:    { canvas: "#191919", surface: "#242424", ink: "#F4F4F0", hairline: "#3A3A3A" },
+  dark: {
+    "scheme-mode": "dark",
+    canvas: "#191919", surface: "#242424", ink: "#F4F4F0", hairline: "#3A3A3A",
+  },
   compact: { "control-h": "28px", "row-h": "32px" },
 })
 ```
@@ -120,6 +124,11 @@ Which emits:
 - **Density.** A four-token swap — `--control-h`, `--control-h-sm`, `--row-h`,
   `--row-pad-y`. Every control and table row reads those, so one attribute
   retunes the whole app without a single component knowing density exists.
+- **`scheme-mode`** is the value `color-scheme` takes; the reset reads it as
+  `color-scheme: var(--scheme-mode)`. A theme with a `dark` axis must set it in
+  both, or the page pairs dark colours with light form controls and scrollbars.
+  The emitter cannot infer it — a dark-only theme has no `dark` axis to infer
+  from — which is why it is a token rather than a rule.
 
 A third axis (contrast, brand) waits until something needs one. A general
 named-modes mechanism was rejected: it would require designing a
@@ -144,11 +153,26 @@ the sheet, including comments, because they terminate the template literal; and
 no `<`, `>` or `&`, because the renderer escapes them, so a child combinator
 would ship as `&gt;` and silently break its rule.
 
-`bootScript` stays inline in the document — `<head>` on the server,
-`index.html` in SPA. It stamps the enhanced marker and restores the remembered
-scheme and density before the first paint, so nothing reflows. It is wrapped in
+`emitTokensCss()` enforces both on the values it is handed: a name or value
+carrying a backtick, `<`, `>`, `&`, `{` or `}` throws, naming the token and the
+character, because the alternative is a declaration that dies with no error at
+all. The same rule means **no CSS nesting anywhere in the sheet** — `&` is
+escaped like any other character, so a nested rule ships broken. Grouped
+selectors are flat `:where(...)` lists.
+
+`schemeBootScript` stays inline in the document — `<head>` on the server,
+`index.html` in SPA. It restores the remembered scheme and density before the
+first paint, so nothing reflows, reading `lemol-ui:scheme` and
+`lemol-ui:density`. Both are exported as `schemeStorageKey` and
+`densityStorageKey`, so a switcher cannot drift from what the script reads, and
+the values are allow-listed rather than written through. It is wrapped in
 `try`/`catch`, because a private window that refuses `localStorage` must not
 take the page down.
+
+Stamping the JS-enhanced marker is `ui-remix`'s job: the marker exists to hide
+no-JS fallbacks, which is a component concern in the package that knows what a
+component is. `ui-remix` concatenates this script and exports the composed
+string, so a document still inlines one.
 
 ## Cascade layers
 
@@ -172,6 +196,12 @@ The emitted sheet therefore opens with
 and puts every element default inside `@layer base`. Base loses to components;
 components lose to nothing.
 
+**Layer order is fixed by the first `@layer` statement the browser sees.** If
+remix's stylesheet is evaluated before the emitted sheet, `rmx` already exists
+and our statement appends `base` after it — inverting the order with no error,
+so element defaults start beating components. The emitted sheet has to reach
+the document first.
+
 **When you add a global element default, put it in `@layer base`.** Reach for
 unlayered only when a rule must override a component, and say why in a comment.
 One such rule is load-bearing:
@@ -183,6 +213,10 @@ One such rule is load-bearing:
 The user agent's own `[hidden]` rule loses to any author `display`, and most
 components set one — so without this, toggling `element.hidden` from the
 runtime silently does nothing.
+
+That is the only unlayered rule `ui-design` ships. The other one in this system
+— hiding a no-JS fallback once the runtime is live — comes from `ui-remix` with
+the marker it reads.
 
 ## Adding a token
 

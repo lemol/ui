@@ -66,8 +66,15 @@ needing Safari 17.5 does not push our 17.0 floor up.
 
 ## Reduced motion
 
-`prefers-reduced-motion: reduce` zeroes every animation and transition duration
-**globally**, in the emitted sheet, so no component opts in individually.
+`prefers-reduced-motion: reduce` zeroes **every duration token** in the emitted
+sheet, so no component opts in individually. Token zeroing rather than a
+universal `*` override, because it also reaches the `::view-transition-*`
+pseudo-elements a universal selector cannot match — and those animate the whole
+viewport.
+
+The consequence is deliberate: CSS that hard-codes a duration keeps animating.
+That is a violation of the token contract, and finding it this way beats
+masking it.
 
 Do not fight that media query from inside a component. If an interaction is
 unusable without motion, the interaction is the problem.

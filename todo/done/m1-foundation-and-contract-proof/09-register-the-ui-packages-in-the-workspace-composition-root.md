@@ -2,6 +2,8 @@
 title: Register the ui packages in the workspace composition root
 tags: [workspace]
 depends_on: [6]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T04:27:06Z
 ---
 Make `repos/ui` visible to the workspace.
 

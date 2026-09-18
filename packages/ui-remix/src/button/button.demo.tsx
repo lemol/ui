@@ -1,0 +1,50 @@
+import { css } from "remix/ui"
+import { Button, type ButtonSize, type ButtonTone, LinkButton } from "./button.tsx"
+
+const tones: ButtonTone[] = ["primary", "neutral", "ghost", "danger"]
+const sizes: ButtonSize[] = ["md", "sm"]
+
+/**
+ * The demo is styled from primitives rather than from Button's own tokens: it
+ * is a page, not a component, and the layout components that would own this
+ * spacing arrive in task 13.
+ */
+const row = css({
+  display: "flex",
+  flexWrap: "wrap",
+  alignItems: "center",
+  gap: "var(--sp-3)",
+  marginBlockEnd: "var(--sp-4)",
+})
+
+const label = css({
+  fontSize: "var(--fs-xs)",
+  color: "var(--ink-subtle)",
+  letterSpacing: "var(--tr-wide)",
+  textTransform: "uppercase",
+})
+
+export function ButtonDemo() {
+  return () => (
+    <>
+      {sizes.map((size) => (
+        <div key={size}>
+          <p mix={label}>size {size}</p>
+          <div mix={row}>
+            {tones.map((tone) => (
+              <Button key={tone} size={size} tone={tone}>
+                {tone}
+              </Button>
+            ))}
+            <Button disabled size={size}>
+              disabled
+            </Button>
+            <LinkButton href="#" size={size} tone="primary">
+              link
+            </LinkButton>
+          </div>
+        </div>
+      ))}
+    </>
+  )
+}

@@ -1,6 +1,7 @@
 import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
+import { ButtonDemo } from "./button.demo.tsx"
 import { Button, type ButtonSize, type ButtonTone, LinkButton } from "./button.tsx"
 import { buttonTokens } from "./tokens.ts"
 
@@ -128,5 +129,15 @@ describe("LinkButton", () => {
       ),
     )
     expect(styles).toContain("var(--ui-btn-primary-bg)")
+  })
+})
+
+describe("ButtonDemo", () => {
+  it("renders every tone in both sizes", async () => {
+    const html = await renderToHtml(<ButtonDemo />)
+    for (const tone of tones) expect(html).toContain(`>${tone}</button>`)
+    expect(html).toContain("size md")
+    expect(html).toContain("size sm")
+    expect(html).toContain("disabled")
   })
 })

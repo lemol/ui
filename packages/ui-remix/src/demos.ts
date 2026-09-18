@@ -1,1 +1,19 @@
-export {}
+import { ButtonDemo } from "./button/button.demo.tsx"
+
+/**
+ * The catalogue's source of truth. A demo lives beside the component it
+ * demonstrates and is registered here, so a component cannot be catalogued
+ * from anything but its own source.
+ */
+export const demos = {
+  button: { title: "Button", Demo: ButtonDemo },
+} as const
+
+export type DemoName = keyof typeof demos
+
+/** One catalogue entry, so a consumer need not spell out a lookup into `demos`. */
+export type DemoEntry = (typeof demos)[DemoName]
+
+export function isDemoName(name: string): name is DemoName {
+  return Object.hasOwn(demos, name)
+}

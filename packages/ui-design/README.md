@@ -38,5 +38,6 @@ order, typing, themes and the cascade layers.
 
 ## Status
 
-Scaffold. `src/` holds stubs; the schema, `defineTheme` and `v()` land with M1
-task 10, and the emitter, layers, reset and boot script with task 11.
+The schema, `defineTheme` / `extendTheme` and `v()` have landed (M1 task 10):
+93 primitive names across seven groups, and no values. The emitter, cascade
+layers, reset and boot script on `/css` are still stubs and land with task 11.

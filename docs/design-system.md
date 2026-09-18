@@ -41,6 +41,24 @@ one token and never touching the component:
   "linear-gradient(180deg, var(--accent-highlight), var(--accent) 65%, var(--accent-bronze))",
 ```
 
+**Naming.** Ramps you do arithmetic on are numeric, and the number is a
+multiplier: `sp-4` is four 4px units. Sets you choose from are t-shirt sized:
+`r-md`, `fs-lg`, `dur-fast`. Space is the only ramp, so this is one rule with
+one exception to remember.
+
+The 4px base is a resolution, not a constraint — a theme on an 8px grid uses
+the even steps. The multiplier is not enforced by the compiler, because the
+schema holds no values; it is checked by a test in the package that supplies
+them.
+
+**A component token default must not contain `color-mix()`.** Semantic tones
+are named in full — `<tone>`, `<tone>-ink`, `<tone>-subtle`, `<tone>-border` —
+so a component never derives one from another. Deriving would not remove the
+mix ratio, it would move it into the component, where a literal `12%` is the
+same kind of bug as a literal `200ms`: correct today, and impossible to retune
+centrally. A theme that wants derived values may compute them itself; that is
+a theme's business.
+
 ## Emission order
 
 `ui-remix/src/tokens.ts` aggregates every component's record and exports the
@@ -162,9 +180,11 @@ runtime silently does nothing.
 
 ## Adding a token
 
-**A primitive:** put the value in the right record in
-`ui-design/src/tokens.ts`. Nothing else — the flattener picks it up and the
-name union widens, so `v("your-token")` typechecks immediately.
+**A primitive:** add the **name** to the right group in
+`ui-design/src/tokens.ts`. That package holds no values. The name union
+widens, so `v("your-token")` typechecks immediately, and every theme then
+fails to compile until it supplies a value — which is the intended prompt,
+not an obstacle.
 
 **A component token:** put it in that component's `tokens.ts`, defaulting to a
 primitive. The aggregate in `ui-remix/src/tokens.ts` picks it up and themes can

@@ -2,6 +2,8 @@
 title: 'ui-design: token schema, theme composition and v()'
 tags: [ui-design]
 depends_on: [6]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T06:02:32Z
 ---
 `src/tokens.ts`, `src/theme.ts`, `src/ref.ts`. Strings and data only — nothing
 here is a component, which is precisely what lets a future `ui-opentui` share

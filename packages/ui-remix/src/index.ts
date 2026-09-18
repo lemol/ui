@@ -7,6 +7,7 @@ export {
   LinkButton,
   type LinkButtonProps,
 } from "./button/button.tsx"
+export { type ColumnCount, Grid, type GridProps } from "./grid/grid.tsx"
 export { type Justify, Row, type RowProps } from "./row/row.tsx"
 export type { SpaceStep } from "./space.ts"
 export { Stack, type StackProps } from "./stack/stack.tsx"

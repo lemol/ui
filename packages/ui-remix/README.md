@@ -71,7 +71,7 @@ none of them appears in `src/tokens.ts` and a skin retunes them by changing the
 primitives they read — the space scale, `--page-max`, `--gutter` — rather than
 the components.
 
-| Component | Props | Declares |
+| Component | Layout props | Declares |
 | --- | --- | --- |
 | `Stack` | `gap`: a space step. `align`: `start`, `center`, `end`, `baseline`, `stretch` | `display: flex`, `flex-direction: column` |
 | `Row` | `gap` and `align` as above. `justify`: `start`, `center`, `end`, `between`, `around`, `evenly`. `wrap`: a boolean | `display: flex` |

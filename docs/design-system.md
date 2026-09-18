@@ -9,10 +9,11 @@ tokens; the tokens are the part that must not drift.
 `--ink-muted`, `--sp-4`, `--r-md`, `--dur-fast`. A theme supplies their values.
 
 **Component tokens** are the retheming surface — `--ui-btn-primary-bg`,
-`--ui-field-border`, `--ui-dialog-surface`. A component that has a retheming
-surface declares its own, defaulting relationally to a primitive; a component
-whose every value is a structural keyword or a primitive the caller chose
-declares none, and the layout components are that case:
+`--ui-field-border`, `--ui-dialog-surface`. A component whose every value is a
+structural keyword or a primitive — one a theme sets, or one a caller picks off
+a scale — declares none; the layout components are all four of them. A
+component with something to retheme declares its own, defaulting relationally
+to a primitive:
 
 ```ts
 // ui-remix/src/button/tokens.ts

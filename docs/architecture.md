@@ -114,7 +114,10 @@ single gate for every change.
 
 ## Testing
 
-- A **server-render test per component**, via `remix/ui/server`.
+- A **server-render test per component**, via `remix/ui/server` — `test/render.ts`
+  is the harness, and `apps/playground/app/ui/home.test.tsx` the worked example.
+  It reaches for no router, no asset server and no DOM, because `remix/ui/server`
+  is inside the import allow-list and the other three are not.
 - **Browser tests for the runtime behaviours only.** A DOM shim would be
   testing the shim, which is the same conclusion `@mionso/design` reached.
 - **Pure logic extracted and tested directly** — the palette's match rule is

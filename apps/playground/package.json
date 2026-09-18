@@ -1,0 +1,17 @@
+{
+  "name": "@lemol/ui-playground",
+  "version": "0.1.0",
+  "private": true,
+  "description": "The catalogue: page recipes, theme and no-JS switches, rendered from the same source the packages ship",
+  "type": "module",
+  "main": "./app/router.ts",
+  "scripts": {
+    "dev": "NODE_ENV=development bun --watch server.ts",
+    "start": "bun server.ts",
+    "typecheck": "tsc -p tsconfig.json",
+    "test": "bun test"
+  },
+  "dependencies": {
+    "remix": "3.0.0-rc.2"
+  }
+}

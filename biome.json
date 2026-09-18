@@ -4,5 +4,11 @@
   "files": { "includes": ["**", "!.agents", "!.claude"] },
   "formatter": { "indentStyle": "space", "indentWidth": 2, "lineWidth": 100 },
   "linter": { "enabled": true, "rules": { "preset": "recommended" } },
-  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "asNeeded" } }
+  "javascript": { "formatter": { "quoteStyle": "double", "semicolons": "asNeeded" } },
+  "overrides": [
+    {
+      "includes": ["**/remix.json"],
+      "json": { "parser": { "allowComments": true } }
+    }
+  ]
 }

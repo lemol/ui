@@ -1,0 +1,25 @@
+{
+  "$schema": "../../node_modules/remix/schema/remix.json",
+
+  // The single source of asset configuration: `app/assets.ts` loads this block
+  // and adds only what JSON cannot express (the browser target, watching, and
+  // the Bun store mount). `remix assets` and `remix doctor` read the same
+  // block, so the running server and the CLI cannot disagree about what is
+  // browser-reachable.
+  "assets": {
+    "basePath": "/assets",
+
+    // Browser-reachable source lives in `public/` directories beside its
+    // narrowest owner. Everything else under `app/` stays server-only, so a
+    // controller cannot leak into the browser by being imported.
+    "allowFiles": ["app/routes.ts", "app/**/public/**"],
+    "allowPackages": ["remix"],
+    "denyFiles": ["app/**/*.test.*"]
+  },
+
+  // `remix db` is absent: the playground has no persistence.
+  // `remix test` is absent: the suite runs under `bun test`, per AGENTS.md.
+  "doctor": {
+    "strict": true
+  }
+}

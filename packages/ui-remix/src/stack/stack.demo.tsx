@@ -1,8 +1,16 @@
 import { css } from "remix/ui"
 import { type Align, alignStyles } from "../align.ts"
+import type { SpaceStep } from "../space.ts"
 import { Stack } from "./stack.tsx"
 
 const aligns = Object.keys(alignStyles) as Align[]
+
+/**
+ * The steps this demo shows — a readable sample of the scale rather than all
+ * of it. Exported so stack.test.tsx asserts against what is rendered instead
+ * of a second copy of the list.
+ */
+export const demoGaps: SpaceStep[] = [0, 2, 4, 8]
 
 /**
  * Styled from primitives, not from any component's tokens: a demo is a page,
@@ -39,7 +47,7 @@ export function StackDemo() {
     <>
       <div mix={section}>
         <p mix={label}>gap, on the primitive space scale</p>
-        {([0, 2, 4, 8] as const).map((gap) => (
+        {demoGaps.map((gap) => (
           <div key={gap} mix={section}>
             <p mix={label}>gap {gap}</p>
             <Stack gap={gap}>

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { primitiveNames } from "@lemol/ui-design"
+import { primitiveNames, schema } from "@lemol/ui-design"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import {
@@ -10,12 +10,14 @@ import {
 } from "../../../../test/styles.ts"
 import { type Align, alignStyles } from "../align.ts"
 import type { SpaceStep } from "../space.ts"
-import { RowDemo } from "./row.demo.tsx"
-import { type Justify, Row } from "./row.tsx"
+import { demoGaps, RowDemo } from "./row.demo.tsx"
+import { type Justify, justifyStyles, Row } from "./row.tsx"
 
 const aligns = Object.keys(alignStyles) as Align[]
-const justifies: Justify[] = ["start", "center", "end", "between", "around", "evenly"]
-const steps: SpaceStep[] = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 24]
+const justifies = Object.keys(justifyStyles) as Justify[]
+
+/** Derived, not restated: a step the schema gains is a step these loops cover. */
+const steps = schema.space.map((name) => Number(name.slice(3)) as SpaceStep)
 
 /** Row's structural vocabulary. Nothing here is a length or a colour. */
 const keywords = new Set([
@@ -130,8 +132,18 @@ describe("Row", () => {
 })
 
 describe("RowDemo", () => {
-  it("renders every justification it claims to demonstrate", async () => {
+  it("renders every value of every axis it demonstrates", async () => {
+    // The demo shows four axes, so all four are checked. Each list comes from
+    // the Record the component itself keys off, or from the demo's own gap
+    // sample, so a value added to any of them cannot slip past a loop that
+    // covers the old set and still passes.
     const html = await renderToHtml(<RowDemo />)
     for (const justify of justifies) expect(html).toContain(`justify ${justify}`)
+    for (const align of aligns) expect(html).toContain(`align ${align}`)
+    for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
+    // wrap is a boolean, so its one value is checked by the CSS it produces
+    // rather than by a label, which a Row that forgot the prop would still
+    // print.
+    expect(stylesOf(html)).toContain("flex-wrap: wrap")
   })
 })

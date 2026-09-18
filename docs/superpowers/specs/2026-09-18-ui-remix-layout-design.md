@@ -2,7 +2,7 @@
 
 Date: 2026-09-18
 Task: M1 / 13
-Status: designed
+Status: implemented
 
 Four layout components that declare **no tokens of their own**. `Button`
 proved the contract by reading nothing but `--ui-btn-*`; these prove it from
@@ -65,6 +65,10 @@ blocks actually rendered are emitted, so the stylesheet does not grow. Its one
 real consequence is stated in "The always/optional split" below.
 
 ### `space.ts`
+
+Overtaken: `align` is shared too and shipped as a second module, `src/align.ts`
+— see "Two refinements to the spec" in
+`../plans/2026-09-18-ui-remix-layout.md`.
 
 Stack, Row and Grid need the same Record and the same type. Three copies would
 drift, and `remix/ui` caches a `css()` block by content — so three identical
@@ -192,6 +196,10 @@ items of unequal height — is a bug in almost every one.
 
 One `*.test.tsx` per component directory, using the `test/render.ts` and
 `test/styles.ts` helpers as they stand. No new helper is needed.
+
+Overtaken: one was — `nonPrimitiveValues`, because all four tests needed the
+same filter. See "Two refinements to the spec" in
+`../plans/2026-09-18-ui-remix-layout.md`.
 
 - **Server render.** The element, its children, and the class it carries.
 - **The contract, mirrored.** `Button`'s test asserts every declaration value

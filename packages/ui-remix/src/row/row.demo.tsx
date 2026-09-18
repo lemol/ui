@@ -1,9 +1,17 @@
 import { css } from "remix/ui"
 import { type Align, alignStyles } from "../align.ts"
-import { type Justify, Row } from "./row.tsx"
+import type { SpaceStep } from "../space.ts"
+import { type Justify, justifyStyles, Row } from "./row.tsx"
 
 const aligns = Object.keys(alignStyles) as Align[]
-const justifies: Justify[] = ["start", "center", "end", "between", "around", "evenly"]
+const justifies = Object.keys(justifyStyles) as Justify[]
+
+/**
+ * The steps this demo shows — a readable sample of the scale rather than all
+ * of it. Exported so row.test.tsx asserts against what is rendered instead of
+ * a second copy of the list.
+ */
+export const demoGaps: SpaceStep[] = [0, 2, 4, 8]
 
 /** Primitives, not tokens: a demo is a page, not a component. */
 const label = css({
@@ -43,7 +51,7 @@ export function RowDemo() {
     <>
       <div mix={section}>
         <p mix={label}>gap, on the primitive space scale</p>
-        {([0, 2, 4, 8] as const).map((gap) => (
+        {demoGaps.map((gap) => (
           <div key={gap} mix={section}>
             <p mix={label}>gap {gap}</p>
             <Row gap={gap}>

@@ -17,7 +17,12 @@ const gridBase = css({
  */
 export type ColumnCount = 1 | 2 | 3 | 4 | 5 | 6
 
-const columnStyles: Record<ColumnCount, CSSMixinDescriptor> = {
+/**
+ * Exported so the test and the demo derive their count list from it rather
+ * than restating it: a seventh count added here would otherwise reach neither,
+ * and every loop over it would keep passing while covering six.
+ */
+export const columnStyles: Record<ColumnCount, CSSMixinDescriptor> = {
   1: css({ gridTemplateColumns: "repeat(1, 1fr)" }),
   2: css({ gridTemplateColumns: "repeat(2, 1fr)" }),
   3: css({ gridTemplateColumns: "repeat(3, 1fr)" }),

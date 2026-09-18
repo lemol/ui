@@ -18,7 +18,12 @@ const rowBase = css({
  */
 export type Justify = "start" | "center" | "end" | "between" | "around" | "evenly"
 
-const justifyStyles: Record<Justify, CSSMixinDescriptor> = {
+/**
+ * Exported so the test and the demo derive their value list from it rather
+ * than restating it: a seventh justification added here would otherwise reach
+ * neither, and every loop over it would keep passing while covering six.
+ */
+export const justifyStyles: Record<Justify, CSSMixinDescriptor> = {
   start: css({ justifyContent: "start" }),
   center: css({ justifyContent: "center" }),
   end: css({ justifyContent: "end" }),

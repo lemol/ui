@@ -1,7 +1,15 @@
 import { css } from "remix/ui"
-import { type ColumnCount, Grid } from "./grid.tsx"
+import type { SpaceStep } from "../space.ts"
+import { type ColumnCount, columnStyles, Grid } from "./grid.tsx"
 
-const counts: ColumnCount[] = [1, 2, 3, 4, 5, 6]
+const counts = Object.keys(columnStyles).map(Number) as ColumnCount[]
+
+/**
+ * The steps this demo shows — a readable sample of the scale rather than all
+ * of it. Exported so grid.test.tsx asserts against what is rendered instead of
+ * a second copy of the list.
+ */
+export const demoGaps: SpaceStep[] = [0, 2, 4, 8]
 
 /** Primitives, not tokens: a demo is a page, not a component. */
 const label = css({
@@ -40,7 +48,7 @@ export function GridDemo() {
 
       <div mix={section}>
         <p mix={label}>gap, on the primitive space scale</p>
-        {([0, 2, 4, 8] as const).map((gap) => (
+        {demoGaps.map((gap) => (
           <div key={gap} mix={section}>
             <p mix={label}>gap {gap}</p>
             <Grid cols={4} gap={gap}>

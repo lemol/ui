@@ -10,8 +10,9 @@ import { renderToString } from "remix/ui/server"
  * test that needed a shim would be testing the shim.
  *
  * Styles a component declares with `css()` are collected during the render and
- * emitted as one `<style>` element, so assertions about a component's CSS read
- * the same string as assertions about its markup.
+ * emitted as one `<style>` element per distinct `css()` block, in the same
+ * string as the markup — so a test reads both out of one return value, and
+ * `test/styles.ts` is what pulls the blocks apart when which block matters.
  *
  * Two things this deliberately cannot do, both of which belong to the app:
  * resolve a `clientEntry()` to a browser module (`renderToString` takes no

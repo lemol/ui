@@ -39,7 +39,8 @@ export interface StackProps {
    * it does: each `css()` block is its own cascade sub-layer, layer order
    * beats specificity within a layer, and sub-layer order follows the order
    * blocks are first encountered during the render rather than the order of
-   * this array. For `gap` and `align`, use the props — they exist for this.
+   * this array. `gap` always has a block, so it goes through its prop.
+   * `align` is yours through `mix` as long as you do not also pass the prop.
    */
   mix?: MixInput<HTMLDivElement> | undefined
   children?: RemixNode | undefined

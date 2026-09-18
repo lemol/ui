@@ -50,8 +50,16 @@ describe("Container", () => {
     expect(styles).not.toContain("margin-block")
   })
 
-  it("keeps its own css() blocks property-disjoint", async () => {
-    expect(sharedProperties(styleBlocksOf(await renderToHtml(<Container />)))).toEqual([])
+  it("renders a single block, so there is no order to get wrong", async () => {
+    // The disjointness check is the invariant the other three components need,
+    // and on its own it cannot fail here: one block has no second block to
+    // collide with, and sharedProperties de-dupes within a block. The count is
+    // what states Container's actual position — it declares everything in one
+    // place — and it is what breaks the day a second block appears, at which
+    // point the disjointness assertion below starts doing real work.
+    const blocks = styleBlocksOf(await renderToHtml(<Container />))
+    expect(blocks).toHaveLength(1)
+    expect(sharedProperties(blocks)).toEqual([])
   })
 
   it("adds through mix a property it does not declare itself", async () => {

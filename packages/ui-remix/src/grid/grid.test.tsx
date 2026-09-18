@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { primitiveNames } from "@lemol/ui-design"
+import { primitiveNames, schema } from "@lemol/ui-design"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import {
@@ -9,11 +9,13 @@ import {
   stylesOf,
 } from "../../../../test/styles.ts"
 import type { SpaceStep } from "../space.ts"
-import { GridDemo } from "./grid.demo.tsx"
-import { type ColumnCount, Grid } from "./grid.tsx"
+import { demoGaps, GridDemo } from "./grid.demo.tsx"
+import { type ColumnCount, columnStyles, Grid } from "./grid.tsx"
 
-const counts: ColumnCount[] = [1, 2, 3, 4, 5, 6]
-const steps: SpaceStep[] = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 24]
+const counts = Object.keys(columnStyles).map(Number) as ColumnCount[]
+
+/** Derived, not restated: a step the schema gains is a step these loops cover. */
+const steps = schema.space.map((name) => Number(name.slice(3)) as SpaceStep)
 
 /** Grid's structural vocabulary: the display keyword and the track lists. */
 const keywords = new Set(["grid", ...counts.map((count) => `repeat(${count}, 1fr)`)])
@@ -86,8 +88,12 @@ describe("Grid", () => {
 })
 
 describe("GridDemo", () => {
-  it("renders every column count it claims to demonstrate", async () => {
+  it("renders every value of both axes it demonstrates", async () => {
+    // Counts come from columnStyles and gaps from the demo's own sample, so a
+    // count added to the Record is covered here instead of being skipped by a
+    // loop that keeps passing over the old six.
     const html = await renderToHtml(<GridDemo />)
     for (const cols of counts) expect(html).toContain(`cols ${cols}`)
+    for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
   })
 })

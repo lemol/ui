@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { primitiveNames } from "@lemol/ui-design"
+import { primitiveNames, schema } from "@lemol/ui-design"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import {
@@ -10,11 +10,13 @@ import {
 } from "../../../../test/styles.ts"
 import { type Align, alignStyles } from "../align.ts"
 import type { SpaceStep } from "../space.ts"
-import { StackDemo } from "./stack.demo.tsx"
+import { demoGaps, StackDemo } from "./stack.demo.tsx"
 import { Stack } from "./stack.tsx"
 
 const aligns = Object.keys(alignStyles) as Align[]
-const steps: SpaceStep[] = [0, 1, 2, 3, 4, 5, 6, 8, 10, 12, 16, 24]
+
+/** Derived, not restated: a step the schema gains is a step these loops cover. */
+const steps = schema.space.map((name) => Number(name.slice(3)) as SpaceStep)
 
 /** Stack's structural vocabulary. Nothing here is a length or a colour. */
 const keywords = new Set(["flex", "column", "start", "center", "end", "baseline", "stretch"])
@@ -94,8 +96,12 @@ describe("Stack", () => {
 })
 
 describe("StackDemo", () => {
-  it("renders every alignment it claims to demonstrate", async () => {
+  it("renders every value of both axes it demonstrates", async () => {
+    // Both lists come from what the demo renders — alignStyles and its own
+    // demoGaps — so an axis value added to either is covered here rather than
+    // silently left out of a loop that still passes.
     const html = await renderToHtml(<StackDemo />)
     for (const align of aligns) expect(html).toContain(`align ${align}`)
+    for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
   })
 })

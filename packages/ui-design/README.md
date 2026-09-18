@@ -38,5 +38,9 @@ order, typing, themes and the cascade layers.
 
 ## Status
 
-Scaffold. `src/` holds stubs; the schema, `defineTheme` and `v()` land with M1
-task 10, and the emitter, layers, reset and boot script with task 11.
+`@lemol/ui-design` is implemented: 93 primitive names across seven groups, and
+no values.
+
+`@lemol/ui-design/css` is not. `emitTokensCss()`, the cascade layers, the reset
+and `bootScript` are stubs, so the entry-point table above describes the
+contract that subpath will hold rather than what it currently does.

@@ -13,7 +13,7 @@ growing its own.
 | Import | Holds |
 | --- | --- |
 | `@lemol/ui-design` | The primitive token schema, `defineTheme` / `extendTheme`, and `v()` — the typed token reference. |
-| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer base, rmx` setup, the element defaults, the reduced-motion reset, and `schemeBootScript`. |
+| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer rmx-reset, base, rmx` setup, the element defaults, the reduced-motion reset, and `schemeBootScript`. |
 
 `/css` is a separate subpath so that taking the schema does not mean taking the
 stylesheet with it.

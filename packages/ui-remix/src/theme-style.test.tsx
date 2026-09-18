@@ -34,8 +34,8 @@ describe("ThemeStyle", () => {
   it("opens with the layer statement, which nothing may precede", async () => {
     const html = await renderToHtml(<ThemeStyle theme={theme} />)
     const style = html.indexOf("<style")
-    expect(html.indexOf("@layer base, rmx;")).toBeGreaterThan(style)
-    expect(html.indexOf("--canvas:")).toBeGreaterThan(html.indexOf("@layer base, rmx;"))
+    expect(html.indexOf("@layer rmx-reset, base, rmx;")).toBeGreaterThan(style)
+    expect(html.indexOf("--canvas:")).toBeGreaterThan(html.indexOf("@layer rmx-reset, base, rmx;"))
   })
 
   it("includes this package's component tokens without being asked", async () => {
@@ -72,7 +72,7 @@ describe("ThemeStyle", () => {
     const handle = { props: { theme } } as unknown as Handle<ThemeStyleProps>
     const element = ThemeStyle(handle)()
     expect(element.type).toBe("style")
-    expect(element.props.innerHTML).toContain("@layer base, rmx;")
+    expect(element.props.innerHTML).toContain("@layer rmx-reset, base, rmx;")
     expect(element.props.children).toBeUndefined()
   })
 

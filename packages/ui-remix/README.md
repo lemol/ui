@@ -74,8 +74,8 @@ package's aggregate:
 
 **It belongs in `<head>`.** `remix/ui` splices its own component styles in
 immediately before `</head>`, so a `ThemeStyle` in the body is evaluated after
-the `rmx` layer exists — and `@layer base, rmx;` then registers `base` after
-it, inverting the order with no error. See
+the `rmx` layer exists — and `@layer rmx-reset, base, rmx;` then registers
+`base` after it, inverting the order with no error. See
 [design-system.md](../../docs/design-system.md#delivery).
 
 ## Limits

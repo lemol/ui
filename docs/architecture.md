@@ -31,7 +31,7 @@ packages/
     src/theme.ts            defineTheme, extendTheme
     src/ref.ts              v() -- typed token reference
     src/css/emit.ts         emitTokensCss() -> string
-    src/css/layers.ts       @layer base, rmx
+    src/css/layers.ts       @layer rmx-reset, base, rmx
     src/css/boot.ts         schemeBootScript (no-flash scheme and density restore)
     src/css/reset.ts        element defaults in @layer base, and the reduced-motion reset
   ui-remix/

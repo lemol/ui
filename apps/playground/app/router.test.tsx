@@ -103,7 +103,7 @@ describe("the catalogue route", () => {
     // ours arrived second, `base` would register after `rmx` and element
     // defaults would start beating components — with no error at all.
     const page = await html("/c/button")
-    const ours = page.indexOf("@layer base, rmx;")
+    const ours = page.indexOf("@layer rmx-reset, base, rmx;")
     const theirs = page.indexOf("data-rmx-style")
     expect(ours).toBeGreaterThan(-1)
     expect(theirs).toBeGreaterThan(-1)

@@ -722,3 +722,36 @@ more than the rename itself.
   anything named `-bg` is not.
 - The literal-keys constraint on theme objects holds for every theme anyone
   writes, not just `mini`'s.
+
+## Follow-up: the layer statement now names `rmx-reset`
+
+`layerStatement` changed from `"@layer base, rmx;"` to
+`"@layer rmx-reset, base, rmx;"`. `rmx-reset` is `@remix-run/ui`'s own reset
+layer (`REMIX_UI_RESET_LAYER`, in `layers.js`) — declared in the package this
+repo already depends on, but not emitted into by `remix@3.0.0-rc.2`. Naming it
+now, while it is empty, means a future release that starts using it registers
+the layer where this statement already put it, beneath `base`, rather than
+wherever first use happens to land — which is the same silent-inversion class
+`layers.ts` exists to prevent, just triggered by an upstream release instead
+of a stylesheet ordering mistake. Tasks 15 and 17 are the first to reach for
+`remix/ui/*` primitives, so the exposure window is close.
+
+Order, weakest first: `rmx-reset` (a generic third-party reset, unused today),
+then `base` (our token-wired element defaults — `resetCss`'s `body { background:
+var(--canvas) }` and the rest of it — which must beat a generic reset), then
+`rmx` (components, which must beat both). remix's own `src/ui/README.md`
+prescribes the two-layer `@layer base, rmx;` form; it has no reason to name a
+layer it does not use. That is not a conflict — naming `rmx-reset` first still
+establishes `base` before `rmx`, which is exactly what remix's README asks
+for, with an added layer beneath both that costs nothing while unused.
+
+All call sites that quoted or asserted the old string were updated:
+`packages/ui-design/src/css/layers.ts`, `emit.test.ts`,
+`packages/ui-design/README.md`, `packages/ui-remix/README.md`,
+`packages/ui-remix/src/theme-style.tsx`, `theme-style.test.tsx`,
+`apps/playground/app/router.test.tsx`, `docs/architecture.md`, and
+`docs/design-system.md`'s Delivery and Cascade layers sections, the latter
+gaining a paragraph on the three-layer order for components written against
+it going forward. `docs/superpowers/plans/*` and the two dated specs for the
+CSS emitter and the overall architecture were left untouched, as historical
+records of what those tasks decided at the time.

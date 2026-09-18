@@ -170,8 +170,9 @@ selector-precedence story for combinations that do not yet exist.
 and splices the resulting `<style>` elements in immediately before `</head>` —
 after all authored head content, before anything in the body. A `ThemeStyle` in
 the body is therefore evaluated after `@layer rmx.*` already exists, and
-`@layer base, rmx;` then registers `base` at the *end* of the order rather than
-the front, because a layer statement cannot move a layer that exists. Element
+`@layer rmx-reset, base, rmx;` then registers `base` at the *end* of the order
+rather than the front, because a layer statement cannot move a layer that
+exists. Element
 defaults start beating components, with no error at all.
 
 **The requirement is that it precede remix's styles, not that it come first in
@@ -191,7 +192,8 @@ is the layer order, not the stylesheet, that body placement breaks.
 A runtime assertion cannot catch it. `ThemeStyle` renders during the tree walk
 and remix injects its style elements afterwards, so at render time there is no
 remix style element to detect. The guard is a render test asserting that
-`@layer base, rmx;` precedes the first `data-rmx-style` in the document.
+`@layer rmx-reset, base, rmx;` precedes the first `data-rmx-style` in the
+document.
 
 `emitTokensCss()` stays exported for anyone who prefers a static file, and
 `layerStatement` is exported separately for an SPA that wants the statement in
@@ -240,17 +242,34 @@ how a link-styled button ends up blue and underlined.
 The emitted sheet therefore opens with
 
 ```css
-@layer base, rmx;
+@layer rmx-reset, base, rmx;
 ```
 
 and puts every element default inside `@layer base`. Base loses to components;
 components lose to nothing.
 
+**The three names are ordered weakest to strongest, and the weakest one is
+unused.** `rmx-reset` is `@remix-run/ui`'s own reset layer (`REMIX_UI_RESET_LAYER`)
+— declared in the package, not yet emitted into by the version this repo
+depends on. It is named here anyway, first, so that if a future remix release
+starts emitting a generic element reset into it, that reset registers where it
+already belongs — beneath `base` — instead of registering wherever first use
+happens to land. `base` sits in the middle: our own token-wired element
+defaults must beat a generic third-party reset, and must still lose to `rmx`.
+`rmx` stays last, because components must beat every reset, including one that
+does not exist yet. remix's own README prescribes the two-layer
+`@layer base, rmx;` form — reasonably, since it has no reason to name a layer
+it does not use — so this repo's three-layer statement is a forward hedge on
+top of that, not a disagreement with it.
+
 **Layer order is fixed by the first `@layer` statement the browser sees.** If
 remix's stylesheet is evaluated before the emitted sheet, `rmx` already exists
-and our statement appends `base` after it — inverting the order with no error,
-so element defaults start beating components. The emitted sheet has to reach
-the document first.
+and our statement appends the other two after it — inverting the order with no
+error, so element defaults start beating components. The emitted sheet has to
+reach the document first. The same rule is why naming `rmx-reset` now, rather
+than when remix first emits into it, matters: waiting means that layer
+registers on remix's schedule, not this statement's, and nothing would signal
+the moment it happened.
 
 **`rmx` is not one layer; every distinct `css({...})` style object gets its own
 sub-layer.** The emitted style element reads

@@ -16,10 +16,10 @@ export interface ThemeStyleProps {
  * collects every `css({...})` rule and splices the resulting style elements in
  * immediately before `</head>` — after all authored head content, before
  * anything in the body. So a ThemeStyle in the body is evaluated after
- * `@layer rmx.*` already exists, and `@layer base, rmx;` then registers `base`
- * at the *end* of the order rather than the front, because a layer statement
- * cannot move a layer that exists. Element defaults start beating components,
- * with no error at all.
+ * `@layer rmx.*` already exists, and `@layer rmx-reset, base, rmx;` then
+ * registers `base` at the *end* of the order rather than the front, because a
+ * layer statement cannot move a layer that exists. Element defaults start
+ * beating components, with no error at all.
  *
  * A runtime assertion cannot catch that: this renders during the tree walk and
  * remix injects its style elements afterwards, so at render time there is no

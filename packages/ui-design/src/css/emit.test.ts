@@ -25,11 +25,11 @@ describe("the sheet", () => {
   it("opens with the layer statement", () => {
     // Layer order is fixed by the first @layer statement the browser sees, so
     // nothing may precede it.
-    expect(sheet.startsWith("@layer base, rmx;\n")).toBe(true)
+    expect(sheet.startsWith("@layer rmx-reset, base, rmx;\n")).toBe(true)
   })
 
   it("emits the blocks in the documented order", () => {
-    expect(at(":root {")).toBeGreaterThan(at("@layer base, rmx;"))
+    expect(at(":root {")).toBeGreaterThan(at("@layer rmx-reset, base, rmx;"))
     expect(at("@media (prefers-color-scheme: dark)")).toBeGreaterThan(at(":root {"))
     expect(at(':root[data-scheme="dark"]')).toBeGreaterThan(at("@media (prefers-color-scheme"))
     expect(at(':root[data-density="compact"]')).toBeGreaterThan(at(':root[data-scheme="dark"]'))

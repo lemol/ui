@@ -66,6 +66,12 @@
       "sourceType": "github",
       "skillPath": ".agents/skills/remix/SKILL.md",
       "computedHash": "f1bf71157e7143fac9f49d3c0b0ebfeee790487d30ea4e04e6ed3eb5f64ed0dc"
+    },
+    "todo-md": {
+      "source": "lemol/todo.md",
+      "sourceType": "github",
+      "skillPath": "skills/todo-md/SKILL.md",
+      "computedHash": "2156e4cebb5f9f1e52d77f886f29418ff6c4975ffa031c5ff095dd8ef34803d4"
     }
   }
 }

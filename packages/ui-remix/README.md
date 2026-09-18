@@ -1,6 +1,6 @@
 # @lemol/ui-remix
 
-Remix 3 components, and the `--ui-*` token contract each one declares beside
+Remix 3 components, and the `--ui-*` token contract a component declares beside
 itself. Also `ThemeStyle`, which puts an emitted stylesheet into the document,
 and the two files that are the whole of this repo's hand-written client code.
 
@@ -63,6 +63,45 @@ is what the tier is for, and it reaches every instance instead of one call site.
 it means a token is missing. See
 [design-system.md](../../docs/design-system.md#cascade-layers).
 
+### `Stack` / `Row` / `Grid` / `Container`
+
+Layout, and **no tokens of their own** — the contract proved from the opposite
+side to `Button`. Each reads primitives directly and declares no `--ui-*`, so
+none of them appears in `src/tokens.ts` and a skin retunes them by changing the
+space scale rather than by changing them.
+
+| | Props | Declares |
+| --- | --- | --- |
+| `Stack` | `gap`, `align` | `display: flex`, `flex-direction: column` |
+| `Row` | `gap`, `align`, `justify`, `wrap` | `display: flex` |
+| `Grid` | `gap`, `cols` | `display: grid` |
+| `Container` | — | `max-inline-size: var(--page-max)`, `padding-inline: var(--gutter)`, `margin-inline: auto` |
+
+`gap` is a step on the primitive space scale — `gap={4}` is `var(--sp-4)` — and
+its type derives from `schema.space`, so a step the schema does not hold is a
+typecheck failure. The Record of blocks is shared in `src/space.ts`, and `align`
+in `src/align.ts`, because `remix/ui` caches a `css()` block by content: a copy
+per component would collapse to one sub-layer anyway and save nothing while
+still drifting.
+
+**Which axes have defaults, and why it matters.** `gap` defaults to `0` and
+`Row`'s `align` to `center`; both blocks therefore always render. `Stack`'s
+`align`, `Row`'s `justify` and `wrap`, and `Grid`'s `cols` render no block
+until their prop is passed, which leaves those properties fully reachable
+through `mix`. See
+[design-system.md](../../docs/design-system.md#cascade-layers) for the rule and
+the cost of giving an axis a default.
+
+`Container` takes no props because it has nothing to decide: both of its
+lengths are primitives a theme sets. It cannot change its tag either, so a
+caller wanting `<main>` wraps it rather than configuring it.
+
+`Grid` has no responsive mode. `repeat(auto-fit, minmax(…))` needs a track
+minimum and the schema holds no primitive for one; a caller-supplied length
+would be the only open-ended value in the package. Until a sizing ramp exists,
+a responsive track list goes through `mix`, which is reliable precisely because
+`cols` was not passed.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -82,8 +121,9 @@ the `rmx` layer exists — and `@layer rmx-reset, base, rmx;` then registers
 
 - **A component never hard-codes a colour, radius, duration or space step.** It
   declares its own tokens in `src/<name>/tokens.ts`, each defaulting relationally
-  to a primitive, and reads only that tier. A skin is a set of token values; it
-  is never a forked component.
+  to a primitive, and reads only that tier — or it declares none and reads
+  primitives directly, as the layout components do. A skin is a set of token
+  values; it is never a forked component.
 - **SPA-safe.** No `node:*`, no `bun`, no `effect`, and no server-side `remix/*`
   entry — `remix/router`, `remix/routes`, `remix/assets`, `remix/spa` are all
   out. `test/boundaries.test.ts` enforces it, which is what makes SPA
@@ -100,16 +140,21 @@ the `rmx` layer exists — and `@layer rmx-reset, base, rmx;` then registers
 
 ## Structure
 
-One directory per component, holding the component, its token record, its demo
-and its test:
+One directory per component, holding the component, its demo, its test, and its
+token record if it has one:
 
 ```
 src/button/button.tsx  tokens.ts  button.demo.tsx  button.test.tsx
+src/stack/stack.tsx               stack.demo.tsx   stack.test.tsx
 ```
 
-Co-location is what keeps the demo from drifting from the component.
-`src/tokens.ts` aggregates every component's record and exports the union of
-their names as a type.
+Co-location is what keeps the demo from drifting from the component. A missing
+`tokens.ts` is a claim, not an omission: that component styles itself from
+primitives and structural keywords alone, and its test fails on a `--ui-`
+anywhere in its output. `src/tokens.ts` aggregates every component's record and
+exports the union of their names as a type. A Record of blocks more than one
+component uses sits at the package root instead: `src/space.ts`,
+`src/align.ts`.
 
 ## Reading
 
@@ -120,7 +165,9 @@ transitions.
 
 ## Status
 
-`Button`, `LinkButton` and `ThemeStyle` ship. `src/tokens.ts` aggregates the
-component records and exports `ComponentTokenName`; `src/demos.ts` registers
-one demo. `runtime.ts` and `compat.ts` are still stubs — nothing here needs
-client JavaScript yet.
+`Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container` and `ThemeStyle`
+ship. `src/tokens.ts` aggregates the component records and exports
+`ComponentTokenName`; the four layout components add nothing to it, which is
+what they exist to demonstrate. `src/demos.ts` registers five demos.
+`runtime.ts` and `compat.ts` are still stubs — nothing here needs client
+JavaScript yet.

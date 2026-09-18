@@ -6,8 +6,9 @@
  * why `defineTheme` requires the full set rather than patching a default.
  *
  * Names are grouped so a category is derivable from membership: the
- * prefers-reduced-motion reset in /css iterates `schema.motion` rather than
- * keeping a second list of durations that can drift.
+ * prefers-reduced-motion reset in /css selects the `dur-`-prefixed names
+ * within `schema.motion` rather than keeping a second list of durations
+ * that can drift.
  *
  * Naming rule: ramps you do arithmetic on are numeric and the number is a
  * multiplier, so `sp-4` is four 4px units. Sets you choose from are t-shirt

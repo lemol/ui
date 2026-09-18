@@ -401,3 +401,17 @@ deliberately. Here one document disagrees with itself.
 - **Task 16** no longer needs to add semantic primitives; its brief allowed for
   it, but task 15 lands first and needs an invalid state, so the semantic set
   is defined here instead.
+- **Task 12 has no `accent-active`.** Neutral surfaces have `surface-hover` and
+  `surface-active`, but `accent` and `link` have hover only, so a primary
+  Button has no in-contract way to make `:active` differ from `:hover` — and
+  `color-mix()` in a component default is banned by decision 3, which closes
+  the usual workaround. Adding the primitive later is additive and cheap while
+  there is exactly one theme. Task 12 should decide.
+- **Task 18 will hit `exactOptionalPropertyTypes`.**
+  `defineTheme({ base, dark: cond ? overrides : undefined })` does not
+  compile; the idiom is `...(cond ? { dark: overrides } : {})`.
+- **The schema is closed, and the escape hatch is undocumented.** An app
+  needing its own primitive (this document's own skin example references
+  `--accent-bronze`, which is not in the schema) can widen the seam:
+  `defineTheme<ComponentTokenName | "accent-bronze">`. Non-obvious; task 18
+  should document it wherever it lands.

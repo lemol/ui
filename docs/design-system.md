@@ -91,11 +91,17 @@ The engine knows exactly two variant axes.
 
 ```ts
 export const miniTheme = defineTheme({
-  base:    { canvas: "#FBFBFA", surface: "#FFFFFF", ink: "#111111", hairline: "#EAEAEA" },
+  base: {
+    canvas: "#FBFBFA", surface: "#FFFFFF", ink: "#111111", hairline: "#EAEAEA",
+    // … and the other 89 primitives
+  },
   dark:    { canvas: "#191919", surface: "#242424", ink: "#F4F4F0", hairline: "#3A3A3A" },
   compact: { "control-h": "28px", "row-h": "32px" },
 })
 ```
+
+`base` is total: every primitive the schema names, not a sample. `extendTheme`
+is how a second theme avoids restating them.
 
 Which emits:
 

@@ -59,3 +59,6 @@ export const missing = defineTheme({ base: { canvas: "#fff" } })
 
 // @ts-expect-error - `nope` is neither a primitive nor a component token
 export const unknownKey = defineTheme({ base, dark: { nope: "x" } })
+
+// @ts-expect-error - a typo'd component token is rejected once C is supplied
+export const typoedComponentToken = defineTheme<Comp>({ base, dark: { "ui-btn-primry-bg": "x" } })

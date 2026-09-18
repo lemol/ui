@@ -616,8 +616,20 @@ export type DemoName = keyof typeof demos
 ```
 
 `Document` gains `scheme` and `density` props and renders them as
-`data-scheme` / `data-density` on `<html>`, plus `<ThemeStyle>` as its first
-head child. Unset props render no attribute, because remix omits `undefined`.
+`data-scheme` / `data-density` on `<html>`, plus `<ThemeStyle>` in `<head>`
+ahead of remix's spliced styles. Unset props render no attribute, because remix
+omits `undefined`.
+
+**Not as the first head child, which this spec first said.** The requirement is
+only that `ThemeStyle` precede the styles remix splices in before `</head>`;
+tags remix does not splice may go ahead of it, and `<meta charset>` has to.
+The spec only honours a charset declaration in the first 1024 bytes, and the
+emitted sheet is kilobytes long — so `ThemeStyle` first pushed charset to byte
+8058, where it is ignored. HTTP hid it behind the response's `Content-Type`;
+saved to disk, opened over `file://` or embedded as an `iframe srcdoc`, the
+title's U+00B7 came out as mojibake. `charset`, `viewport` and `title` now
+precede it, and `router.test.tsx` pins the byte offset under 1024 alongside the
+existing layer-order assertion.
 
 The switchers are query params on the server, so light, dark and compact are
 all reachable with the runtime absent — which is the third "done when".

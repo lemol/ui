@@ -174,6 +174,17 @@ the body is therefore evaluated after `@layer rmx.*` already exists, and
 the front, because a layer statement cannot move a layer that exists. Element
 defaults start beating components, with no error at all.
 
+**The requirement is that it precede remix's styles, not that it come first in
+`<head>`.** Remix splices only its own styles, so anything it does not splice
+may sit ahead of `ThemeStyle` — and `<meta charset>` must, because the HTML
+spec only honours a charset declaration within the first 1024 bytes and the
+emitted sheet is kilobytes long. Put `ThemeStyle` first and the charset lands
+past 8KB, where it is ignored. That is invisible over HTTP, since the response
+carries a `Content-Type`, and shows up the moment the page is saved to disk,
+opened over `file://` or embedded as an `iframe srcdoc`: the document decodes
+with a locale default and any non-ASCII text becomes mojibake. So `charset`,
+`viewport` and `title` go first, then `ThemeStyle`, then everything else.
+
 A `<style>` element in the body is valid CSS and does apply document-wide; it
 is the layer order, not the stylesheet, that body placement breaks.
 

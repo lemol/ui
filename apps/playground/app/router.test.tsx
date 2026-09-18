@@ -105,6 +105,21 @@ describe("the catalogue route", () => {
     expect(ours).toBeLessThan(theirs)
   })
 
+  it("declares its charset inside the first 1024 bytes", async () => {
+    // The spec only honours <meta charset> in the first 1024 bytes, and the
+    // emitted token sheet is kilobytes long — so ThemeStyle ahead of it put
+    // charset past 8KB. That still decoded correctly over HTTP, because the
+    // response carries a Content-Type; it broke the moment the page was saved
+    // to disk, opened over file:// or embedded as an iframe srcdoc, and the
+    // title's U+00B7 came out as mojibake. Bytes, not characters, because the
+    // limit is a byte limit and the sheet ahead of it is not all ASCII.
+    const page = await html("/c/button")
+    const at = page.indexOf("<meta charset")
+    expect(at).toBeGreaterThan(-1)
+    const offset = new TextEncoder().encode(page.slice(0, at)).length
+    expect(offset).toBeLessThan(1024)
+  })
+
   it("carries the theme's own values, and lets them beat the component defaults", async () => {
     const page = await html("/c/button")
     expect(page).toContain("--accent: #1F6B5C;")

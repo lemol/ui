@@ -2,22 +2,29 @@
 
 Date: 2026-09-18
 Task: M1 / 12
-Status: agreed, not yet implemented
+Status: implemented
 
 The load-bearing task of M1. `Button` and `LinkButton` styled only through
 `--ui-btn-*`, the aggregate in `ui-remix/src/tokens.ts`, `ThemeStyle`, `mini`'s
 theme with real values for every primitive, the cross-package type wiring, and
 `/c/button` rendering in light, dark and compact with no client JavaScript.
 
-If the contract is wrong, it is wrong here. Writing it found four things that
-were wrong: two in shipped documents, one in the schema, and one in the obvious
-way to write the component.
+If the contract is wrong, it is wrong here. Writing it found five things that
+were wrong: two in shipped documents, one in the schema, one in the obvious way
+to write the component, and one in `remix/ui`'s cascade behaviour that no
+document here had recorded. The fifth was found by a manual browser check after
+thirteen passing tests, and it is the one with reach beyond Button.
 
-## The four corrections
+The plan was amended once before implementation, in commit `3cb99c0`. So
+`docs/superpowers/plans/2026-09-18-ui-remix-button-contract.md` is intent as
+amended pre-implementation rather than an untouched record of what was first
+agreed.
+
+## The five corrections
 
 ### 1. `ThemeStyle` belongs in `<head>`, not the body
 
-`docs/design-system.md:143-146` says a `<style>` element is valid in the body
+`docs/design-system.md:188-189` ("Delivery") says a `<style>` element is valid in the body
 and applies document-wide, so `ThemeStyle` renders in server mode and inside
 the SPA tree with no special casing. The first half is true and the conclusion
 is false.
@@ -102,7 +109,7 @@ JavaScript colour interpolation.
 `danger-ink`, `danger-subtle` and `danger-border`, and no hover value — so
 `--ui-btn-danger-bg-hover` has no primitive to default to, and a destructive
 button either does not respond to hover or derives its hover value inside the
-component, which `docs/design-system.md:54-60` forbids.
+component, which `docs/design-system.md:72-85` ("Two tiers") forbids.
 
 `danger-hover` is added to `schema.color`, and the line is drawn there.
 `accent`, `link` and `danger` are the interactive colours. `success`, `warning`
@@ -114,7 +121,7 @@ the value. Only `mini` exists, and it is written in this task.
 
 ### 4. `--ui-btn-border-width` defaults to a literal
 
-`docs/design-system.md:12-13` says each component token defaults relationally
+`docs/design-system.md:11-13` says each component token defaults relationally
 to a primitive. `hairline` is a colour; there is no border-width primitive, and
 one property does not justify widening the schema.
 
@@ -131,11 +138,18 @@ and every entry has to be argued for in review, which is the point.
 ### 5. `remix/ui` sub-layers every `css()` call, and layer order beats specificity within them
 
 Found by manual browser check during task closeout, after thirteen
-`button.test.tsx` tests had already passed. `remix/ui` gives every `css({...})`
-call its own cascade sub-layer — the emitted style element reads
-`@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }`, one block per call site — and
-within cascade layers, layer order beats specificity regardless of how
-specific either rule is.
+`button.test.tsx` tests had already passed. `remix/ui` gives every distinct
+`css({...})` style object its own cascade sub-layer — the emitted style element
+reads `@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }` — and within cascade
+layers, layer order beats specificity regardless of how specific either rule
+is.
+
+Blocks are keyed by content, not by call site: `processStyleClass` hashes the
+style object and caches by that hash, so two `css()` calls with equal objects
+collapse into one class and one sub-layer, and a factory like
+`toneStyle(tone)` is one call site producing four. Counting call sites gets the
+number wrong in both directions, which matters because the question that
+decides correctness is which declarations share a block.
 
 `Button`'s `&:disabled` override originally lived in `buttonBase`, and the
 tone colours lived in a separate per-tone `css()` block. `buttonBase`'s
@@ -155,13 +169,16 @@ disabled block ahead of any tone block, and the bug returns regardless of how
 `mix` is written. The rule that generalizes, now recorded in
 `docs/design-system.md`'s "Cascade layers" section: when one `css()` block
 must override another on the same element, put both declarations in the same
-block. Two new tests in `button.test.tsx` pin the fix: one asserts the
-disabled declarations live in the same block as the tone's, the other asserts
-`buttonBase`'s own block does not carry `:disabled` at all.
+block, and the corollary that makes it actionable: a component's own blocks
+must be property-disjoint, so that no two of them can contend and their order
+stops mattering at all. Three tests in `button.test.tsx` pin it — the disabled
+declarations live in the same block as the tone's, `buttonBase`'s own block
+carries no `:disabled`, and the caller's `mix` block registers before the
+tone's when its descriptor rendered earlier.
 
-So "writing it found four things that were wrong" is now five, and the fifth
-is the highest-value one — it is a document-worthy fact about `remix/ui`
-itself, not something specific to Button.
+The fifth correction is the highest-value one: it is a document-worthy fact
+about `remix/ui` itself rather than anything specific to Button, and it is the
+reason the `mix` claim above had to be narrowed too.
 
 ## Button's surface
 
@@ -268,7 +285,7 @@ and `remix/ui`'s own button mixin defaults the attribute for the same reason.
 `LinkButton` renders an `<a>` and requires `href`. It needs
 `text-decoration: none` to beat the reset's `:where(a)` underline; `base` loses
 to `rmx`, so the component's own `css()` wins with no unlayered rule. That is
-asserted rather than assumed: `docs/design-system.md:178-196` describes the
+asserted rather than assumed: `docs/design-system.md:229-238` describes the
 neighbouring hazard — an *unlayered* `a` rule, which `rmx` would lose to — and
 the assertion is what tells us which side of that line the reset is on.
 
@@ -606,7 +623,7 @@ A real `/c/:component` route, not a throwaway `/c/button`. The registry is
 about ten lines, and task 19 then adds demos to it rather than replacing it.
 
 ```
-/c/:component            ?scheme=dark  ?density=compact  ?js=off
+/c/:component            ?scheme=dark  ?density=compact  ?nojs
 ```
 
 ```ts
@@ -644,13 +661,17 @@ rule directly:
 
 | Test | Enforces |
 | --- | --- |
-| `ui-remix/src/tokens.test.ts` — every key is `ui-` prefixed, every default is `var(--<primitive>)` against imported `primitiveNames`, or an allow-listed literal; no default contains `color-mix(` | `design-system.md:44-60`, and catches a default referencing a primitive that no longer exists |
+| `ui-remix/src/tokens.test.ts` — every key is `ui-` prefixed, every default is `var(--<primitive>)` against imported `primitiveNames`, or an allow-listed literal; no default contains `color-mix(` | `design-system.md:55-79`, and catches a default referencing a primitive that no longer exists |
 | Button's emitted CSS block contains no hex colour and no raw length | "reads only `var(--ui-btn-*)`", in machine-checkable form |
 | A gradient override of `ui-btn-primary-bg` lands in `:root` after the component default, with `button.tsx` untouched | done-when 2, and decision 2 above |
 | Renaming a token is a `tsc` failure at `mini`'s theme | done-when 1 |
 | `@layer base, rmx;` precedes the first `data-rmx-style` in the rendered document | decision 1 above |
-| `mini/src/theme.test.ts` — `sp-N` is N×4px | `design-system.md:50-52`, which asks for this test and has had nothing to put it in until now |
-| `LinkButton` renders `<a href>` with no underline | that `rmx` beats `base`, the case `design-system.md:178-196` describes going wrong |
+| `<meta charset>` sits within the first 1024 bytes of a real response | decision 1's real invariant: ahead of remix's styles, not first in `<head>` |
+| The disabled declarations share a block with the tone declarations they beat, per tone | decision 5 — the fix itself, asserted block by block rather than document-wide |
+| `buttonBase`'s own block carries no `:disabled` at all | decision 5 — stops the split that caused the bug from returning unnoticed |
+| The caller's `mix` block registers *before* the tone's when its descriptor also rendered earlier | decision 5 applied to `mix`: the narrow guarantee, so the prose cannot drift from it |
+| `mini/src/theme.test.ts` — `sp-N` is N×4px | `design-system.md:62-70`, which asks for this test and has had nothing to put it in until now |
+| `LinkButton` renders `<a href>` with no underline | that `rmx` beats `base`, the case `design-system.md:229-238` describes going wrong |
 | `/c/button` renders every tone with `entry={null}` | done-when 3 |
 
 The rename check is a type-level failure, so it is asserted with a
@@ -665,13 +686,18 @@ more than the rename itself.
 
 ## Documents to correct
 
-- `docs/design-system.md:143-146` — `ThemeStyle` goes in `<head>`, with the
-  reason: remix injects its own styles at the end of head, so body placement
-  inverts the layer order.
-- `docs/design-system.md` — add `danger-hover` to the interactive-colour list
-  and state why `success`/`warning`/`info` have no hover value.
-- `docs/design-system.md:12-13` — note the border-width exception and the
+- `docs/design-system.md:161-226` ("Delivery") — `ThemeStyle` goes in `<head>`,
+  with the reason: remix injects its own styles at the end of head, so body
+  placement inverts the layer order. And it goes *after* `<meta charset>`,
+  because the invariant is only that it precede remix's styles.
+- `docs/design-system.md:80-84` — add `danger-hover` to the interactive-colour
+  list and state why `success`/`warning`/`info` have no hover value.
+- `docs/design-system.md:55-60` — note the border-width exception and the
   allow-list that keeps it honest.
+- `docs/design-system.md:227-325` ("Cascade layers") — sub-layers are
+  content-addressed rather than one per call site; a component's own blocks
+  must be property-disjoint; the caller's `mix` adds but does not override;
+  and the client's refcounted remove/re-insert can reorder blocks mid-session.
 - `packages/ui-remix/README.md` — Button, LinkButton, ThemeStyle, the aggregate.
 - `packages/ui-remix-mini/README.md` — the theme and the literal-keys constraint.
 - `packages/ui-design/README.md` — the `danger-hover` addition.

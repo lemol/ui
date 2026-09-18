@@ -1,4 +1,5 @@
 import { ButtonDemo } from "./button/button.demo.tsx"
+import { RowDemo } from "./row/row.demo.tsx"
 import { StackDemo } from "./stack/stack.demo.tsx"
 
 /**
@@ -8,6 +9,7 @@ import { StackDemo } from "./stack/stack.demo.tsx"
  */
 export const demos = {
   button: { title: "Button", Demo: ButtonDemo },
+  row: { title: "Row", Demo: RowDemo },
   stack: { title: "Stack", Demo: StackDemo },
 } as const
 

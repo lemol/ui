@@ -1,6 +1,8 @@
 ---
 title: 'Plan M1: foundation and contract proof'
 tags: [planning]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T03:33:00Z
 ---
 Plan the M1 implementation. Full spec: `docs/superpowers/specs/2026-09-17-lemol-ui-architecture-design.md`.
 

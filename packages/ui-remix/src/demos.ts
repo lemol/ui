@@ -1,4 +1,5 @@
 import { ButtonDemo } from "./button/button.demo.tsx"
+import { StackDemo } from "./stack/stack.demo.tsx"
 
 /**
  * The catalogue's source of truth. A demo lives beside the component it
@@ -7,6 +8,7 @@ import { ButtonDemo } from "./button/button.demo.tsx"
  */
 export const demos = {
   button: { title: "Button", Demo: ButtonDemo },
+  stack: { title: "Stack", Demo: StackDemo },
 } as const
 
 export type DemoName = keyof typeof demos

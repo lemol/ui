@@ -8,6 +8,7 @@ How the lemol UI packages fit together, and why they are the way they are.
 | Package boundaries, structure, and the dependency rules | [architecture.md](architecture.md) |
 | The token layer: schema, the component-token contract, themes, variants | [design-system.md](design-system.md) |
 | Behaviour: the native-first ladder, the command protocol, the baseline | [interactivity.md](interactivity.md) |
+| Motion: tokens, native entry/exit, reduced motion, view transitions | [motion.md](motion.md) |
 
 Package specifics live in each `packages/<name>/README.md`. The component
 catalogue is documented in `packages/ui-remix/README.md`, added as components

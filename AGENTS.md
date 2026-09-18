@@ -14,6 +14,8 @@ Remix 3 component library, and one concrete minimal design built on both.
   themes, cascade layers.
 - [docs/interactivity.md](docs/interactivity.md) — the native-first ladder, the
   command protocol, the browser baseline.
+- [docs/motion.md](docs/motion.md) — motion tokens, native entry/exit, reduced
+  motion, view transitions.
 
 Each `packages/<name>/README.md` covers that package's contents and limits.
 Dated decision records live in `docs/superpowers/specs/` — read those for why a
@@ -58,6 +60,10 @@ bun run playground    # the catalogue
   `overlay()` factory.
 - **Element defaults go in `@layer base`.** Unlayered CSS beats layered CSS, so
   reach for unlayered only when a rule must beat a component, and say why.
+- **Motion is native and tokenised.** Overlay components ship their entry/exit
+  transition with `@starting-style` + `allow-discrete` when they are built, not
+  as a later pass. Name duration and easing tokens, never literals. Mint
+  `view-transition-name` values; never hand-write one.
 - **No build step.** Packages ship TypeScript from `src/`. Browser assets are
   the Remix asset server's job, configured in `remix.json`. Do not add a
   bundler.

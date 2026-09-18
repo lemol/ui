@@ -481,6 +481,53 @@ lacks.
 
 **M4 — mionso.** Later, its own spec, once things are nice here.
 
+**M5 — Motion system.** Depends on M2, not M4: the curated micro-interaction
+catalogue, view transitions across frame and document navigation,
+shared-element morphs with minted names, and a playground motion page with a
+reduced-motion toggle.
+
+Note the split: the motion *mechanism* is not deferred to M5. Each overlay
+component ships its entry/exit transition when it is built, in M1 and M2.
+Retrofitting `@starting-style` into a finished catalogue costs more than three
+lines per component at the time, and an unanimated `Dialog` in M1 becomes the
+reference everyone copies afterwards.
+
+## Motion
+
+Reviewed [transitions.dev](https://transitions.dev/) as a reference. Its value
+is its taxonomy and quality bar — which micro-interactions are worth having —
+not its technique; it is a commercial product with a Pro tier, so the list and
+the standard are what we take. Its free catalogue tracks ours closely: modal
+open/close, menu dropdown, accordion, tooltip, toast, tabs sliding, skeleton
+reveal, checkbox check, toggle, icon swap, success check, error shake, number
+pop-in, banner stacking.
+
+The mechanism is native, which is why this fits the rest of the architecture:
+
+- `@starting-style` (Baseline 2024) and `transition-behavior: allow-discrete`
+  (Baseline with Firefox 129) give `<dialog>` and `popover` entry and exit
+  animation with no JavaScript.
+- `overlay` is **not** Baseline and is absent in Safari, so **exit animations
+  degrade in Safari while entry animations work**. Accepted rather than papered
+  over with a JavaScript close sequence — entry is the half users notice.
+- Degradation is silent: an engine that does not know `@starting-style` ignores
+  the block and the element simply appears. This is also why `@starting-style`
+  requiring Safari 17.5 does not push the 17.0 floor up.
+- The `transition` shorthand is declared twice, the first without
+  `allow-discrete`, so other properties still transition on engines lacking
+  `transition-behavior`.
+- Same-document view transitions are cross-browser (Chrome 111, Safari 18,
+  Firefox 144) and cover Remix frame navigation. Cross-document
+  (`@view-transition`) is Chrome 126+ / Safari 18.2+ and **not in stable
+  Firefox** — MDN lists it as limited availability, not Baseline, contrary to
+  several 2026 write-ups. Its failure mode is an ordinary navigation.
+- Two visible elements sharing a `view-transition-name` throw and skip the
+  transition. Same failure class as `commandfor`, same treatment: names are
+  minted and scoped by the component, never hand-written.
+
+`prefers-reduced-motion: reduce` zeroes every duration globally in the emitted
+sheet, so no component opts in. See [docs/motion.md](../../motion.md).
+
 ## Rejected alternatives
 
 - **Headless components with separate skins.** Maximum freedom, but `mini` and

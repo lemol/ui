@@ -45,9 +45,10 @@ bun run playground    # the catalogue
 ## Rules
 
 - **Styling goes through the contract.** No component hard-codes a colour,
-  radius, duration, or space step. Each declares its own `--ui-*` tokens beside
-  itself, defaulting to a primitive. A skin is a set of token values, never a
-  forked component.
+  radius, duration, or space step. A component with something to retheme
+  declares its own `--ui-*` tokens beside itself, defaulting to a primitive;
+  one styled from structural keywords and primitives alone declares none. A
+  skin is a set of token values, never a forked component.
 - **Native first, then `remix/ui`, then hand-written.** Check the ladder in
   [interactivity.md](docs/interactivity.md) before writing DOM code.
 - **SPA-safe.** The packages must not import `node:*`, `bun`, `effect`, or any

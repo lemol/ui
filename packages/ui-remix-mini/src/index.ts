@@ -1,1 +1,1 @@
-export {}
+export { miniTheme } from "./theme.ts"

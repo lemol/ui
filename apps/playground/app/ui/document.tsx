@@ -12,8 +12,8 @@ export interface DocumentProps {
    *
    * Every page here has to be complete markup before a script runs, so the
    * unenhanced render is a first-class mode rather than something to remember
-   * to check. Task 19 turns this prop into a visible toggle; task 18 replaces
-   * this document with `mini`'s.
+   * to check. The no-JS/JS split is exercised through this prop rather than a
+   * visible toggle yet, and this document stands in for `mini`'s own.
    */
   entry: ScriptEntry | null
   /**

@@ -1,0 +1,101 @@
+/**
+ * Assertions about the CSS a component's `css()` calls emit, shared across
+ * every component test that cares which cascade sub-layer a declaration
+ * landed in.
+ *
+ * `remix/ui` gives every distinct `css({...})` style object its own cascade
+ * sub-layer, and within layers, layer order beats specificity — see "Cascade
+ * layers" in docs/design-system.md. That is what makes *which block* a
+ * declaration sits in a correctness question, not a formatting one, and why
+ * these helpers keep blocks apart instead of collapsing them into one string.
+ */
+
+/** The css remix collected during the render, with the markup dropped. */
+export const stylesOf = (html: string): string =>
+  [...html.matchAll(/<style data-rmx-style="[^"]*">([\s\S]*?)<\/style>/g)]
+    .map((match) => match[1] ?? "")
+    .join("\n")
+
+/**
+ * Each `<style data-rmx-style="…">` block kept separate, one per css() call.
+ * Joining them, as stylesOf does, is fine for "does this text appear
+ * anywhere" but hides *which* sub-layer a declaration landed in — and layer
+ * order, not specificity, decides which of two conflicting declarations wins.
+ * Tests that care which block a declaration is in must look at the blocks
+ * separately, not at the joined string.
+ */
+export const styleBlocksOf = (html: string): string[] =>
+  [...html.matchAll(/<style data-rmx-style="[^"]*">([\s\S]*?)<\/style>/g)].map(
+    (match) => match[1] ?? "",
+  )
+
+/** Every declaration value in a block of css. */
+export const valuesOf = (styles: string): string[] =>
+  [...styles.matchAll(/[\w-]+\s*:\s*([^;{}]+)[;}]/g)].map((match) => (match[1] ?? "").trim())
+
+/**
+ * The property names declared at the top level of a css() block — the level
+ * that actually contends for a cascade slot with another block's top-level
+ * declarations. A nested rule such as `&:disabled` is deliberately excluded:
+ * restating a property there that the block already sets at top level is the
+ * co-location pattern the cascade-layers rule requires (see
+ * "wins the disabled cascade from within the tone's own sub-layer" in
+ * button.test.tsx), not a second declaration of the same property.
+ *
+ * This is a flat scan, not a parser: it strips nested `{ ... }` groups before
+ * matching, so it does not need to understand selectors, only depth. `block`
+ * is the raw `<style>` text — `@layer rmx.<hash> { .<hash> { … } }` — so the
+ * declarations of interest sit two braces deep, not zero: depth 1 is the
+ * `@layer` body (the class selector), depth 2 is the selector's own body, and
+ * anything deeper is a nested rule like `&:disabled`.
+ */
+const topLevelPropertiesOf = (block: string): string[] => {
+  let depth = 0
+  let flat = ""
+  for (const char of block) {
+    if (char === "{") {
+      depth += 1
+      continue
+    }
+    if (char === "}") {
+      depth = Math.max(0, depth - 1)
+      continue
+    }
+    flat += depth === 2 ? char : ""
+  }
+  return [...flat.matchAll(/(?:^|;)\s*([\w-]+)\s*:/g)].map((match) => match[1] ?? "")
+}
+
+/**
+ * The properties declared by more than one of a component's own css() blocks.
+ * `buttonBase`, `sizeStyles` and `toneStyles` must be property-disjoint: if
+ * two blocks can both set the same property, sub-layer order — not either
+ * block's author — decides which one paints, and that order is neither
+ * fixed by source (registration follows render order) nor stable across a
+ * client session (see "Client-side, the order is not even stable within one
+ * session" in docs/design-system.md). Property-disjointness is what makes a
+ * component correct under any order instead of correct under the order
+ * observed today.
+ *
+ * `blocks` is deduplicated by exact text before comparing, because remix/ui
+ * caches a `css()` block by content and reuses one sub-layer across every
+ * element that renders it: the same `buttonBase` block appearing once per
+ * button in a multi-render test is one block, not evidence that "display"
+ * is declared twice.
+ *
+ * Returns the offending property names, empty when the blocks are disjoint,
+ * so a test can assert `expect(sharedProperties(blocks)).toEqual([])` and
+ * name the property when it fails.
+ */
+export const sharedProperties = (blocks: string[]): string[] => {
+  const seenIn = new Map<string, number>()
+  const shared = new Set<string>()
+  for (const block of new Set(blocks)) {
+    for (const property of new Set(topLevelPropertiesOf(block))) {
+      const count = (seenIn.get(property) ?? 0) + 1
+      seenIn.set(property, count)
+      if (count > 1) shared.add(property)
+    }
+  }
+  return [...shared].sort()
+}

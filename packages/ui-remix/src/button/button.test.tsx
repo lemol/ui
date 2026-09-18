@@ -1,35 +1,13 @@
 import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
+import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../../test/styles.ts"
 import { ButtonDemo } from "./button.demo.tsx"
 import { Button, type ButtonSize, type ButtonTone, LinkButton } from "./button.tsx"
 import { buttonTokens } from "./tokens.ts"
 
 const tones: ButtonTone[] = ["primary", "neutral", "ghost", "danger"]
 const sizes: ButtonSize[] = ["sm", "md"]
-
-/** The css remix collected during the render, with the markup dropped. */
-const stylesOf = (html: string) =>
-  [...html.matchAll(/<style data-rmx-style="[^"]*">([\s\S]*?)<\/style>/g)]
-    .map((match) => match[1] ?? "")
-    .join("\n")
-
-/**
- * Each `<style data-rmx-style="…">` block kept separate, one per css() call
- * (remix/ui gives every css() call its own cascade sub-layer). Joining them,
- * as stylesOf does, is fine for "does this text appear anywhere" but hides
- * *which* sub-layer a declaration landed in — and layer order, not
- * specificity, decides which of two conflicting declarations wins. Tests that
- * care which block a declaration is in must look at the blocks separately.
- */
-const styleBlocksOf = (html: string) =>
-  [...html.matchAll(/<style data-rmx-style="[^"]*">([\s\S]*?)<\/style>/g)].map(
-    (match) => match[1] ?? "",
-  )
-
-/** Every declaration value in a block of css. */
-const valuesOf = (styles: string) =>
-  [...styles.matchAll(/[\w-]+\s*:\s*([^;{}]+)[;}]/g)].map((match) => (match[1] ?? "").trim())
 
 /**
  * Values a declaration may carry instead of a token. Structural keywords only:
@@ -181,6 +159,23 @@ describe("Button", () => {
     const baseBlock = blocks.find((block) => block.includes("inline-flex"))
     expect(baseBlock).toBeDefined()
     expect(baseBlock).not.toContain(":disabled")
+  })
+
+  it("keeps its own css() blocks property-disjoint", async () => {
+    // The checkable form of the cascade-layers rule: no two of the blocks a
+    // single Button renders — buttonBase, its size and its tone — may
+    // declare the same top-level property, or sub-layer order (not either
+    // block's author) decides which one paints (see docs/design-system.md,
+    // "A component's own blocks must be property-disjoint"). Checked per
+    // tone and size, because two different tones sharing "color" is not a
+    // violation — a button only ever renders one tone at a time — but a tone
+    // sharing a property with buttonBase or its own size block is.
+    for (const tone of tones) {
+      for (const size of sizes) {
+        const blocks = styleBlocksOf(await renderToHtml(<Button size={size} tone={tone} />))
+        expect(sharedProperties(blocks)).toEqual([])
+      }
+    }
   })
 })
 

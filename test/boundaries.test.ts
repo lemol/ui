@@ -4,7 +4,7 @@ import { dirname, join, relative, resolve, sep } from "node:path"
 import { Glob } from "bun"
 
 const packagesRoot = resolve(import.meta.dir, "..", "packages")
-const harness = resolve(import.meta.dir, "render.ts")
+const harnesses = [resolve(import.meta.dir, "render.ts"), resolve(import.meta.dir, "styles.ts")]
 
 // The dependency graph from docs/architecture.md. Each package may import its own
 // files under src/, plus the specifiers listed here. An entry matches exactly or as
@@ -56,7 +56,7 @@ export const violations = (file: string, source: string): string[] => {
   return specifiersOf(source).flatMap((specifier) => {
     if (specifier.startsWith(".")) {
       const target = resolve(packagesRoot, dirname(file), specifier)
-      if (target === harness) {
+      if (harnesses.includes(target)) {
         return isTest(file) ? [] : [`${file}: runtime code imports the test harness (${specifier})`]
       }
       // A sibling package is reached by name, so that package.json records the edge.
@@ -176,6 +176,7 @@ describe("the SPA import boundary", () => {
       const source = [
         'import { expect, test } from "bun:test"',
         'import { renderToHtml } from "../../../../test/render.ts"',
+        'import { styleBlocksOf } from "../../../../test/styles.ts"',
       ].join("\n")
       expect(violations(spec, source)).toEqual([])
 
@@ -183,6 +184,7 @@ describe("the SPA import boundary", () => {
       expect(violations(runtime, source)).toEqual([
         `${runtime}: bun:test is not SPA-safe`,
         `${runtime}: runtime code imports the test harness (../../../../test/render.ts)`,
+        `${runtime}: runtime code imports the test harness (../../../../test/styles.ts)`,
       ])
     })
 

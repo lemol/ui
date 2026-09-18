@@ -1,5 +1,12 @@
 import { describe, expect, it } from "bun:test"
-import { groupOf, type PrimitiveName, primitiveNames, schema, tokenGroups } from "./tokens.ts"
+import {
+  groupOf,
+  headingScale,
+  type PrimitiveName,
+  primitiveNames,
+  schema,
+  tokenGroups,
+} from "./tokens.ts"
 
 describe("schema", () => {
   it("exposes every group", () => {
@@ -49,5 +56,31 @@ describe("groupOf", () => {
 
   it("throws on a name that is not in the schema", () => {
     expect(() => groupOf("nope" as PrimitiveName)).toThrow("Unknown primitive token: nope")
+  })
+})
+
+describe("the heading scale", () => {
+  it("covers h1 through h6 and nothing else", () => {
+    expect(Object.keys(headingScale)).toEqual(["1", "2", "3", "4", "5", "6"])
+  })
+
+  it("names only sizes the type group holds", () => {
+    // A name the schema dropped would resolve to nothing: no error, no style.
+    const sizes: readonly string[] = schema.type
+    for (const name of Object.values(headingScale)) expect(sizes).toContain(name)
+  })
+
+  it("gives each level a size of its own", () => {
+    // Two levels on one step is a scale with a rung missing, and it reads as a
+    // heading that did not change when the level did.
+    expect(new Set(Object.values(headingScale)).size).toBe(6)
+  })
+
+  it("descends", () => {
+    // The order the type group declares its sizes in is the order the scale
+    // walks, so h1 is the largest without this file knowing any value.
+    const order: readonly string[] = schema.type
+    const positions = Object.values(headingScale).map((name) => order.indexOf(name))
+    expect(positions).toEqual([...positions].sort((a, b) => b - a))
   })
 })

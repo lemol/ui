@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { primitiveNames, schema } from "../tokens.ts"
+import { headingScale, primitiveNames, schema } from "../tokens.ts"
 import { reducedMotionCss, resetCss, unlayeredCss } from "./reset.ts"
 
 const durationNames = schema.motion.filter((name) => name.startsWith("dur-"))
@@ -43,6 +43,16 @@ describe("the reset", () => {
     // child combinator would ship broken.
     expect(resetCss).not.toContain("&")
     expect(resetCss).not.toContain(">")
+  })
+
+  it("sizes every bare heading from the scale", () => {
+    // Derived from the same map the component's tokens default from, so this
+    // fails if either side is edited alone.
+    for (const [level, name] of Object.entries(headingScale)) {
+      expect(resetCss).toMatch(
+        new RegExp(`:where\\(h${level}\\)\\s*\\{[^}]*font-size:\\s*var\\(--${name}\\)`),
+      )
+    }
   })
 })
 

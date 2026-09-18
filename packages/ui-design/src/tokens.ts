@@ -135,3 +135,28 @@ export function groupOf(name: PrimitiveName): TokenGroup {
   if (group === undefined) throw new Error(`Unknown primitive token: ${name}`)
   return group
 }
+
+/**
+ * Which primitive sizes a bare heading, by element.
+ *
+ * `h1`–`h6` are HTML elements, not components, so this tells a package that
+ * holds no values nothing about which components exist — /css derives its six
+ * font-size rules from it, and ui-remix's Heading defaults its size tokens from
+ * it. Deriving both from one map is why the floor a bare <h2> lands on and the
+ * token <Heading level={2}> reads cannot drift apart, and it is the same move
+ * reducedMotionCss makes with the dur- names in schema.motion.
+ *
+ * h5 lands on body size and h6 below it. Both stay distinct through the
+ * fw-bold, tr-tight and lh-tight the reset's heading rule already carries, and
+ * stopping at fs-sm leaves fs-xs and fs-2xs to the smaller UI that needs them.
+ */
+export const headingScale = {
+  1: "fs-3xl",
+  2: "fs-2xl",
+  3: "fs-xl",
+  4: "fs-lg",
+  5: "fs-md",
+  6: "fs-sm",
+} as const satisfies Record<number, PrimitiveName>
+
+export type HeadingLevel = keyof typeof headingScale

@@ -2,7 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [14 - Typography: Heading, Text, Eyebrow and the type scale](./m1-foundation-and-contract-proof/14-typography-heading-text-eyebrow-and-the-type-scale.md)
 - [ ] [15 - Field: native form controls and constraint validation](./m1-foundation-and-contract-proof/15-field-native-form-controls-and-constraint-validation.md)
 - [ ] [16 - Badge: the semantic token set](./m1-foundation-and-contract-proof/16-badge-the-semantic-token-set.md)
 - [ ] [17 - Dialog, overlay() and the Invoker Commands compat shim](./m1-foundation-and-contract-proof/17-dialog-overlay-and-the-invoker-commands-compat-shim.md)

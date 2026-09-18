@@ -586,10 +586,15 @@ In `packages/ui-remix/src/index.ts`, add these exports (biome sorts them; run
 `bun run fix` afterwards):
 
 ```ts
-export { type Align, alignStyles } from "./align.ts"
+export { type Align } from "./align.ts"
 export { type SpaceStep } from "./space.ts"
 export { Stack, type StackProps } from "./stack/stack.tsx"
 ```
+
+Export the `Align` type, which appears in `StackProps` and `RowProps`, but not
+`alignStyles` — that Record is how the components are built, not something a
+consumer needs. Tests and demos import it from `../align.ts` directly. Same
+for `gaps`: `SpaceStep` is public, the Record is not.
 
 In `packages/ui-remix/src/demos.ts`, add the import and the entry:
 
@@ -1439,8 +1444,15 @@ describe("Container", () => {
 })
 
 describe("ContainerDemo", () => {
-  it("renders the edge that makes the maximum width visible", async () => {
-    expect(await renderToHtml(<ContainerDemo />)).toContain("page-max")
+  it("frames the container in a full-bleed band, so the measure is visible", async () => {
+    // Asserting on "page-max" alone would be vacuous: Container's own CSS
+    // emits var(--page-max) into the same document, so that string is there
+    // whatever the demo renders. These two come from the demo and nowhere
+    // else — the band is the whole point of it, since a Container with no
+    // full-width context behind it looks like a plain div.
+    const html = await renderToHtml(<ContainerDemo />)
+    expect(html).toContain("gutter padded, centred")
+    expect(stylesOf(html)).toContain("border-block: 1px solid var(--hairline)")
   })
 })
 ```

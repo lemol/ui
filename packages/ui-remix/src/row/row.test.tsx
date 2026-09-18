@@ -49,7 +49,7 @@ describe("Row", () => {
             await renderToHtml(<Row align={align} gap={step} justify={justify} wrap />),
           )
           expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
-          expect(styles).not.toContain("var(--ui-")
+          expect(styles).not.toContain("--ui-")
         }
       }
     }

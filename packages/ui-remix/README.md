@@ -68,14 +68,15 @@ it means a token is missing. See
 Layout, and **no tokens of their own** — the contract proved from the opposite
 side to `Button`. Each reads primitives directly and declares no `--ui-*`, so
 none of them appears in `src/tokens.ts` and a skin retunes them by changing the
-space scale rather than by changing them.
+primitives they read — the space scale, `--page-max`, `--gutter` — rather than
+the components.
 
-| | Props | Declares |
+| Component | Props | Declares |
 | --- | --- | --- |
-| `Stack` | `gap`, `align` | `display: flex`, `flex-direction: column` |
-| `Row` | `gap`, `align`, `justify`, `wrap` | `display: flex` |
-| `Grid` | `gap`, `cols` | `display: grid` |
-| `Container` | — | `max-inline-size: var(--page-max)`, `padding-inline: var(--gutter)`, `margin-inline: auto` |
+| `Stack` | `gap`: a space step. `align`: `start`, `center`, `end`, `baseline`, `stretch` | `display: flex`, `flex-direction: column` |
+| `Row` | `gap` and `align` as above. `justify`: `start`, `center`, `end`, `between`, `around`, `evenly`. `wrap`: a boolean | `display: flex` |
+| `Grid` | `gap`. `cols`: `1` to `6` | `display: grid` |
+| `Container` | none | `max-inline-size: var(--page-max)`, `padding-inline: var(--gutter)`, `margin-inline: auto` |
 
 `gap` is a step on the primitive space scale — `gap={4}` is `var(--sp-4)` — and
 its type derives from `schema.space`, so a step the schema does not hold is a
@@ -87,14 +88,18 @@ still drifting.
 **Which axes have defaults, and why it matters.** `gap` defaults to `0` and
 `Row`'s `align` to `center`; both blocks therefore always render. `Stack`'s
 `align`, `Row`'s `justify` and `wrap`, and `Grid`'s `cols` render no block
-until their prop is passed, which leaves those properties fully reachable
-through `mix`. See
+unless asked for — `wrap` unless it is `true`, the others unless the prop is
+passed — which leaves those properties fully reachable through `mix`. See
 [design-system.md](../../docs/design-system.md#cascade-layers) for the rule and
 the cost of giving an axis a default.
 
-`Container` takes no props because it has nothing to decide: both of its
+`Container` has no layout props because it has nothing to decide: both of its
 lengths are primitives a theme sets. It cannot change its tag either, so a
 caller wanting `<main>` wraps it rather than configuring it.
+
+`cols` stops at six. Twelve is the convention for grid systems that count
+*spans*; these are equal `1fr` tracks, and more than six of them is unreadable
+at any width `--page-max` permits. A judgement, not a schema constraint.
 
 `Grid` has no responsive mode. `repeat(auto-fit, minmax(…))` needs a track
 minimum and the schema holds no primitive for one; a caller-supplied length

@@ -9,8 +9,10 @@ tokens; the tokens are the part that must not drift.
 `--ink-muted`, `--sp-4`, `--r-md`, `--dur-fast`. A theme supplies their values.
 
 **Component tokens** are the retheming surface — `--ui-btn-primary-bg`,
-`--ui-field-border`, `--ui-dialog-surface`. Each component declares its own,
-defaulting relationally to a primitive:
+`--ui-field-border`, `--ui-dialog-surface`. A component that has a retheming
+surface declares its own, defaulting relationally to a primitive; a component
+whose every value is a structural keyword or a primitive the caller chose
+declares none, and the layout components are that case:
 
 ```ts
 // ui-remix/src/button/tokens.ts
@@ -328,9 +330,9 @@ The resolution is to decide per axis whether it has a default at all:
 - **An axis with a default** renders its block always, carrying the default as
   its value. There is one block for that property, so there is nothing to
   order.
-- **An axis without one** renders its block only when its prop is passed. The
-  component then declares that property nowhere, and the browser's own default
-  applies.
+- **An axis without one** renders its block only when asked for — when the prop
+  is passed, or for a boolean axis when it is `true`. The component then
+  declares that property nowhere, and the browser's own default applies.
 
 A block is left out by putting `undefined` in the `mix` array — `remix/ui`
 skips undefined entries, so `align === undefined ? undefined : alignStyles[align]`

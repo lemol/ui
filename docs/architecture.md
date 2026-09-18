@@ -36,7 +36,10 @@ packages/
     src/css/reset.ts        element defaults in @layer base, and the reduced-motion reset
   ui-remix/
     src/button/             button.tsx + tokens.ts + button.demo.tsx + test
+    src/stack/              …and no tokens.ts, when primitives are all it reads
     src/dialog/             …one directory per component
+    src/space.ts            blocks more than one component uses: the gap scale
+    src/align.ts            …and cross-axis alignment
     src/theme-style.tsx     ThemeStyle — puts the emitted sheet in the document
     src/tokens.ts           aggregates every component's contract
     src/compat.ts           Invoker Commands backfill

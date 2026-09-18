@@ -36,7 +36,7 @@ describe("Stack", () => {
       for (const step of steps) {
         const styles = stylesOf(await renderToHtml(<Stack align={align} gap={step} />))
         expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
-        expect(styles).not.toContain("var(--ui-")
+        expect(styles).not.toContain("--ui-")
       }
     }
   })

@@ -6,9 +6,10 @@ are the important half.
 
 ## 1. Styling goes through the contract
 
-No component hard-codes a colour, radius, duration, or space step. Each
-component declares its own `--ui-*` tokens beside itself, defaulting to a
-primitive. A skin is a set of token values.
+No component hard-codes a colour, radius, duration, or space step. A component
+with something to retheme declares its own `--ui-*` tokens beside itself,
+defaulting to a primitive; one styled from structural keywords and primitives
+alone declares none. A skin is a set of token values.
 
 **Why.** The alternative was tried. In `@mionso/design`, brand decisions live
 inside components — `Button`'s primary tone is an amber gradient with an inset

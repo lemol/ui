@@ -33,7 +33,7 @@ describe("Grid", () => {
       for (const step of steps) {
         const styles = stylesOf(await renderToHtml(<Grid cols={cols} gap={step} />))
         expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
-        expect(styles).not.toContain("var(--ui-")
+        expect(styles).not.toContain("--ui-")
       }
     }
   })

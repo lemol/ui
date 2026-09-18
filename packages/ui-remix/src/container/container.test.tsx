@@ -27,7 +27,7 @@ describe("Container", () => {
   it("reads no contract token, only primitives and structural keywords", async () => {
     const styles = stylesOf(await renderToHtml(<Container />))
     expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
-    expect(styles).not.toContain("var(--ui-")
+    expect(styles).not.toContain("--ui-")
   })
 
   it("takes its width and gutter from the sizing primitives", async () => {

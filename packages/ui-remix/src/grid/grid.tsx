@@ -39,9 +39,10 @@ export interface GridProps {
    * There is no responsive mode. Auto-fit needs a track minimum for
    * `repeat(auto-fit, minmax(<min>, 1fr))`, and `schema.sizing` holds no
    * primitive for one — a caller-supplied length would be the single
-   * open-ended value in a package built to have none. Recorded as a finding
-   * on task 13 rather than added; until then, a responsive track list goes
-   * through `mix`, which is reliable precisely because `cols` was not passed.
+   * open-ended value in a package built to have none. Deferred until such a
+   * primitive exists rather than added now; meanwhile a responsive track list
+   * goes through `mix`, which is reliable precisely because `cols` was not
+   * passed.
    */
   cols?: ColumnCount | undefined
   /**

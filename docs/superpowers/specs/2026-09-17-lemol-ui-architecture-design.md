@@ -2,6 +2,11 @@
 
 Date: 2026-09-17
 
+> **This is a dated decision record**, not maintained documentation. It records
+> what was decided on this date, the reasoning at the time, and the
+> alternatives that were rejected. For what is true now, read
+> [docs/README.md](../../README.md) and the documents it indexes.
+
 ## Purpose
 
 `lemol/ui` holds the UI packages shared across lemol projects. Three packages

@@ -16,6 +16,11 @@
  */
 export const schema = {
   color: [
+    // The value `color-scheme` takes, so the emitter needs no rule of its own:
+    // a theme says `light` in `base` and `dark` in its dark axis, and the axis
+    // carries it like any other name. Emitter logic cannot replace it, because
+    // a dark-only theme has no dark axis to infer from.
+    "scheme-mode",
     "canvas",
     "surface",
     "surface-raised",
@@ -102,7 +107,10 @@ export const schema = {
     "ease-in-out-smooth",
   ],
   sizing: ["control-h", "control-h-sm", "row-h", "row-pad-y", "page-max", "gutter"],
-  elevation: ["shadow-sm", "shadow-md", "shadow-lg", "focus-ring"],
+  // `focus-ring` holds the whole `outline` shorthand. `outline-offset` is a
+  // separate property that cannot be folded into it, so it gets its own name
+  // rather than a literal in the reset or a borrowed space step.
+  elevation: ["shadow-sm", "shadow-md", "shadow-lg", "focus-ring", "focus-ring-offset"],
 } as const
 
 export type TokenGroup = keyof typeof schema

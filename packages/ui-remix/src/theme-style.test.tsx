@@ -1,8 +1,9 @@
 import { describe, expect, it } from "bun:test"
 import { defineTheme, type PrimitiveTokens, primitiveNames } from "@lemol/ui-design"
 import { emitTokensCss } from "@lemol/ui-design/css"
+import type { Handle } from "remix/ui"
 import { renderToHtml } from "../../../test/render.ts"
-import { ThemeStyle } from "./theme-style.tsx"
+import { ThemeStyle, type ThemeStyleProps } from "./theme-style.tsx"
 import { type ComponentTokenName, componentTokens } from "./tokens.ts"
 
 /** A complete theme whose every value names itself, so a declaration is traceable. */
@@ -56,5 +57,38 @@ describe("ThemeStyle", () => {
       <ThemeStyle componentTokens={{ ...componentTokens, "ui-app-x": "1px" }} theme={theme} />,
     )
     expect(html).toContain("--ui-app-x: 1px;")
+  })
+
+  it("sets innerHTML on the style element and renders no children", () => {
+    // Every test above reads rendered HTML, and emitTokensCss() currently bans
+    // &, < and > — so a rewrite to text children (`<style>{css}</style>`)
+    // would produce byte-identical HTML and pass all of them. This reads the
+    // element remix actually builds, before serialization erases the
+    // distinction: a text child fails it even while the emitter's ban still
+    // makes the two forms look the same on the wire. If this starts failing,
+    // someone switched to text children, which will silently corrupt any
+    // future declaration the emitter is allowed to carry (see the doc comment
+    // on ThemeStyle for why that's a real future, not a hypothetical one).
+    const handle = { props: { theme } } as unknown as Handle<ThemeStyleProps>
+    const element = ThemeStyle(handle)()
+    expect(element.type).toBe("style")
+    expect(element.props.innerHTML).toContain("@layer base, rmx;")
+    expect(element.props.children).toBeUndefined()
+  })
+
+  it("remix escapes text children but not innerHTML", async () => {
+    // Pins the assumption ThemeStyle's innerHTML choice rests on. A literal
+    // string is used here, not emitTokensCss(), specifically to carry the
+    // characters the emitter refuses to emit today — the point is to check
+    // the renderer's behaviour in isolation, not the emitter's ban. If this
+    // ever fails, remix stopped escaping text content (or started escaping
+    // innerHTML), and the innerHTML decision in theme-style.tsx needs
+    // revisiting, not just this test.
+    const raw = "a & b < c > d"
+    const viaInnerHtml = await renderToHtml(<style innerHTML={raw} />)
+    const viaChildren = await renderToHtml(<style>{raw}</style>)
+    expect(viaInnerHtml).toContain(raw)
+    expect(viaChildren).not.toContain(raw)
+    expect(viaChildren).toContain("a &amp; b &lt; c &gt; d")
   })
 })

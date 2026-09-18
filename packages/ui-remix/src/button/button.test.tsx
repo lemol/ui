@@ -219,20 +219,16 @@ describe("ButtonDemo", () => {
     // in, so dropping a tone from only one size's section fails here even
     // though the tone still occurs somewhere in the full document.
     const html = await renderToHtml(<ButtonDemo />)
-    const sections = sizes
-      .map((size) => ({ size, start: html.indexOf(`size ${size}`) }))
-      .sort((a, b) => a.start - b.start)
-      .map(({ size, start }, i, all) => ({
-        size,
-        start,
-        html: html.slice(start, all[i + 1]?.start ?? html.length),
-      }))
+    const starts = sizes.map((size) => html.indexOf(`size ${size}`)).sort((a, b) => a - b)
 
-    expect(sections).toHaveLength(sizes.length)
-    for (const section of sections) {
-      expect(section.start).toBeGreaterThanOrEqual(0)
-      for (const tone of tones) expect(section.html).toContain(`>${tone}</button>`)
-      expect(section.html).toContain("disabled")
+    for (const [i, start] of starts.entries()) {
+      // The real guard. A missing label gives -1, and slicing from -1 would
+      // widen the section to most of the document and pass on a tone that
+      // only appears in the other size's section.
+      expect(start).toBeGreaterThanOrEqual(0)
+      const section = html.slice(start, starts[i + 1] ?? html.length)
+      for (const tone of tones) expect(section).toContain(`>${tone}</button>`)
+      expect(section).toContain("disabled")
     }
   })
 })

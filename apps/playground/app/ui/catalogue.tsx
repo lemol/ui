@@ -17,9 +17,11 @@ const heading = css({
 })
 
 /**
- * The frame around a demo: a title and the demo's own markup. Knobs, the
- * switcher form and the component index are task 19 — this route exists now so
- * that Button's contract is provable in a real document.
+ * The frame around a demo: a title and the demo's own markup, and nothing
+ * else yet. Knobs, the switcher form and the component index are still to
+ * come; scheme and density are query params in the meantime. The route exists
+ * this early so that Button's contract is provable in a real document rather
+ * than only in a render test.
  */
 export function CataloguePage(handle: Handle<CataloguePageProps>) {
   return () => {

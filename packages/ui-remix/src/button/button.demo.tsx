@@ -6,8 +6,7 @@ const sizes: ButtonSize[] = ["md", "sm"]
 
 /**
  * The demo is styled from primitives rather than from Button's own tokens: it
- * is a page, not a component, and the layout components that would own this
- * spacing arrive in task 13.
+ * is a page, not a component, and no layout component owns this spacing yet.
  */
 const row = css({
   display: "flex",
@@ -36,8 +35,19 @@ export function ButtonDemo() {
                 {tone}
               </Button>
             ))}
+            {/* Three disabled buttons, not one. neutral's colours are the
+                closest to the disabled ones, so a manual browser pass over
+                neutral alone is what let a disabled button render in its
+                tone's colours. primary and danger are the tones where the
+                override failing is obvious at a glance. */}
             <Button disabled size={size}>
               disabled
+            </Button>
+            <Button disabled size={size} tone="primary">
+              disabled primary
+            </Button>
+            <Button disabled size={size} tone="danger">
+              disabled danger
             </Button>
             <LinkButton href="#" size={size} tone="primary">
               link

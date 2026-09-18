@@ -85,7 +85,12 @@ describe("the catalogue route", () => {
   it("renders the demo for a component it knows", async () => {
     const response = await get("/c/button")
     expect(response.status).toBe(200)
-    expect(await response.text()).toContain("Button")
+    const page = await response.text()
+    // Not `toContain("Button")`: <title>Button · lemol ui</title> satisfies
+    // that on its own, so the route would pass with the demo body missing
+    // entirely. These name things only the demo renders.
+    expect(page).toContain("size md")
+    expect(page).toContain(">primary</button>")
   })
 
   it("is a 404 for one it does not", async () => {
@@ -130,15 +135,24 @@ describe("the catalogue route", () => {
     )
   })
 
-  it("renders light, dark and compact with no client JavaScript", async () => {
+  it("renders unset, light, dark and compact with no client JavaScript", async () => {
     // Assertions read the <html> open tag, not the page. The emitted sheet
     // carries `:root[data-scheme="dark"]` and `:root[data-density="compact"]`
     // selectors of its own, so a whole-page `not.toContain("data-scheme")`
     // would fail on every request.
-    const light = await html("/c/button?nojs")
+    // Unset: no attribute at all, so the media query decides the scheme.
+    const unset = await html("/c/button?nojs")
+    expect(unset).not.toContain("<script")
+    expect(htmlTag(unset)).not.toContain("data-scheme")
+    expect(htmlTag(unset)).not.toContain("data-density")
+
+    // The value with a job the others do not have: the emitter guards its
+    // dark block with `:root:not([data-scheme="light"])`, so `light` is what
+    // beats a dark system preference. Unset renders no attribute and does not
+    // exercise it.
+    const light = await html("/c/button?nojs&scheme=light")
+    expect(htmlTag(light)).toContain('data-scheme="light"')
     expect(light).not.toContain("<script")
-    expect(htmlTag(light)).not.toContain("data-scheme")
-    expect(htmlTag(light)).not.toContain("data-density")
 
     const dark = await html("/c/button?nojs&scheme=dark")
     expect(htmlTag(dark)).toContain('data-scheme="dark"')

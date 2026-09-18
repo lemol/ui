@@ -50,6 +50,7 @@ export const schema = {
     "warning-subtle",
     "warning-border",
     "danger",
+    "danger-hover",
     "danger-ink",
     "danger-subtle",
     "danger-border",

@@ -26,6 +26,19 @@ describe("schema", () => {
   it("names no token twice", () => {
     expect(new Set(primitiveNames).size).toBe(primitiveNames.length)
   })
+
+  it("gives every interactive colour a hover value, and no status colour one", () => {
+    // accent, link and danger are the colours something hovers. success,
+    // warning and info are read on static elements — Badge, not Button — so
+    // they get no hover value until something needs one. Deriving one inside a
+    // component is what design-system.md forbids.
+    const interactive = ["accent", "link", "danger"]
+    const status = ["success", "warning", "info"]
+    const colors = schema.color as readonly string[]
+
+    expect(interactive.filter((name) => !colors.includes(`${name}-hover`))).toEqual([])
+    expect(status.filter((name) => colors.includes(`${name}-hover`))).toEqual([])
+  })
 })
 
 describe("groupOf", () => {

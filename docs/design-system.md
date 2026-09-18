@@ -55,12 +55,15 @@ one token and never touching the component:
   "linear-gradient(180deg, var(--accent-highlight), var(--accent) 65%, var(--accent-bronze))",
 ```
 
-A default that cannot name a primitive is an exception, not a pattern.
-`--ui-btn-border-width: 1px` is the only one at present: `hairline` is a
-colour, there is no border-width primitive, and one property does not justify
-widening a schema every theme has to satisfy. The exception is allow-listed in
-`ui-remix/src/tokens.test.ts` rather than tolerated, so adding a second one
-means editing a list and arguing for it.
+A default that cannot name a primitive is an exception, not a pattern, and the
+allow-list in `ui-remix/src/tokens.test.ts` holds every one: `1px` for
+`--ui-btn-border-width`, because `hairline` is a colour and there is no
+border-width primitive; `transparent` for the ghost tone, which keeps a ghost
+button the same size as a filled one; and `uppercase` for
+`--ui-eyebrow-transform`, because caps are taste rather than structure and a
+brand that sets things in sentence case must be able to say `none` instead of
+forking the component. Adding a fourth means editing that list and arguing for
+it.
 
 **Naming.** Ramps you do arithmetic on are numeric, and the number is a
 multiplier: `sp-4` is four 4px units. Sets you choose from are t-shirt sized:

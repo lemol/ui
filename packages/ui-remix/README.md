@@ -107,6 +107,30 @@ would be the only open-ended value in the package. Until a sizing ramp exists,
 a responsive track list goes through `mix`, which is reliable precisely because
 `cols` was not passed.
 
+### `Heading` / `Text` / `Eyebrow`
+
+The type scale as a contract. `Heading` separates the document outline from the
+appearance: `level` picks the element, `size` picks the step and defaults to
+`level`, so an `h3` that has to look like an `h5` needs no escape hatch.
+
+| Axis | Values | Comes from |
+| --- | --- | --- |
+| `Heading` `level` | `1` to `6`, required | The element rendered |
+| `Heading` `size` | `1` to `6`, defaults to `level` | `--ui-heading-<n>-size` |
+| `Text` `size` | `sm`, `md`, `lg` | `--ui-text-size-<size>` |
+| `Text` `tone` | `default`, `muted`, `subtle` | `--ui-text-ink*` |
+| `Text` `as` | `p`, `span`, `div` | The element rendered |
+| `Eyebrow` | no axes | `--ui-eyebrow-*`, all five |
+
+The six heading sizes default from `headingScale` in `@lemol/ui-design`, which
+is also where the reset gets the sizes it gives a bare `h1`–`h6`. One map, so a
+heading nobody wrapped in the component and one that went through it cannot
+drift apart.
+
+`Text` declares no `font-weight`, so `mix={css({ fontWeight: "var(--fw-semibold)" })}`
+is reliable. `Heading` and `Eyebrow` declare `color`, so their ink goes through
+their tokens.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -151,6 +175,7 @@ token record if it has one:
 ```
 src/button/button.tsx  tokens.ts  button.demo.tsx  button.test.tsx
 src/stack/stack.tsx               stack.demo.tsx   stack.test.tsx
+src/heading/heading.tsx tokens.ts heading.demo.tsx heading.test.tsx
 ```
 
 Co-location is what keeps the demo from drifting from the component. A missing
@@ -170,9 +195,9 @@ transitions.
 
 ## Status
 
-`Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container` and `ThemeStyle`
-ship. `src/tokens.ts` aggregates the component records and exports
-`ComponentTokenName`; the four layout components add nothing to it, which is
-what they exist to demonstrate. `src/demos.ts` registers five demos.
-`runtime.ts` and `compat.ts` are still stubs — nothing here needs client
-JavaScript yet.
+`Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container`, `Heading`, `Text`,
+`Eyebrow` and `ThemeStyle` ship. `src/tokens.ts` aggregates the component
+records and exports `ComponentTokenName`; the four layout components add nothing
+to it, which is what they exist to demonstrate, and the three typographic ones
+add twenty-two between them. `src/demos.ts` registers eight demos. `runtime.ts`
+and `compat.ts` are still stubs — nothing here needs client JavaScript yet.

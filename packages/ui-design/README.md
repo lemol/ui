@@ -12,8 +12,8 @@ growing its own.
 
 | Import | Holds |
 | --- | --- |
-| `@lemol/ui-design` | The primitive token schema, `defineTheme` / `extendTheme`, and `v()` — the typed token reference. |
-| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer rmx-reset, base, rmx` setup, the element defaults, the reduced-motion reset, and `schemeBootScript`. |
+| `@lemol/ui-design` | The primitive token schema, `defineTheme` / `extendTheme`, `v()` — the typed token reference — and `headingScale` / `HeadingLevel`, the map from heading level to size step. |
+| `@lemol/ui-design/css` | `emitTokensCss()`, the `@layer rmx-reset, base, rmx` setup, the element defaults — `h1`–`h6` sized from `headingScale`, so a bare heading is never left on the user agent's default — the reduced-motion reset, and `schemeBootScript`. |
 
 `/css` is a separate subpath so that taking the schema does not mean taking the
 stylesheet with it.
@@ -45,8 +45,9 @@ order, typing, themes and the cascade layers.
 
 `@lemol/ui-design` holds 96 primitive names across seven groups, and no values.
 `@lemol/ui-design/css` emits the stylesheet: the layer statement, a block per
-variant axis, the element defaults, the one unlayered rule, and the
-reduced-motion reset.
+variant axis, the element defaults — including the six `:where(hN) { font-size:
+var(--fs-*) }` rules derived from `headingScale` — the one unlayered rule, and
+the reduced-motion reset.
 
 Two things the entry table above deliberately does not hold: the component that
 puts an emitted sheet into a document, and the boot script that also stamps the

@@ -38,12 +38,6 @@ const buttonBase = css({
   // No outline anywhere in here. The reset's :where(:focus-visible) rule owns
   // the focus ring, and it applies precisely because nothing here competes
   // with it. A per-component ring is how a focus ring drifts.
-  "&:disabled": {
-    background: "var(--ui-btn-disabled-bg)",
-    borderColor: "var(--ui-btn-disabled-border)",
-    color: "var(--ui-btn-disabled-ink)",
-    cursor: "not-allowed",
-  },
 })
 
 const sizeStyles: Record<ButtonSize, CSSMixinDescriptor> = {
@@ -62,6 +56,16 @@ const sizeStyles: Record<ButtonSize, CSSMixinDescriptor> = {
 /**
  * `:active` deliberately reuses the hover background. A separate press colour
  * is four more tokens for an effect that lasts a hundred milliseconds.
+ *
+ * The `:disabled` override lives here, inside the tone's own css() block,
+ * rather than in buttonBase. remix/ui gives every css() call its own cascade
+ * sub-layer, and within layers, layer order beats specificity — so a
+ * `.base:disabled` rule in a layer registered before the tone's layer loses
+ * to `.tone { color: … }` even though it is more specific. Putting the
+ * disabled declarations in the same css() block as the tone declarations
+ * they must beat keeps them in the same sub-layer, where normal specificity
+ * rules apply and `.cls:disabled` reliably beats `.cls`. The values are
+ * tone-independent by design; only their position moved.
  */
 const toneStyle = (tone: ButtonTone): CSSMixinDescriptor =>
   css({
@@ -69,6 +73,12 @@ const toneStyle = (tone: ButtonTone): CSSMixinDescriptor =>
     borderColor: `var(--ui-btn-${tone}-border)`,
     color: `var(--ui-btn-${tone}-ink)`,
     "&:hover:not(:disabled)": { background: `var(--ui-btn-${tone}-bg-hover)` },
+    "&:disabled": {
+      background: "var(--ui-btn-disabled-bg)",
+      borderColor: "var(--ui-btn-disabled-border)",
+      color: "var(--ui-btn-disabled-ink)",
+      cursor: "not-allowed",
+    },
   })
 
 const toneStyles: Record<ButtonTone, CSSMixinDescriptor> = {

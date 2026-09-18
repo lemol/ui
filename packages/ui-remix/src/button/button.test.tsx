@@ -14,6 +14,19 @@ const stylesOf = (html: string) =>
     .map((match) => match[1] ?? "")
     .join("\n")
 
+/**
+ * Each `<style data-rmx-style="…">` block kept separate, one per css() call
+ * (remix/ui gives every css() call its own cascade sub-layer). Joining them,
+ * as stylesOf does, is fine for "does this text appear anywhere" but hides
+ * *which* sub-layer a declaration landed in — and layer order, not
+ * specificity, decides which of two conflicting declarations wins. Tests that
+ * care which block a declaration is in must look at the blocks separately.
+ */
+const styleBlocksOf = (html: string) =>
+  [...html.matchAll(/<style data-rmx-style="[^"]*">([\s\S]*?)<\/style>/g)].map(
+    (match) => match[1] ?? "",
+  )
+
 /** Every declaration value in a block of css. */
 const valuesOf = (styles: string) =>
   [...styles.matchAll(/[\w-]+\s*:\s*([^;{}]+)[;}]/g)].map((match) => (match[1] ?? "").trim())
@@ -101,6 +114,43 @@ describe("Button", () => {
     const pinned = css({ position: "fixed" })
     const styles = stylesOf(await renderToHtml(<Button mix={pinned}>Save</Button>))
     expect(styles).toContain("position: fixed")
+  })
+
+  it("wins the disabled cascade from within the tone's own sub-layer", async () => {
+    // remix/ui gives every css() call its own cascade sub-layer, and within
+    // layers, layer order beats specificity — not just "more specific wins".
+    // buttonBase's sub-layer is registered before the tone's, so a
+    // `.base:disabled` rule sitting in buttonBase would lose to
+    // `.tone { color: … }` even though `:disabled` is more specific. A test
+    // that only checks the disabled declarations are *present somewhere* in
+    // the document (as every prior test here does) cannot see that: the text
+    // is there, but the wrong rule wins at paint time. The only reliable fix
+    // is to put the disabled override in the *same* css() block as the tone
+    // declarations it must beat, so ordinary specificity applies within one
+    // sub-layer. This test asserts the two live together, block by block.
+    for (const tone of tones) {
+      const blocks = styleBlocksOf(await renderToHtml(<Button tone={tone}>Save</Button>))
+      const toneBlock = blocks.find(
+        (block) => block.includes(`var(--ui-btn-${tone}-bg)`) && block.includes(":disabled"),
+      )
+      expect(toneBlock).toBeDefined()
+      expect(toneBlock).toContain("var(--ui-btn-disabled-bg)")
+      expect(toneBlock).toContain("var(--ui-btn-disabled-border)")
+      expect(toneBlock).toContain("var(--ui-btn-disabled-ink)")
+      expect(toneBlock).toContain("cursor: not-allowed")
+    }
+  })
+
+  it("keeps the disabled override out of buttonBase's own sub-layer", async () => {
+    // The regression this guards against is silent: buttonBase would still
+    // read correctly as CSS text, it would just be beaten by the tone's
+    // layer again. Asserting buttonBase's own block (the one carrying the
+    // shared, tone-independent declarations) does NOT also carry `:disabled`
+    // is what stops that split from reintroducing itself unnoticed.
+    const blocks = styleBlocksOf(await renderToHtml(<Button>Save</Button>))
+    const baseBlock = blocks.find((block) => block.includes("inline-flex"))
+    expect(baseBlock).toBeDefined()
+    expect(baseBlock).not.toContain(":disabled")
   })
 })
 

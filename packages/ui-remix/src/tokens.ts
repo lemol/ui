@@ -1,4 +1,5 @@
 import { buttonTokens } from "./button/tokens.ts"
+import { headingTokens } from "./heading/tokens.ts"
 
 /**
  * Every component's token record in one object, for `emitTokensCss()` to write
@@ -9,6 +10,7 @@ import { buttonTokens } from "./button/tokens.ts"
  */
 export const componentTokens = {
   ...buttonTokens,
+  ...headingTokens,
 } satisfies Record<string, string>
 
 /**

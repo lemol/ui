@@ -913,7 +913,7 @@ Create `packages/ui-remix-mini/src/theme.test.ts`:
 import { describe, expect, it } from "bun:test"
 import { extendTheme, primitiveNames, schema } from "@lemol/ui-design"
 import { emitTokensCss } from "@lemol/ui-design/css"
-import { componentTokens } from "@lemol/ui-remix"
+import { type ComponentTokenName, componentTokens } from "@lemol/ui-remix"
 import { miniTheme } from "./theme.ts"
 
 describe("miniTheme", () => {
@@ -987,10 +987,16 @@ describe("a skin is a set of token values", () => {
     // point: if excess property checking ever stops reaching this object, the
     // directive below goes unused and tsc fails with TS2578 — so the proof
     // cannot rot silently.
-    extendTheme(miniTheme, {
+    const wrong = extendTheme(miniTheme, {
       // @ts-expect-error - ui-btn-primary-background is not a token ui-remix declares
       base: { "ui-btn-primary-background": "red" },
     })
+
+    // At runtime the bogus name passes straight through and would emit a
+    // custom property no component reads — which is why the type layer has to
+    // be the thing that catches it. `tsc` is the real assertion here; this one
+    // records what happens when it does not run.
+    expect(wrong.base["ui-btn-primary-background" as ComponentTokenName]).toBe("red")
   })
 })
 ```

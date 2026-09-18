@@ -133,11 +133,26 @@ describe("LinkButton", () => {
 })
 
 describe("ButtonDemo", () => {
-  it("renders every tone in both sizes", async () => {
+  it("renders every tone within each size's own section", async () => {
+    // Each size section is led by its "size <name>" label. Slicing the html
+    // at those labels scopes the tone check to the section it claims to be
+    // in, so dropping a tone from only one size's section fails here even
+    // though the tone still occurs somewhere in the full document.
     const html = await renderToHtml(<ButtonDemo />)
-    for (const tone of tones) expect(html).toContain(`>${tone}</button>`)
-    expect(html).toContain("size md")
-    expect(html).toContain("size sm")
-    expect(html).toContain("disabled")
+    const sections = sizes
+      .map((size) => ({ size, start: html.indexOf(`size ${size}`) }))
+      .sort((a, b) => a.start - b.start)
+      .map(({ size, start }, i, all) => ({
+        size,
+        start,
+        html: html.slice(start, all[i + 1]?.start ?? html.length),
+      }))
+
+    expect(sections).toHaveLength(sizes.length)
+    for (const section of sections) {
+      expect(section.start).toBeGreaterThanOrEqual(0)
+      for (const tone of tones) expect(section.html).toContain(`>${tone}</button>`)
+      expect(section.html).toContain("disabled")
+    }
   })
 })

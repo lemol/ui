@@ -8,6 +8,7 @@ export {
   type LinkButtonProps,
 } from "./button/button.tsx"
 export { Container, type ContainerProps } from "./container/container.tsx"
+export { Eyebrow, type EyebrowProps } from "./eyebrow/eyebrow.tsx"
 export { type ColumnCount, Grid, type GridProps } from "./grid/grid.tsx"
 export { Heading, type HeadingProps } from "./heading/heading.tsx"
 export { type Justify, Row, type RowProps } from "./row/row.tsx"

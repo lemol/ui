@@ -11,8 +11,12 @@ import { componentTokens } from "./tokens.ts"
  *   toolbar does not reflow when a tone changes.
  * - `1px` is a border width, and the schema has no border-width primitive.
  *   Named here rather than written into button.tsx, so a skin can change it.
+ * - `uppercase` is Eyebrow's whole look. `display: inline-flex` in Button is
+ *   structural — change it and the component stops working — but caps are
+ *   taste, and a brand that sets things in sentence case has to be able to say
+ *   `--ui-eyebrow-transform: none` rather than fork the component.
  */
-const allowedLiterals = new Set(["transparent", "1px"])
+const allowedLiterals = new Set(["transparent", "1px", "uppercase"])
 
 const primitives = new Set<string>(primitiveNames)
 const entries = Object.entries(componentTokens)

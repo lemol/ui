@@ -21,17 +21,28 @@ export const buttonTokens = {
 }
 ```
 
-The component reads only its own tier:
+The component reads only its own tier, through `css()`:
 
 ```ts
 // ui-remix/src/button/button.tsx
-const toneStyles = {
-  primary: {
-    background: "var(--ui-btn-primary-bg)",
-    color:      "var(--ui-btn-primary-ink)",
-  },
-}
+const toneStyle = (tone: ButtonTone) =>
+  css({
+    background:  `var(--ui-btn-${tone}-bg)`,
+    color:       `var(--ui-btn-${tone}-ink)`,
+    borderColor: `var(--ui-btn-${tone}-border)`,
+    // In this block and not a shared one, because each css() call is its own
+    // cascade sub-layer and layer order beats specificity. See "Cascade
+    // layers" below before splitting a block.
+    "&:disabled": {
+      background: "var(--ui-btn-disabled-bg)",
+      color:      "var(--ui-btn-disabled-ink)",
+    },
+  })
 ```
+
+Which properties share a `css()` block is a correctness question, not a tidiness
+one — [Cascade layers](#cascade-layers) is the part to read before writing the
+second block.
 
 A skin is then a set of values. An app keeps a distinctive button by overriding
 one token and never touching the component:
@@ -230,24 +241,60 @@ and our statement appends `base` after it — inverting the order with no error,
 so element defaults start beating components. The emitted sheet has to reach
 the document first.
 
-**`rmx` is not one layer; every `css({...})` call gets its own sub-layer.**
-The emitted style element reads `@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }`,
-one such block per call site. Within cascade layers, layer order beats
-specificity — a rule in an earlier sub-layer loses to a rule in a later one no
-matter how specific it is. A `&:disabled` override sitting in one `css()`
-block can therefore lose to a plain `color` declaration in a different
-`css()` block, if that block's sub-layer happens to register second, even
-though `:disabled` is the more specific selector. **When one `css()` block
-must override another on the same element, put both declarations in the same
-block** — relying on specificity across two `css()` calls does not work, no
-matter which one is written second.
+**`rmx` is not one layer; every distinct `css({...})` style object gets its own
+sub-layer.** The emitted style element reads
+`@layer rmx.rmxc-<hash> { .rmxc-<hash> { … } }`. Blocks are content-addressed,
+not per call site: `processStyleClass` hashes the style object and caches by
+that hash, so two `css()` calls in different files with equal objects collapse
+into one class and one sub-layer, while one `css()` call whose object differs by
+a single value is a separate sub-layer. Reason about the objects, because "one
+block per call site" is wrong in both directions — it over-counts identical
+blocks and under-counts a factory like `toneStyle(tone)` that produces four.
 
-Sub-layer order follows render order, not source order, and reordering the
-component's `mix` array does not fix it: registration happens the first time
-a given `css()` call is encountered during the render, so a page whose first
+Within cascade layers, layer order beats specificity — a rule in an earlier
+sub-layer loses to a rule in a later one no matter how specific it is. A
+`&:disabled` override sitting in one `css()` block therefore loses to a plain
+`color` declaration in a different block whose sub-layer registers second, even
+though `:disabled` is the more specific selector. **When one `css()` block must
+override another on the same element, put both declarations in the same block**
+— relying on specificity across two `css()` calls does not work, no matter
+which one is written second.
+
+Sub-layer order follows render order, not source order, and reordering a
+component's `mix` array does not fix it: registration happens the first time a
+given style object is encountered during the render, so a page whose first
 button happens to be disabled registers the disabled block before any tone
 block, and the bug reappears on every other page regardless of how `mix` is
 written.
+
+**Client-side, the order is not even stable within one session.**
+`createStyleManager.remove()` deletes a rule once its refcount reaches zero,
+and the next `insert()` appends it at the *end* of the sheet rather than at its
+old index. So unmounting the last element using a block and mounting another
+one later moves that block behind everything else. This is the stronger reason
+for the co-location rule: it holds even where render order is fixed and
+predictable, because nothing about the initial order is permanent. Blocks
+adopted from the server render are pinned and never removed, so the churn is
+confined to blocks first inserted on the client.
+
+**A component's own blocks must be property-disjoint.** If `buttonBase`,
+`sizeStyles` and `toneStyles` each declare properties none of the others
+declare, no two of them can ever contend and their sub-layer order stops
+mattering. That is what makes the component correct under any order rather than
+under the order observed today. Adding `padding-inline` to a shared base block
+when a size block already sets it reintroduces the bug — and it reintroduces it
+silently, since both declarations are present and only one wins.
+
+**The caller's `mix` is subject to the same rule, so a component's `mix` prop
+adds but does not override.** Composing the caller's descriptor last in a `mix`
+array does not give it the last sub-layer. If that descriptor already rendered
+on an earlier element, it registered first and the component's own declarations
+beat it. Document `mix` as what it is: a way to set properties the component
+leaves alone. Overriding a property the component declares goes through its
+`--ui-*` token, which is the entire purpose of the component tier.
+`!important` is the other reliable exit, since `remix/ui` emits no `!important`
+of its own and passes one through untouched — but an `!important` in a caller's
+one-off is a token that should have existed.
 
 **When you add a global element default, put it in `@layer base`.** Reach for
 unlayered only when a rule must override a component, and say why in a comment.

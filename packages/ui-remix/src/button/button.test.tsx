@@ -109,11 +109,41 @@ describe("Button", () => {
     expect(stylesOf(await renderToHtml(<Button>Save</Button>))).not.toContain("outline")
   })
 
-  it("applies mix last, because it is the escape hatch", async () => {
-    // A structural override the contract cannot express as a token value.
+  it("adds through mix a property it does not declare itself", async () => {
+    // The half of the escape hatch that does work: `position` appears nowhere
+    // in buttonBase, sizeStyles or toneStyles, so no block of Button's can
+    // contend with the caller's and sub-layer order cannot matter.
     const pinned = css({ position: "fixed" })
-    const styles = stylesOf(await renderToHtml(<Button mix={pinned}>Save</Button>))
-    expect(styles).toContain("position: fixed")
+    const blocks = styleBlocksOf(await renderToHtml(<Button mix={pinned}>Save</Button>))
+    expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
+    expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
+  })
+
+  it("gives the caller's mix no later sub-layer than its own tone", async () => {
+    // The guarantee `mix` actually carries, pinned so the prose cannot drift
+    // from it. `mix` was documented as "composed last, so it wins" — it is
+    // not, for the same reason the disabled bug happened. Sub-layer order
+    // follows the order blocks are first encountered during the render, so
+    // rendering the caller's descriptor on an *earlier* element registers it
+    // first, and a later sub-layer beats an earlier one regardless of
+    // specificity. Overriding a declared property goes through the token.
+    const callerMix = css({ color: "rebeccapurple" })
+    const blocks = styleBlocksOf(
+      await renderToHtml(
+        <div>
+          <span mix={callerMix}>earlier</span>
+          <Button mix={callerMix} tone="primary">
+            Save
+          </Button>
+        </div>,
+      ),
+    )
+    const caller = blocks.findIndex((block) => block.includes("rebeccapurple"))
+    const tone = blocks.findIndex((block) => block.includes("var(--ui-btn-primary-ink)"))
+    expect(caller).toBeGreaterThanOrEqual(0)
+    expect(tone).toBeGreaterThanOrEqual(0)
+    // Both set `color`. The caller's block is earlier, so Button's tone wins.
+    expect(caller).toBeLessThan(tone)
   })
 
   it("wins the disabled cascade from within the tone's own sub-layer", async () => {

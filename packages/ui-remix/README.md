@@ -48,6 +48,21 @@ Tone backgrounds use the `background` shorthand, so a skin may set
 as invalid. Gradients do not interpolate, so a gradient skin swaps instantly on
 hover while the flat default transitions.
 
+**`mix` adds; it does not override.** It reliably sets properties the component
+leaves alone — `position`, a grid placement, a margin the surrounding layout
+owns. It does not reliably override a property the component declares, and
+composing it last does not change that: each `css()` block is its own cascade
+sub-layer, layer order beats specificity inside a layer, and sub-layer order
+follows the order blocks are first encountered during the render rather than the
+order of the `mix` array. A descriptor already rendered on an earlier element
+registers first and loses to the component's own tone.
+
+To change a property the component declares, set its `--ui-btn-*` token — that
+is what the tier is for, and it reaches every instance instead of one call site.
+`!important` also wins, since no component here declares one, but reaching for
+it means a token is missing. See
+[design-system.md](../../docs/design-system.md#cascade-layers).
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this

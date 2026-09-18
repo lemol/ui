@@ -66,6 +66,12 @@ const sizeStyles: Record<ButtonSize, CSSMixinDescriptor> = {
  * they must beat keeps them in the same sub-layer, where normal specificity
  * rules apply and `.cls:disabled` reliably beats `.cls`. The values are
  * tone-independent by design; only their position moved.
+ *
+ * LinkButton shares these blocks, so every tone carries a `:disabled` rule
+ * that can never match an `<a>`. Four inert rules are the price of one
+ * sub-layer per tone. Do not "clean them up" by splitting the disabled
+ * declarations back into a shared block: that is exactly the arrangement that
+ * shipped disabled buttons in their tone's colours.
  */
 const toneStyle = (tone: ButtonTone): CSSMixinDescriptor =>
   css({
@@ -96,7 +102,23 @@ export interface ButtonProps {
   disabled?: boolean | undefined
   name?: string | undefined
   value?: string | undefined
-  /** The structural escape hatch. Composed last, so it wins. */
+  /**
+   * The structural escape hatch: properties the contract has no token for,
+   * such as `position` or a grid placement owned by the layout around it.
+   *
+   * It reliably **adds** properties Button does not itself declare. It does
+   * **not** reliably override one Button does declare, and composing it last
+   * here does not make it win. remix/ui gives every `css()` block its own
+   * cascade sub-layer; within a layer, layer order beats specificity, and
+   * sub-layer order follows the order blocks are first encountered during the
+   * render rather than the order of this array. A descriptor that already
+   * rendered on an earlier element registers first, so Button's own tone then
+   * beats the override — silently.
+   *
+   * To change a property Button declares, set its `--ui-btn-*` token. That is
+   * the intended path and the reason the contract exists. `!important` also
+   * works, because Button declares nothing important of its own.
+   */
   mix?: MixInput<HTMLButtonElement> | undefined
   children?: RemixNode | undefined
 }
@@ -127,6 +149,12 @@ export interface LinkButtonProps {
   href: string
   tone?: ButtonTone | undefined
   size?: ButtonSize | undefined
+  /**
+   * Adds properties LinkButton does not declare; it does not reliably
+   * override one it does. Same mechanism as `ButtonProps.mix` — sub-layer
+   * order, not array order, decides — so reach for the `--ui-btn-*` token to
+   * change something the component already sets.
+   */
   mix?: MixInput<HTMLAnchorElement> | undefined
   children?: RemixNode | undefined
 }

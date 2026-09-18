@@ -273,11 +273,35 @@ neighbouring hazard — an *unlayered* `a` rule, which `rmx` would lose to — a
 the assertion is what tells us which side of that line the reset is on.
 
 Both compose through `mix`, which accepts an array, with the caller's `mix`
-last so the escape hatch wins:
+last:
 
 ```tsx
-mix={[buttonBase, tones[tone], sizes[size], handle.props.mix]}
+mix={[buttonBase, toneStyles[tone], sizeStyles[size], mix]}
 ```
+
+**Composing it last does not make it win, and this spec originally claimed it
+did.** Correction 5 applies to the caller's block exactly as it applies to the
+component's own: sub-layer order follows the order blocks are first encountered
+during the render, not the order of this array. Put the caller's descriptor on
+an earlier element in the same document and the order becomes
+`caller → buttonBase → tone → size`, so Button's own tone beats the override
+with no error. Client-side it is worse: `createStyleManager.remove()` drops a
+rule at refcount zero and the next `insert()` appends it at the end of the
+sheet, so the order can change mid-session.
+
+The honest guarantee, which is what the doc comments and
+`packages/ui-remix/README.md` now state:
+
+- `mix` reliably **adds** properties the component does not declare.
+- It does **not** reliably override one the component does declare.
+- Overriding a declared property goes through its `--ui-btn-*` token. That is
+  the intended path and the reason the component tier exists. `!important`
+  also works — `remix/ui` emits none of its own and passes one through — but
+  needing it means a token is missing.
+
+Nothing in the repo depended on the wrong claim; no caller overrides a property
+Button sets. The defect was the documented guarantee, and a wrong mental model
+here is what produced the disabled bug in the first place.
 
 ### `remix/ui/button` is not used, and that is not a ladder violation
 

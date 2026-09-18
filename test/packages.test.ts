@@ -58,6 +58,13 @@ for (const { dir, peers } of packages) {
   })
 }
 
+// The subpath exists so that taking the schema does not mean taking the
+// stylesheet with it, which one import in the barrel would quietly undo.
+test("keeps the ui-design barrel clear of the css subpath", async () => {
+  const barrel = await Bun.file(`${root}packages/ui-design/src/index.ts`).text()
+  expect(barrel).not.toContain("./css")
+})
+
 test("pins remix to the version the root declares", async () => {
   const pinned = (await read("package.json")).peerDependencies?.remix
   expect(pinned).toBeString()

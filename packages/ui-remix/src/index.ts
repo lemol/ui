@@ -6,4 +6,5 @@ export {
   LinkButton,
   type LinkButtonProps,
 } from "./button/button.tsx"
+export { ThemeStyle, type ThemeStyleProps } from "./theme-style.tsx"
 export { type ComponentTokenName, componentTokens } from "./tokens.ts"

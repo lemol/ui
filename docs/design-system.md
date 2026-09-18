@@ -89,6 +89,16 @@ value. `success`, `warning` and `info` are read on static elements — a badge,
 not a button — and get none until something needs one. A component deriving a
 hover from a fill is the same violation as deriving a subtle from a tone.
 
+**A property can belong to both tiers at once.** This is rare, not disallowed:
+it happens when the element is ordinary markup someone else may author
+directly, not only through the component. The reset's `:where(h1, …, h6)`
+rule is the floor for a bare heading nobody wrapped; `heading/tokens.ts` is the
+retheming surface for one that went through `Heading`. Where the two describe
+the same property, they must share the data that produces it — `headingScale`
+is what keeps a `Heading`'s size and a bare `<h2>`'s size from drifting apart —
+because a floor and a retheming surface that happen to agree today, with
+nothing tying them together, are one edit away from disagreeing tomorrow.
+
 ## Emission order
 
 `ui-remix/src/tokens.ts` aggregates every component's record and exports the

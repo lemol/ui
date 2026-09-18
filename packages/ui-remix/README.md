@@ -128,8 +128,8 @@ heading nobody wrapped in the component and one that went through it cannot
 drift apart.
 
 `Text` declares no `font-weight`, so `mix={css({ fontWeight: "var(--fw-semibold)" })}`
-is reliable. `Heading` and `Eyebrow` declare `color`, so their ink goes through
-their tokens.
+is reliable. `Heading`, `Text` and `Eyebrow` all declare `color`, so their ink
+goes through the contract — `tone` on `Text`, the token on the other two.
 
 ### `ThemeStyle`
 
@@ -175,8 +175,10 @@ token record if it has one:
 ```
 src/button/button.tsx  tokens.ts  button.demo.tsx  button.test.tsx
 src/stack/stack.tsx               stack.demo.tsx   stack.test.tsx
-src/heading/heading.tsx tokens.ts heading.demo.tsx heading.test.tsx
 ```
+
+Dropped rather than aligned: `heading/` is another instance of the "with
+`tokens.ts`" row above, not a third case.
 
 Co-location is what keeps the demo from drifting from the component. A missing
 `tokens.ts` is a claim, not an omission: that component styles itself from

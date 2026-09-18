@@ -99,3 +99,37 @@ export const sharedProperties = (blocks: string[]): string[] => {
   }
   return [...shared].sort()
 }
+
+/**
+ * The declaration values a component emits that are neither a structural
+ * keyword it named nor a primitive the schema holds.
+ *
+ * This is the contract check for a component with no token tier of its own.
+ * Button's test asserts the inverse — every value *is* a `var(--ui-btn-*)` —
+ * because Button owns a tier. A layout component reads primitives directly,
+ * so what has to be checked is that it reads nothing else: an unvetted
+ * literal, a primitive the schema dropped, or a `--ui-*` borrowed from some
+ * other component's contract. The last is the failure these components exist
+ * to make visible, and it is the one that would otherwise look correct.
+ *
+ * `keywords` is the component's own structural vocabulary — `flex`, `column`,
+ * `auto`. Each component states its own, because a keyword allowed everywhere
+ * is a keyword nobody argued for.
+ *
+ * `primitives` is passed in rather than imported. `@lemol/ui-design` does not
+ * resolve from this directory — the workspace symlink exists only inside the
+ * packages that depend on it — and a generic CSS-assertion harness has no
+ * business knowing a token schema exists either way.
+ *
+ * Returns the offending values, empty when the component is clean.
+ */
+export const nonPrimitiveValues = (
+  styles: string,
+  keywords: Set<string>,
+  primitives: Set<string>,
+): string[] =>
+  valuesOf(styles).filter((value) => {
+    if (keywords.has(value)) return false
+    const referenced = /^var\(--([\w-]+)\)$/.exec(value)?.[1]
+    return referenced === undefined || !primitives.has(referenced)
+  })

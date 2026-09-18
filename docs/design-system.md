@@ -9,8 +9,11 @@ tokens; the tokens are the part that must not drift.
 `--ink-muted`, `--sp-4`, `--r-md`, `--dur-fast`. A theme supplies their values.
 
 **Component tokens** are the retheming surface — `--ui-btn-primary-bg`,
-`--ui-field-border`, `--ui-dialog-surface`. Each component declares its own,
-defaulting relationally to a primitive:
+`--ui-field-border`, `--ui-dialog-surface`. A component whose every value is a
+structural keyword or a primitive — one a theme sets, or one a caller picks off
+a scale — declares none; the layout components are all four of them. A
+component with something to retheme declares its own, defaulting relationally
+to a primitive:
 
 ```ts
 // ui-remix/src/button/tokens.ts
@@ -314,6 +317,40 @@ mattering. That is what makes the component correct under any order rather than
 under the order observed today. Adding `padding-inline` to a shared base block
 when a size block already sets it reintroduces the bug — and it reintroduces it
 silently, since both declarations are present and only one wins.
+
+**An axis with a default takes its property away from `mix`.** Disjointness is
+easy to satisfy while a component's axes are independent, as `Button`'s base,
+size and tone are. It gets harder the moment an axis has a default, because the
+default and the value that replaces it are the same property — and the obvious
+arrangement, a default in the base block with a step block over the top, is
+exactly what the rule forbids. Two blocks would declare `gap`, so render order,
+not the author, would decide which paints.
+
+The resolution is to decide per axis whether it has a default at all:
+
+- **An axis with a default** renders its block always, carrying the default as
+  its value. There is one block for that property, so there is nothing to
+  order.
+- **An axis without one** renders its block only when asked for — when the prop
+  is passed, or for a boolean axis when it is `true`. The component then
+  declares that property nowhere, and the browser's own default applies.
+
+A block is left out by putting `undefined` in the `mix` array — `remix/ui`
+skips undefined entries, so `align === undefined ? undefined : alignStyles[align]`
+composes nothing when the prop is absent. That is behaviour of `mix` rather
+than of any one component, so it holds anywhere a descriptor is conditional.
+
+The second case has a benefit worth designing for. `mix` reliably adds a
+property the component does not declare and reliably overrides nothing — so an
+axis that renders no block by default stays fully reachable through `mix`, and
+the caller chooses which channel to use. Only passing the prop and setting the
+property through `mix` at once is ambiguous, and that is visibly the caller's
+error rather than a silent one.
+
+So an axis given a default costs something: it takes that property away from
+`mix` for every caller. Give an axis a default when the unset behaviour is
+wrong almost every time — a horizontal row stretching items of unequal height —
+and leave it out when the component has no business presuming, as with spacing.
 
 **The caller's `mix` is subject to the same rule, so a component's `mix` prop
 adds but does not override.** Composing the caller's descriptor last in a `mix`

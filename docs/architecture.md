@@ -74,10 +74,21 @@ catalogue.
 Enforced by `test/boundaries.test.ts`:
 
 ```
-may import:       remix/ui, remix/ui/*, @lemol/ui-design
-must NOT import:  node:*, bun, effect,
+must NOT import:  node:*, bun, bun:*, effect,
                   remix/router, remix/routes, remix/assets, remix/spa
+
+may import:       ui-design       nothing
+                  ui-remix        remix/ui, remix/ui/*, @lemol/ui-design
+                  ui-remix-mini   remix/ui, remix/ui/*, @lemol/ui-design,
+                                  @lemol/ui-remix
 ```
+
+The deny list is the SPA floor and applies to all three. The allow list is the
+graph above it: `ui-design` reaches for no renderer, which is the rule that
+keeps it reusable, and a sibling package is reached by name — never by a
+relative path out of `src/` — so `package.json` records every edge. A test file
+beside its component may also import `bun:test` and `test/render.ts`; runtime
+code may import neither.
 
 This is what makes SPA portability a checked property. `remix/spa` keeps the
 same router contract as the server — `render()` middleware plus

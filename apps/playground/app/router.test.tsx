@@ -76,3 +76,74 @@ describe("unknown asset paths", () => {
     expect((await get("/assets/app/ui/public/nope.tsx")).status).toBe(404)
   })
 })
+
+/** The root element's open tag, so an attribute assertion cannot be satisfied
+ *  by a selector inside the emitted stylesheet. */
+const htmlTag = (page: string) => /<html[^>]*>/.exec(page)?.[0] ?? ""
+
+describe("the catalogue route", () => {
+  it("renders the demo for a component it knows", async () => {
+    const response = await get("/c/button")
+    expect(response.status).toBe(200)
+    expect(await response.text()).toContain("Button")
+  })
+
+  it("is a 404 for one it does not", async () => {
+    expect((await get("/c/nope")).status).toBe(404)
+  })
+
+  it("delivers the token sheet ahead of remix's component styles", async () => {
+    // Layer order is fixed by the first @layer statement the browser sees, and
+    // remix splices its own style elements in immediately before </head>. If
+    // ours arrived second, `base` would register after `rmx` and element
+    // defaults would start beating components — with no error at all.
+    const page = await html("/c/button")
+    const ours = page.indexOf("@layer base, rmx;")
+    const theirs = page.indexOf("data-rmx-style")
+    expect(ours).toBeGreaterThan(-1)
+    expect(theirs).toBeGreaterThan(-1)
+    expect(ours).toBeLessThan(theirs)
+  })
+
+  it("carries the theme's own values, and lets them beat the component defaults", async () => {
+    const page = await html("/c/button")
+    expect(page).toContain("--accent: #1F6B5C;")
+    // mini softens the button: the component default is emitted first and the
+    // theme's value second, under one selector at one specificity.
+    expect(page.indexOf("--ui-btn-radius: var(--r-sm);")).toBeLessThan(
+      page.indexOf("--ui-btn-radius: var(--r-md);"),
+    )
+  })
+
+  it("renders light, dark and compact with no client JavaScript", async () => {
+    // Assertions read the <html> open tag, not the page. The emitted sheet
+    // carries `:root[data-scheme="dark"]` and `:root[data-density="compact"]`
+    // selectors of its own, so a whole-page `not.toContain("data-scheme")`
+    // would fail on every request.
+    const light = await html("/c/button?nojs")
+    expect(light).not.toContain("<script")
+    expect(htmlTag(light)).not.toContain("data-scheme")
+    expect(htmlTag(light)).not.toContain("data-density")
+
+    const dark = await html("/c/button?nojs&scheme=dark")
+    expect(htmlTag(dark)).toContain('data-scheme="dark"')
+    expect(dark).not.toContain("<script")
+
+    const compact = await html("/c/button?nojs&density=compact")
+    expect(htmlTag(compact)).toContain('data-density="compact"')
+    expect(compact).not.toContain("<script")
+  })
+
+  it("ignores a scheme or density it does not recognise", async () => {
+    const tag = htmlTag(await html("/c/button?scheme=sepia&density=roomy"))
+    expect(tag).not.toContain("data-scheme")
+    expect(tag).not.toContain("data-density")
+  })
+
+  it("still renders every tone with the runtime absent", async () => {
+    const page = await html("/c/button?nojs")
+    for (const tone of ["primary", "neutral", "ghost", "danger"]) {
+      expect(page).toContain(`>${tone}</button>`)
+    }
+  })
+})

@@ -1,3 +1,5 @@
+import { ThemeStyle } from "@lemol/ui-remix"
+import { miniTheme } from "@lemol/ui-remix-mini"
 import type { ScriptEntry } from "remix/assets"
 import type { Handle, RemixNode } from "remix/ui"
 import { ImportMap } from "remix/ui/server"
@@ -14,15 +16,28 @@ export interface DocumentProps {
    * this document with `mini`'s.
    */
   entry: ScriptEntry | null
+  /**
+   * Rendered as `data-scheme` / `data-density` on the root element, so
+   * `?scheme=dark` beats the media query and `?density=compact` retunes every
+   * control with no client JavaScript at all. Unset renders no attribute.
+   */
+  scheme?: "light" | "dark" | undefined
+  density?: "compact" | undefined
   children?: RemixNode | undefined
 }
 
 export function Document(handle: Handle<DocumentProps>) {
   return () => {
-    const { title, entry, children } = handle.props
+    const { title, entry, scheme, density, children } = handle.props
     return (
-      <html lang="en">
+      <html data-density={density} data-scheme={scheme} lang="en">
         <head>
+          {/* First, and it has to stay first. remix splices its own component
+              styles in immediately before </head>, so a later @layer
+              statement would register `base` after `rmx` and invert the
+              order — element defaults would start beating components with no
+              error. Asserted in router.test.tsx. */}
+          <ThemeStyle theme={miniTheme} />
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />
           <title>{title} · lemol ui</title>

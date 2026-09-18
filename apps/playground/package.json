@@ -12,6 +12,8 @@
     "test": "bun test"
   },
   "dependencies": {
+    "@lemol/ui-remix": "workspace:*",
+    "@lemol/ui-remix-mini": "workspace:*",
     "remix": "3.0.0-rc.2"
   }
 }

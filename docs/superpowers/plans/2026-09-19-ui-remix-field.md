@@ -96,6 +96,19 @@ So a task that declares a kind it does not yet dispatch on cannot compile.
 Each task widens `FieldProps` by exactly the member it implements, and the
 `switch` appears in Task 4, where it first has something to switch on.
 
+**`remix/ui` types `<input>` as a union discriminated on `type`.** `jsx.d.ts`
+maps `input` to `AccessibleInputHTMLProps`, which is
+`Omit<PartialInputHTMLProps, "role"> & InputAriaRoles` — and `InputAriaRoles`
+is a union with one arm per type, each restricting the `role` valid beside it
+and, for the `text`/`search`/`tel`/`url`/`email` arms, forbidding `list`.
+
+A union-typed `type` selects no arm, so `<input type={props.type ?? "text"} />`
+does not compile when `props.type` is `FieldType`. `Field` narrows it with one
+documented assertion, `inputTypeAttribute`, which is sound because `Field`
+passes neither `role` nor `list` — the only attributes any arm constrains.
+The assertion costs the compiler's check on the value, so a test loops over
+`fieldTypes` and asserts the rendered attribute for all twelve.
+
 ---
 
 ## File structure
@@ -537,7 +550,7 @@ import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import { blocksOn, sharedProperties, stylesOf, valuesOf } from "../../../../test/styles.ts"
-import { Field } from "./field.tsx"
+import { Field, fieldTypes } from "./field.tsx"
 
 /**
  * Values a declaration may carry instead of a token. Structural only: nothing
@@ -669,6 +682,19 @@ describe("Field", () => {
     expect(
       markupOf(await renderToHtml(<Field label="Email" name="email" />)),
     ).not.toContain("aria-hidden")
+  })
+
+  it("renders every type it offers, which the compiler no longer checks", async () => {
+    // `inputTypeAttribute` asserts the union down to one literal, because
+    // remix/ui types <input> as a union discriminated on `type`. That buys
+    // the element a typecheck at the cost of checking the value, so the
+    // value is checked here instead — derived from fieldTypes, so a type
+    // added to the list is a type this covers.
+    for (const type of fieldTypes) {
+      expect(markupOf(await renderToHtml(<Field label="X" name="x" type={type} />))).toContain(
+        `type="${type}"`,
+      )
+    }
   })
 
   it("passes the constraint attributes through to the control", async () => {
@@ -888,6 +914,26 @@ export interface FieldInputProps extends FieldCommon {
  */
 export type FieldProps = FieldInputProps
 
+/**
+ * The `type` attribute, narrowed to one literal for the compiler's benefit.
+ *
+ * `remix/ui` types `<input>` as a union discriminated on `type`, so that each
+ * type can restrict what sits beside it: `role` is limited per type, and the
+ * `text`/`search`/`tel`/`url`/`email` arms forbid `list`. A union-typed
+ * `type` selects no arm at all, and `Field`'s `type` is a union by design —
+ * so the element does not typecheck without this.
+ *
+ * The assertion is sound rather than convenient: every arm differs only in
+ * `role` and `list`, `Field` passes neither, and the runtime value is
+ * whatever the caller gave. It narrows the compiler's view, not the data.
+ *
+ * The cost is real and worth naming: if a future `remix/ui` adds an arm that
+ * restricts an attribute `Field` does pass, this hides it. `field.test.tsx`
+ * asserts the rendered `type` for every member of `fieldTypes`, so the value
+ * reaching the DOM stays checked even though the attribute's type does not.
+ */
+const inputTypeAttribute = (type: FieldType | undefined): "text" => (type ?? "text") as "text"
+
 const fieldBase = css({
   display: "flex",
   flexDirection: "column",
@@ -1030,7 +1076,7 @@ export function Field(handle: Handle<FieldProps>) {
           readonly={props.readonly}
           required={required}
           step={props.step}
-          type={props.type ?? "text"}
+          type={inputTypeAttribute(props.type)}
           value={props.value}
         />
         {error === undefined ? undefined : (
@@ -1076,7 +1122,7 @@ than wherever it was pasted.
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 14 tests.
+Expected: PASS, 16 tests.
 
 - [ ] **Step 6: Run the gate**
 
@@ -1312,7 +1358,7 @@ element itself does not change — only where it sits.
               readonly={props.readonly}
               required={required}
               step={props.step}
-              type={props.type ?? "text"}
+              type={inputTypeAttribute(props.type)}
               value={props.value}
             />
           )
@@ -1332,7 +1378,7 @@ Task 5 adds that member and its `case` together.
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 20 tests.
+Expected: PASS, 22 tests.
 
 - [ ] **Step 6: Run the gate**
 
@@ -1630,7 +1676,7 @@ the block sets `color` on the svg, and the path inherits it.
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 27 tests.
+Expected: PASS, 29 tests.
 
 - [ ] **Step 7: Run the gate**
 
@@ -1737,7 +1783,7 @@ Create `packages/ui-remix/src/field/field.demo.tsx`:
 ```tsx
 import { css } from "remix/ui"
 import { Button } from "../button/button.tsx"
-import { Field } from "./field.tsx"
+import { Field, fieldTypes } from "./field.tsx"
 
 /** Primitives, not tokens: a demo is a page, not a component. */
 const label = css({
@@ -1851,7 +1897,7 @@ and inside `demos`, in alphabetical position:
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 30 tests.
+Expected: PASS, 32 tests.
 
 - [ ] **Step 6: Run the gate**
 
@@ -2060,7 +2106,7 @@ EOF
 ## Status
 
 Field ships when Task 7 is committed and `bun run check` is green: three kinds,
-twenty-seven tokens, thirty tests, one demo that submits without JavaScript,
+twenty-seven tokens, thirty-two tests, one demo that submits without JavaScript,
 and the manual check in Task 6 Step 7 done by a human.
 
 What is deliberately not here, each with its owner:
@@ -2107,6 +2153,6 @@ That is forced rather than chosen — see the narrowing table in the pre-flight
 findings — and it means each task's export list grows by the prop type it
 declared.
 
-**Test counts.** 14 after Task 3, 20 after Task 4, 27 after Task 5, 30 after
+**Test counts.** 16 after Task 3, 22 after Task 4, 29 after Task 5, 32 after
 Task 6. If a run disagrees, the plan is wrong about the tests rather than the
 code being wrong about the behaviour — recount before changing anything.

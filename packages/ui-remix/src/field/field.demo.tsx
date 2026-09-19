@@ -83,7 +83,7 @@ export function FieldDemo() {
         />
         <Field
           error="That address is already registered."
-          label="Email"
+          label="Existing email"
           name="existing-email"
           type="email"
           value="ada@example.com"

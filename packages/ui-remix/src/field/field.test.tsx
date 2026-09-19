@@ -1,9 +1,16 @@
 import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
-import { blocksOn, sharedProperties, stylesOf, valuesOf } from "../../../../test/styles.ts"
+import {
+  blocksOn,
+  markupOf,
+  sharedProperties,
+  stylesOf,
+  valuesOf,
+} from "../../../../test/styles.ts"
 import { FieldDemo } from "./field.demo.tsx"
 import { Field, fieldControls, fieldTypes } from "./field.tsx"
+import { fieldTokens } from "./tokens.ts"
 
 /**
  * Values a declaration may carry instead of a token. Structural only: nothing
@@ -46,20 +53,6 @@ const offendersIn = (styles: string): string[] =>
 /** The ids `aria-describedby` points at, in the order it lists them. */
 const describedIds = (html: string): string[] =>
   (/aria-describedby="([^"]*)"/.exec(html)?.[1] ?? "").split(" ").filter((id) => id !== "")
-
-/**
- * The rendered markup with remix's style elements dropped — the complement of
- * `stylesOf`.
- *
- * `renderToHtml` returns the markup and the collected `<style>` blocks in one
- * string, so an assertion about an attribute has to exclude the stylesheet or
- * it is really an assertion about both. `controlBase` emits the selector
- * `&[aria-invalid="true"]` on every render, which makes
- * `expect(html).not.toContain("aria-invalid")` impossible to satisfy and
- * `expect(html).toContain('aria-invalid="true"')` impossible to fail. Both
- * directions are wrong for the same reason.
- */
-const markupOf = (html: string): string => html.replace(/<style[\s\S]*?<\/style>/g, "")
 
 describe("Field", () => {
   it("renders a labelled text input by default", async () => {
@@ -110,8 +103,35 @@ describe("Field", () => {
     expect(describedIds(errorOnly)).toEqual(["email-error"])
 
     for (const html of [hintOnly, both, errorOnly]) {
-      for (const id of describedIds(html)) expect(html).toContain(`id="${id}"`)
+      for (const id of describedIds(html)) {
+        // Exactly once, not merely present: the spec is "every id in
+        // aria-describedby exists exactly once in the markup", and toContain
+        // cannot fail on a duplicate id.
+        const count = [...html.matchAll(new RegExp(`id="${id}"`, "g"))].length
+        expect(count).toBe(1)
+      }
     }
+  })
+
+  it("treats an empty hint or error as absent", async () => {
+    // "" is the obvious way a form controller encodes "no message for this
+    // field" — a bare falsy check already treats it as absent, but this
+    // pins the behaviour down: no aria-describedby, no aria-invalid, no
+    // empty <p>.
+    const html = markupOf(await renderToHtml(<Field error="" hint="" label="Email" name="email" />))
+    expect(html).not.toContain("aria-describedby")
+    expect(html).not.toContain("aria-invalid")
+    expect(html).not.toContain("<p")
+  })
+
+  it("renders the hint and error text, not just their ids", async () => {
+    // Two empty <p>s would satisfy the id assertions above without
+    // rendering anything a user could read.
+    const html = await renderToHtml(
+      <Field error="Already registered" hint="Work address" label="Email" name="email" />,
+    )
+    expect(html).toContain("Work address")
+    expect(html).toContain("Already registered")
   })
 
   it("marks the control invalid only when an error is passed", async () => {
@@ -255,6 +275,65 @@ describe("Field", () => {
     const onControl = blocksOn(html, "input").some((block) => block.includes("grid-column"))
     expect([onWrapper, onControl]).toEqual([true, false])
   })
+
+  it("carries the wrapper's gap token in its own block", async () => {
+    const html = await renderToHtml(<Field label="Email" name="email" />)
+    expect(blocksOn(html, "div")[0]).toContain("gap: var(--ui-field-gap)")
+  })
+
+  it("carries the label's ink token in its own block", async () => {
+    const html = await renderToHtml(<Field label="Email" name="email" />)
+    expect(blocksOn(html, "label")[0]).toContain("color: var(--ui-field-label-ink)")
+  })
+
+  it("carries the required marker's ink token in its own block", async () => {
+    const html = await renderToHtml(<Field label="Email" name="email" required />)
+    expect(blocksOn(html, "span")[0]).toContain("color: var(--ui-field-required-ink)")
+  })
+
+  it("carries the hint's ink token in its own block", async () => {
+    // hint only, no error: blocksOn reads the first <p>, and a render with
+    // both messages would make this assertion true of whichever message
+    // happens to come first rather than of the hint specifically.
+    const html = await renderToHtml(<Field hint="Work address" label="Email" name="email" />)
+    expect(blocksOn(html, "p")[0]).toContain("color: var(--ui-field-hint-ink)")
+  })
+
+  it("carries the error's ink token in its own block", async () => {
+    // error only, no hint — the complement of the hint assertion above.
+    const html = await renderToHtml(<Field error="Already registered" label="Email" name="email" />)
+    expect(blocksOn(html, "p")[0]).toContain("color: var(--ui-field-error-ink)")
+  })
+
+  it("carries the input's height token in its own block", async () => {
+    const html = await renderToHtml(<Field label="Email" name="email" />)
+    expect(
+      blocksOn(html, "input").some((block) => block.includes("height: var(--ui-field-height)")),
+    ).toBe(true)
+  })
+
+  it("emits no --ui-field-* variable outside its own token contract", async () => {
+    // offendersIn accepts any var(--ui-field-*) reference without checking it
+    // resolves to anything, so a typo'd token name — e.g.
+    // --ui-field-chevron-inks — would satisfy it, resolve to nothing at
+    // runtime, and fail no other test.
+    const renders = [
+      await renderToHtml(<Field error="e" hint="h" label="Email" name="email" required />),
+      await renderToHtml(
+        <Field control="textarea" error="e" hint="h" label="Notes" name="notes" required />,
+      ),
+      await renderToHtml(
+        <Field control="select" error="e" hint="h" label="Plan" name="plan" required>
+          <option value="a">A</option>
+        </Field>,
+      ),
+    ]
+    const names = renders.flatMap((html) =>
+      [...stylesOf(html).matchAll(/var\(--(ui-field-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
+    )
+    expect(names.length).toBeGreaterThan(0)
+    for (const name of names) expect(Object.hasOwn(fieldTokens, name)).toBe(true)
+  })
 })
 
 describe("Field, as a textarea", () => {
@@ -263,6 +342,25 @@ describe("Field, as a textarea", () => {
     expect(html).toContain("<textarea")
     expect(html).toContain('id="notes"')
     expect(html).toContain('for="notes"')
+    expect(html).toContain('name="notes"')
+  })
+
+  it("wires aria-describedby and aria-invalid on the textarea", async () => {
+    // The wiring the component exists to make unskippable, and the reason
+    // this branch is tested separately from the input's: the suite already
+    // caught these gaps disappearing here without noticing.
+    const html = await renderToHtml(
+      <Field control="textarea" error="Too short" hint="Optional" label="Notes" name="notes" />,
+    )
+    expect(describedIds(html)).toEqual(["notes-hint", "notes-error"])
+    expect(markupOf(html)).toContain('aria-invalid="true"')
+  })
+
+  it("renders the disabled attribute on the textarea", async () => {
+    const html = markupOf(
+      await renderToHtml(<Field control="textarea" disabled label="Notes" name="notes" />),
+    )
+    expect(html).toContain(" disabled")
   })
 
   it("renders its value as the element's text, where remix puts it", async () => {
@@ -352,6 +450,30 @@ describe("Field, as a select", () => {
     expect(html).toContain('for="plan"')
     expect(html).toContain('<option value="free"')
     expect(html).toContain("selected")
+    expect(html).toContain('name="plan"')
+  })
+
+  it("wires aria-describedby and aria-invalid on the select", async () => {
+    const html = await renderToHtml(
+      <Field control="select" error="Pick one" hint="Change anytime" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(describedIds(html)).toEqual(["plan-hint", "plan-error"])
+    expect(markupOf(html)).toContain('aria-invalid="true"')
+  })
+
+  it("keeps the select frame a grid, so the chevron overlays it", async () => {
+    // Without this, the frame stops being a grid and the chevron falls out
+    // of its cell below the select — invisible to the disjointness test,
+    // which only checks that properties don't collide, not what they are.
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    // The first div is the wrapper; the frame is the second.
+    expect(blocksOn(html, "div", 1)[0]).toContain("display: grid")
   })
 
   it("passes required and disabled through to the select", async () => {
@@ -374,7 +496,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
-    expect(stylesOf(html)).toContain("appearance: none")
+    expect(blocksOn(html, "select").some((block) => block.includes("appearance: none"))).toBe(true)
     expect(html).toContain("<svg")
     expect(html).toContain("<path")
   })
@@ -388,7 +510,7 @@ describe("Field, as a select", () => {
       </Field>,
     )
     expect(/<svg[^>]*aria-hidden="true"/.test(html)).toBe(true)
-    expect(stylesOf(html)).toContain("pointer-events: none")
+    expect(blocksOn(html, "svg")[0]).toContain("pointer-events: none")
   })
 
   it("colours the chevron from a token, so it follows a dark scheme", async () => {
@@ -403,6 +525,9 @@ describe("Field, as a select", () => {
     const blocks = blocksOn(html, "svg")
     expect(blocks.length).toBe(1)
     expect(blocks[0]).toContain("color: var(--ui-field-chevron-ink)")
+    // offendersIn scans CSS only, so a hard-coded colour on the <path>
+    // markup attribute is invisible to the contract check.
+    expect(html).toContain('stroke="currentColor"')
   })
 
   it("leaves room for the chevron in the control's end padding", async () => {
@@ -411,9 +536,13 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
-    expect(stylesOf(html)).toContain(
-      "padding-inline-end: calc(var(--ui-field-pad-x) + var(--ui-field-chevron-space))",
-    )
+    expect(
+      blocksOn(html, "select").some((block) =>
+        block.includes(
+          "padding-inline-end: calc(var(--ui-field-pad-x) + var(--ui-field-chevron-space))",
+        ),
+      ),
+    ).toBe(true)
   })
 
   it("keeps the select's blocks property-disjoint", async () => {

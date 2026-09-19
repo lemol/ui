@@ -43,7 +43,14 @@ interface FieldCommon {
   name: string
   /** Required. An unlabelled control is a broken control. */
   label: string
-  /** Rendered above the control, so it is read before the user types. */
+  /**
+   * Rendered above the control, so it is read before the user types.
+   *
+   * `""` is treated the same as `undefined` — absent — rather than as a
+   * message to render. `""` is the obvious way a form controller encodes "no
+   * hint for this field", and rendering it would still add an empty `<p>` and
+   * an `aria-describedby` that points at it.
+   */
   hint?: string | undefined
   /**
    * A server-supplied error, for the half of validation no attribute can
@@ -51,6 +58,14 @@ interface FieldCommon {
    *
    * It stays set while the user corrects the field, until the next round trip.
    * Clearing it early would need client JavaScript, and Field ships none.
+   *
+   * `""` is treated the same as `undefined` — absent — rather than as an
+   * error to render. `""` is the obvious way a form controller encodes "no
+   * error for this field", and a bare falsy check would already have caught
+   * it; the reason to say so explicitly is that treating it as a value
+   * instead would redden the control, set `aria-invalid="true"`, and point
+   * `aria-describedby` at an empty paragraph — a false positive with no
+   * message to show for it.
    */
   error?: string | undefined
   /** Replaces the id stem, for two forms on one page sharing a field name. */
@@ -307,11 +322,13 @@ export function Field(handle: Handle<FieldProps>) {
     // Only the ids that actually rendered. An aria-describedby naming an id
     // the document does not hold is read as nothing by some assistive
     // technology and skipped entirely by others.
-    const described = [hint === undefined ? "" : hintId, error === undefined ? "" : errorId]
+    const hasHint = hint !== undefined && hint !== ""
+    const hasError = error !== undefined && error !== ""
+    const described = [hasHint ? hintId : "", hasError ? errorId : ""]
       .filter((id) => id !== "")
       .join(" ")
     const describedBy = described === "" ? undefined : described
-    const invalid = error === undefined ? undefined : "true"
+    const invalid = hasError ? "true" : undefined
 
     const control = () => {
       switch (props.control) {
@@ -399,17 +416,17 @@ export function Field(handle: Handle<FieldProps>) {
             </span>
           ) : undefined}
         </label>
-        {hint === undefined ? undefined : (
+        {hasHint ? (
           <p id={hintId} mix={hintStyle}>
             {hint}
           </p>
-        )}
+        ) : undefined}
         {control()}
-        {error === undefined ? undefined : (
+        {hasError ? (
           <p id={errorId} mix={errorStyle}>
             {error}
           </p>
-        )}
+        ) : undefined}
       </div>
     )
   }

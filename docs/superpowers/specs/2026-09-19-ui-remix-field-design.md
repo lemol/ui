@@ -236,8 +236,8 @@ Which block declares what, since disjointness depends on it:
 | `inputBox` | input | `height`, `padding-inline-end` |
 | `textareaBox` | textarea | `padding-inline-end`, `resize` |
 | `selectBox` | select | `height`, `padding-inline-end`, `appearance` |
-| `selectFrame` | select wrapper | `position`, `display` |
-| `chevronStyle` | svg | `position`, `inset-inline-end`, `inline-size`, `block-size`, `color`, `pointer-events` |
+| `selectFrame` | select wrapper | `display` |
+| `chevronStyle` | svg | `grid-area`, `align-self`, `justify-self`, `margin-inline-end`, `inline-size`, `block-size`, `color`, `pointer-events` |
 
 `inputBox` and `selectBox` both declare `height`, and that is not a collision:
 the two never land on the same element. `textareaBox` declares none, so a

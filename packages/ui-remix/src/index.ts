@@ -15,6 +15,7 @@ export {
   type FieldControl,
   type FieldInputProps,
   type FieldProps,
+  type FieldTextareaProps,
   type FieldType,
   fieldControls,
   fieldTypes,

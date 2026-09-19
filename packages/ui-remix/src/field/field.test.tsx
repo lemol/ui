@@ -255,3 +255,66 @@ describe("Field", () => {
     expect([onWrapper, onControl]).toEqual([true, false])
   })
 })
+
+describe("Field, as a textarea", () => {
+  it("renders a labelled textarea", async () => {
+    const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
+    expect(html).toContain("<textarea")
+    expect(html).toContain('id="notes"')
+    expect(html).toContain('for="notes"')
+  })
+
+  it("renders its value as the element's text, where remix puts it", async () => {
+    // `<textarea>{value}</textarea>` renders an empty textarea: remix drops a
+    // textarea's children, silently. The `value` prop is the only way in, and
+    // that inverts the plain-HTML arrangement where the value is the content.
+    const html = await renderToHtml(
+      <Field control="textarea" label="Notes" name="notes" value="typed earlier" />,
+    )
+    expect(html).toContain("<textarea")
+    expect(html).toContain("typed earlier")
+  })
+
+  it("takes rows and the length constraints", async () => {
+    const html = await renderToHtml(
+      <Field
+        control="textarea"
+        label="Notes"
+        maxlength={500}
+        minlength={10}
+        name="notes"
+        placeholder="Anything else?"
+        required
+        rows={4}
+      />,
+    )
+    expect(html).toContain('rows="4"')
+    expect(html).toContain('minlength="10"')
+    expect(html).toContain('maxlength="500"')
+    expect(html).toContain('placeholder="Anything else?"')
+    expect(html).toContain("required")
+  })
+
+  it("declares no height, so rows decides it", async () => {
+    // An input is a fixed --control-h box. A textarea is as tall as the rows
+    // it was given, and a height would fight that.
+    const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
+    const blocks = blocksOn(html, "textarea")
+    expect(blocks.length).toBeGreaterThan(1)
+    expect(blocks.some((block) => block.includes("height:"))).toBe(false)
+  })
+
+  it("keeps the textarea's blocks property-disjoint", async () => {
+    const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
+    const blocks = blocksOn(html, "textarea")
+    expect(blocks.length).toBeGreaterThan(1)
+    expect(sharedProperties(blocks)).toEqual([])
+  })
+
+  it("reads only its own tokens and structural keywords", async () => {
+    const html = await renderToHtml(
+      <Field control="textarea" error="Too short" hint="Optional" label="Notes" name="notes" />,
+    )
+    expect(offendersIn(stylesOf(html))).toEqual([])
+  })
+})

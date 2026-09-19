@@ -70,7 +70,16 @@ interface FieldCommon {
   mix?: MixInput<HTMLDivElement> | undefined
 }
 
-export interface FieldInputProps extends FieldCommon {
+/** Inputs and textareas take `readonly`; a `<select readonly>` is inert. */
+interface FieldEditable extends FieldCommon {
+  readonly?: boolean | undefined
+  value?: string | undefined
+  placeholder?: string | undefined
+  minlength?: number | undefined
+  maxlength?: number | undefined
+}
+
+export interface FieldInputProps extends FieldEditable {
   control?: "input" | undefined
   /** Defaults to `text`, which is also what a bare input defaults to. */
   type?: FieldType | undefined
@@ -79,24 +88,21 @@ export interface FieldInputProps extends FieldCommon {
   min?: string | number | undefined
   max?: string | number | undefined
   step?: string | number | undefined
-  readonly?: boolean | undefined
-  value?: string | undefined
-  placeholder?: string | undefined
-  minlength?: number | undefined
-  maxlength?: number | undefined
+}
+
+export interface FieldTextareaProps extends FieldEditable {
+  control: "textarea"
+  rows?: number | undefined
 }
 
 /**
- * One member for now, and the type is written as an alias rather than as
- * `FieldInputProps` everywhere so that Tasks 4 and 5 widen one line.
- *
  * The union grows a member per task because it has to. Narrowing an optional
  * discriminant works only when every other member has its own `case`, so a
- * task that declared `FieldTextareaProps` before it dispatched on
- * `control === "textarea"` would leave every input-only property unreachable
+ * task that declared `FieldSelectProps` before it dispatched on
+ * `control === "select"` would leave every input-only property unreachable
  * and the package would not compile.
  */
-export type FieldProps = FieldInputProps
+export type FieldProps = FieldInputProps | FieldTextareaProps
 
 /**
  * The `type` attribute, narrowed to one literal for the compiler's benefit.
@@ -217,6 +223,16 @@ const inputBox = css({
   paddingInlineEnd: "var(--ui-field-pad-x)",
 })
 
+/**
+ * A textarea's metrics. No `height`: it is as tall as its `rows`, and a fixed
+ * height would fight that. `resize: vertical` rather than `both`, because
+ * horizontal resize breaks the surrounding layout.
+ */
+const textareaBox = css({
+  paddingInlineEnd: "var(--ui-field-pad-x)",
+  resize: "vertical",
+})
+
 export function Field(handle: Handle<FieldProps>) {
   return () => {
     const props = handle.props
@@ -233,9 +249,51 @@ export function Field(handle: Handle<FieldProps>) {
     const describedBy = described === "" ? undefined : described
     const invalid = error === undefined ? undefined : "true"
 
-    // The <input> is rendered inline, with no dispatch around it, because
-    // there is one kind to render. Task 4 introduces the switch at the
-    // moment it first has something to switch on.
+    const control = () => {
+      switch (props.control) {
+        case "textarea":
+          return (
+            <textarea
+              aria-describedby={describedBy}
+              aria-invalid={invalid}
+              disabled={disabled}
+              id={stem}
+              maxlength={props.maxlength}
+              minlength={props.minlength}
+              mix={[controlBase, textareaBox]}
+              name={name}
+              placeholder={props.placeholder}
+              readOnly={props.readonly}
+              required={required}
+              rows={props.rows}
+              value={props.value}
+            />
+          )
+        default:
+          return (
+            <input
+              aria-describedby={describedBy}
+              aria-invalid={invalid}
+              autocomplete={props.autocomplete}
+              disabled={disabled}
+              id={stem}
+              max={props.max}
+              maxlength={props.maxlength}
+              min={props.min}
+              minlength={props.minlength}
+              mix={[controlBase, inputBox]}
+              name={name}
+              pattern={props.pattern}
+              placeholder={props.placeholder}
+              readonly={props.readonly}
+              required={required}
+              step={props.step}
+              type={inputTypeAttribute(props.type)}
+              value={props.value}
+            />
+          )
+      }
+    }
 
     return (
       <div mix={[fieldBase, mix]}>
@@ -252,26 +310,7 @@ export function Field(handle: Handle<FieldProps>) {
             {hint}
           </p>
         )}
-        <input
-          aria-describedby={describedBy}
-          aria-invalid={invalid}
-          autocomplete={props.autocomplete}
-          disabled={disabled}
-          id={stem}
-          max={props.max}
-          maxlength={props.maxlength}
-          min={props.min}
-          minlength={props.minlength}
-          mix={[controlBase, inputBox]}
-          name={name}
-          pattern={props.pattern}
-          placeholder={props.placeholder}
-          readonly={props.readonly}
-          required={required}
-          step={props.step}
-          type={inputTypeAttribute(props.type)}
-          value={props.value}
-        />
+        {control()}
         {error === undefined ? undefined : (
           <p id={errorId} mix={errorStyle}>
             {error}

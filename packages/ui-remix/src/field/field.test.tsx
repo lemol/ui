@@ -81,6 +81,20 @@ describe("Field", () => {
     expect(html).toContain('name="email"')
   })
 
+  it("treats an empty id the same as absent, falling back to name", async () => {
+    // `id={override ?? ""}` from a controller is ordinary, and `??` alone
+    // would let "" through: `for=""`/`id=""` bind nothing, and the message
+    // ids would collapse to bare "-hint"/"-error" suffixes.
+    const html = markupOf(
+      await renderToHtml(<Field hint="Work address" id="" label="Email" name="email" />),
+    )
+    expect(html).toContain('id="email"')
+    expect(html).toContain('for="email"')
+    expect(html).toContain('id="email-hint"')
+    expect(html).not.toContain('id=""')
+    expect(html).not.toContain('for=""')
+  })
+
   it("describes the control with no messages when it has none", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
     expect(markupOf(html)).not.toContain("aria-describedby")
@@ -144,6 +158,14 @@ describe("Field", () => {
       await renderToHtml(<Field error="Already registered" label="Email" name="email" />),
     )
     expect(withError).toContain('aria-invalid="true"')
+    // The "only" in this test's name: a hint with no error must not be read as
+    // invalid. Mutating `invalid` to `(hasError || hasHint) ? "true" : undefined`
+    // would announce a non-existent error and redden the control, and nothing
+    // above renders this case.
+    const hintOnly = markupOf(
+      await renderToHtml(<Field hint="Work address" label="Email" name="email" />),
+    )
+    expect(hintOnly).not.toContain("aria-invalid")
   })
 
   it("hides the required marker from assistive technology", async () => {
@@ -158,6 +180,14 @@ describe("Field", () => {
     expect(markupOf(await renderToHtml(<Field label="Email" name="email" />))).not.toContain(
       "aria-hidden",
     )
+  })
+
+  it("renders no asterisk when required is explicitly false", async () => {
+    // A `=== true` check loosened to `!== undefined` would still pass every
+    // other test here, since none of them renders `required={false}`.
+    const html = markupOf(await renderToHtml(<Field label="Email" name="email" required={false} />))
+    expect(html).not.toContain("aria-hidden")
+    expect(html).not.toContain(" *</span>")
   })
 
   it("renders every type it offers, which the compiler no longer checks", async () => {
@@ -258,6 +288,9 @@ describe("Field", () => {
     expect(base).toContain('&[aria-invalid="true"]')
     expect(base).toContain("&:disabled")
     expect(base).toContain("&[readonly]")
+    // With border-width set and no border-style, the control paints no
+    // border at all — border-style: solid is what makes border-width visible.
+    expect(base).toContain("border-style: solid")
   })
 
   it("styles no focus ring, leaving the reset's to apply", async () => {
@@ -317,6 +350,11 @@ describe("Field", () => {
     // resolves to anything, so a typo'd token name — e.g.
     // --ui-field-chevron-inks — would satisfy it, resolve to nothing at
     // runtime, and fail no other test.
+    //
+    // What this does not cover: that a token is read by the *right*
+    // declaration. Swapping controlBase's `font-size` to read
+    // `--ui-field-label-size` instead of `--ui-field-font-size` still names a
+    // token this test recognises and offendersIn cannot see, so both pass.
     const renders = [
       await renderToHtml(<Field error="e" hint="h" label="Email" name="email" required />),
       await renderToHtml(
@@ -472,8 +510,27 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
-    // The first div is the wrapper; the frame is the second.
-    expect(blocksOn(html, "div", 1)[0]).toContain("display: grid")
+    // The first div is the wrapper; the frame is the second. Self-checking
+    // rather than trusting the index: a <div> added before the frame would
+    // silently retarget occurrence 1 at the wrapper without this failing, so
+    // the wrapper's own block set is asserted to differ from the frame's.
+    const wrapper = blocksOn(html, "div", 0)
+    const frame = blocksOn(html, "div", 1)
+    expect(frame[0]).toContain("display: grid")
+    expect(frame).not.toEqual(wrapper)
+  })
+
+  it("gives the control and the chevron the same grid cell", async () => {
+    // The frame's display: grid check catches the chevron falling out of the
+    // grid entirely; this catches either child losing its own grid-area,
+    // which breaks the overlay one step down without breaking that check.
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(blocksOn(html, "select").some((block) => block.includes("grid-area: 1 / 1"))).toBe(true)
+    expect(blocksOn(html, "svg").some((block) => block.includes("grid-area: 1 / 1"))).toBe(true)
   })
 
   it("passes required and disabled through to the select", async () => {
@@ -499,6 +556,22 @@ describe("Field, as a select", () => {
     expect(blocksOn(html, "select").some((block) => block.includes("appearance: none"))).toBe(true)
     expect(html).toContain("<svg")
     expect(html).toContain("<path")
+  })
+
+  it("draws the chevron with the exact glyph geometry, not just some path", async () => {
+    // toContain("<path") passes for a path drawing nothing, or the wrong
+    // shape. viewBox, d, fill and stroke-width can each drift independently,
+    // so each is pinned. The glyph is a design decision, so this is
+    // intentional pinning, not over-fitting.
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(html).toContain('viewBox="0 0 12 12"')
+    expect(html).toContain('fill="none"')
+    expect(html).toContain('d="M3 4.5L6 7.5L9 4.5"')
+    expect(html).toContain('stroke-width="1.5"')
   })
 
   it("hides the chevron from assistive technology and from the pointer", async () => {

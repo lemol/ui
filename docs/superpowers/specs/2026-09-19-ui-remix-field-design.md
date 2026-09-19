@@ -232,10 +232,10 @@ Which block declares what, since disjointness depends on it:
 | `labelStyle` | label | `font-size`, `font-weight`, `color` |
 | `requiredStyle` | marker span | `color` |
 | `hintStyle` / `errorStyle` | messages | `font-size`, `color` |
-| `controlBase` | control | `border-style`, `border-width`, `border-color`, `border-radius`, `background`, `color`, `padding-block`, `padding-inline-start`, `font-size`, `&::placeholder`, and every state override |
+| `controlBase` | control | `border-style`, `border-width`, `border-color`, `border-radius`, `background`, `color`, `padding-block-start`, `padding-block-end`, `padding-inline-start`, `font-size`, `&::placeholder`, and every state override |
 | `inputBox` | input | `height`, `padding-inline-end` |
 | `textareaBox` | textarea | `padding-inline-end`, `resize` |
-| `selectBox` | select | `height`, `padding-inline-end`, `appearance` |
+| `selectBox` | select | `grid-area`, `height`, `padding-inline-end`, `appearance` |
 | `selectFrame` | select wrapper | `display` |
 | `chevronStyle` | svg | `grid-area`, `align-self`, `justify-self`, `margin-inline-end`, `inline-size`, `block-size`, `color`, `pointer-events` |
 

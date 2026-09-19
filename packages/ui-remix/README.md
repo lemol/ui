@@ -151,6 +151,9 @@ toolbars are not, and density already retunes the height.
 `email-hint` and `email-error` for the messages — and `aria-describedby` names
 only the messages that rendered, because pointing it at an absent id is a
 silent failure. Pass `id` when two forms on one page share a field name.
+`hint`, `error` and `id` all treat `""` the same as absent, since each is an
+ordinary way for a controller to say "nothing here" and rendering it as a
+value would either add an empty message or break the label's binding.
 
 **Two sources of invalidity, one set of tokens.** A server-supplied `error`
 sets `aria-invalid`; native constraint validation matches `:user-invalid`. Both

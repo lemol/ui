@@ -68,7 +68,16 @@ interface FieldCommon {
    * message to show for it.
    */
   error?: string | undefined
-  /** Replaces the id stem, for two forms on one page sharing a field name. */
+  /**
+   * Replaces the id stem, for two forms on one page sharing a field name.
+   *
+   * `""` is treated the same as `undefined` — absent — for the same reason
+   * `hint` and `error` are: a controller writing `id={override ?? ""}` is
+   * ordinary, and falling through to `name` at least keeps the label bound to
+   * something rather than emitting `for=""`/`id=""`, which bind nothing.
+   * `name` and `label` get no such treatment — they are required, so there is
+   * no fallback value to fall through *to*.
+   */
   id?: string | undefined
   required?: boolean | undefined
   disabled?: boolean | undefined
@@ -316,7 +325,7 @@ export function Field(handle: Handle<FieldProps>) {
   return () => {
     const props = handle.props
     const { name, label, hint, error, required, disabled, mix } = props
-    const stem = props.id ?? name
+    const stem = props.id !== undefined && props.id !== "" ? props.id : name
     const hintId = `${stem}-hint`
     const errorId = `${stem}-error`
     // Only the ids that actually rendered. An aria-describedby naming an id

@@ -69,7 +69,6 @@ interface FieldCommon {
   id?: string | undefined
   required?: boolean | undefined
   disabled?: boolean | undefined
-  readonly?: boolean | undefined
   /** Applies to the wrapper, not the control. See below. */
   mix?: MixInput<HTMLDivElement> | undefined
 }
@@ -84,9 +83,14 @@ property rather than a modifier because a `?` follows.
 
 | Kind | Adds |
 | --- | --- |
-| `input`, the default | `type`, `value`, `placeholder`, `autocomplete`, `pattern`, `minlength`, `maxlength`, `min`, `max`, `step` |
-| `textarea` | `value`, `placeholder`, `rows`, `minlength`, `maxlength` |
+| `input`, the default | `type`, `value`, `placeholder`, `autocomplete`, `pattern`, `minlength`, `maxlength`, `min`, `max`, `step`, `readonly` |
+| `textarea` | `value`, `placeholder`, `rows`, `minlength`, `maxlength`, `readonly` |
 | `select` | `children`, the `<option>`s, required |
+
+`readonly` is on two kinds rather than in `FieldCommon`, because `<select
+readonly>` is inert: HTML gives `select` no `readonly` attribute, so offering
+the prop there would render an attribute that does nothing. `&[readonly]` in
+the control block therefore only ever matches an input or a textarea.
 
 `type` is the text-box family and nothing else: `text`, `email`, `url`, `tel`,
 `password`, `search`, `number`, `date`, `time`, `datetime-local`, `month`,
@@ -228,12 +232,12 @@ Which block declares what, since disjointness depends on it:
 | `labelStyle` | label | `font-size`, `font-weight`, `color` |
 | `requiredStyle` | marker span | `color` |
 | `hintStyle` / `errorStyle` | messages | `font-size`, `color` |
-| `controlBase` | control | `border-style`, `border-width`, `border-color`, `border-radius`, `background`, `color`, `padding-block`, `padding-inline-start`, `font-size`, `&::placeholder`, and every state override |
+| `controlBase` | control | `border-style`, `border-width`, `border-color`, `border-radius`, `background`, `color`, `padding-block-start`, `padding-block-end`, `padding-inline-start`, `font-size`, `&::placeholder`, and every state override |
 | `inputBox` | input | `height`, `padding-inline-end` |
 | `textareaBox` | textarea | `padding-inline-end`, `resize` |
-| `selectBox` | select | `height`, `padding-inline-end`, `appearance` |
-| `selectFrame` | select wrapper | `position`, `display` |
-| `chevronStyle` | svg | `position`, `inset-inline-end`, `inline-size`, `block-size`, `color`, `pointer-events` |
+| `selectBox` | select | `grid-area`, `height`, `padding-inline-end`, `appearance` |
+| `selectFrame` | select wrapper | `display` |
+| `chevronStyle` | svg | `grid-area`, `align-self`, `justify-self`, `margin-inline-end`, `inline-size`, `block-size`, `color`, `pointer-events` |
 
 `inputBox` and `selectBox` both declare `height`, and that is not a collision:
 the two never land on the same element. `textareaBox` declares none, so a

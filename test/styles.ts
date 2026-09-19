@@ -133,3 +133,57 @@ export const nonPrimitiveValues = (
     const referenced = /^var\(--([\w-]+)\)$/.exec(value)?.[1]
     return referenced === undefined || !primitives.has(referenced)
   })
+
+/** Each style block with the hash `remix/ui` keyed it by. */
+const hashedBlocksOf = (html: string): { hash: string; block: string }[] =>
+  [...html.matchAll(/<style data-rmx-style="([^"]*)">([\s\S]*?)<\/style>/g)].map((match) => ({
+    hash: match[1] ?? "",
+    block: match[2] ?? "",
+  }))
+
+/**
+ * The style blocks that landed on one element, found through the class
+ * `remix/ui` wrote on it.
+ *
+ * `sharedProperties` over every block in a document is the right question for
+ * a component that styles one element, and the wrong one for a component that
+ * styles several: two blocks on two different elements never contend for a
+ * cascade slot, so a property both declare is not a collision. Field's label
+ * and its control both declare `color`, legitimately.
+ *
+ * `tag` matches a whole tag name, not a prefix — Field renders both a `<p>`
+ * and a `<path>`, and attributing one's blocks to the other would make a
+ * disjointness assertion meaningless. `occurrence` picks which element with
+ * that tag to read, 0-indexed and defaulting to the first — Field's select
+ * branch renders two `<div>`s, the wrapper and the frame, and without this a
+ * test can only ever reach the wrapper's blocks.
+ *
+ * Returns an empty list for a tag that is absent, carries no class, or whose
+ * occurrence index is out of range. A test asserting disjointness should
+ * check the list is non-empty first: an empty list satisfies
+ * `sharedProperties(blocks)).toEqual([])` without proving anything.
+ */
+export const blocksOn = (html: string, tag: string, occurrence = 0): string[] => {
+  const openings = [...html.matchAll(new RegExp(`<${tag}\\b[^>]*>`, "g"))]
+  const opening = openings[occurrence]?.[0] ?? ""
+  const names = new Set(
+    (/class="([^"]*)"/.exec(opening)?.[1] ?? "").split(/\s+/).filter((name) => name !== ""),
+  )
+  return hashedBlocksOf(html)
+    .filter(({ hash }) => names.has(hash))
+    .map(({ block }) => block)
+}
+
+/**
+ * The rendered markup with remix's style elements dropped — the complement of
+ * `stylesOf`.
+ *
+ * `renderToHtml` returns the markup and the collected `<style>` blocks in one
+ * string, so an assertion about an attribute has to exclude the stylesheet or
+ * it is really an assertion about both. `controlBase` emits the selector
+ * `&[aria-invalid="true"]` on every render, which makes
+ * `expect(html).not.toContain("aria-invalid")` impossible to satisfy and
+ * `expect(html).toContain('aria-invalid="true"')` impossible to fail. Both
+ * directions are wrong for the same reason.
+ */
+export const markupOf = (html: string): string => html.replace(/<style[\s\S]*?<\/style>/g, "")

@@ -131,6 +131,53 @@ drift apart.
 is reliable. `Heading`, `Text` and `Eyebrow` all declare `color`, so their ink
 goes through the contract — `tone` on `Text`, the token on the other two.
 
+### `Field`
+
+Native form controls with their label, hint and error wired by the component,
+and validation left to the browser. No JavaScript validation anywhere.
+
+| Axis | Values | Comes from |
+| --- | --- | --- |
+| `control` | `input` (default), `textarea`, `select` | The element rendered |
+| `type` | the text-box family: `text`, `email`, `url`, `tel`, `password`, `search`, `number`, `date`, `time`, `datetime-local`, `month`, `week` | `input` only |
+| height | one, not an axis | `--control-h`, so density reaches it |
+
+`checkbox`, `radio`, `file`, `range` and `color` are not `type` values. None of
+them is a bordered box of `--control-h` height, so every token here would style
+them wrongly. There is no `size` axis either: forms are uniform in a way
+toolbars are not, and density already retunes the height.
+
+**Ids derive from the required `name`** — `email` for the control,
+`email-hint` and `email-error` for the messages — and `aria-describedby` names
+only the messages that rendered, because pointing it at an absent id is a
+silent failure. Pass `id` when two forms on one page share a field name.
+`hint`, `error` and `id` all treat `""` the same as absent, since each is an
+ordinary way for a controller to say "nothing here" and rendering it as a
+value would either add an empty message or break the label's binding.
+
+**Two sources of invalidity, one set of tokens.** A server-supplied `error`
+sets `aria-invalid`; native constraint validation matches `:user-invalid`. Both
+read `--ui-field-invalid-*`. `:invalid` is not used: it matches an empty
+required field on first paint, so every form would load pre-reddened.
+`:user-invalid` is Chrome 119, so Chrome 114 through 118 shows no invalid
+styling and the validation bubble still blocks submission there.
+
+**A `<textarea>` takes its value from `value`, not from children.** `remix/ui`
+drops a textarea's children. **A `<select>` takes no `value` at all** — HTML
+gives it no such content attribute, so the chosen `<option>` carries
+`selected`. It takes no `readonly` either, for the same reason.
+
+`appearance: none` on the select is what lets it match an input, and the
+chevron that replaces the native arrow is an inline `<svg>` sharing a grid cell
+with the control. Its colour is `--ui-field-chevron-ink`, which a
+`background-image` data URI could not manage: `var()` does not resolve inside
+`url()`.
+
+Twenty-seven tokens in `field/tokens.ts`. Field styles no focus ring, as
+`Button` does not: the reset owns it, and it applies because no component
+competes with it. **`mix` reaches the wrapper, not the control** — a property
+of the control goes through its token.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -198,8 +245,9 @@ transitions.
 ## Status
 
 `Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container`, `Heading`, `Text`,
-`Eyebrow` and `ThemeStyle` ship. `src/tokens.ts` aggregates the component
-records and exports `ComponentTokenName`; the four layout components add nothing
-to it, which is what they exist to demonstrate, and the three typographic ones
-add twenty-two between them. `src/demos.ts` registers eight demos. `runtime.ts`
-and `compat.ts` are still stubs — nothing here needs client JavaScript yet.
+`Eyebrow`, `Field` and `ThemeStyle` ship. `src/tokens.ts` aggregates the
+component records and exports `ComponentTokenName`; the four layout components
+add nothing to it, which is what they exist to demonstrate, the three
+typographic ones add twenty-two between them, and `Field` adds twenty-seven.
+`src/demos.ts` registers nine demos. `runtime.ts` and `compat.ts` are still
+stubs — nothing here needs client JavaScript yet.

@@ -81,6 +81,34 @@ never reaches a textarea.
 `value="a"`, which is invalid HTML that selects nothing. `FieldSelect` has no
 `value` prop; the caller marks the chosen `<option>` with `selected`.
 
+**The union has to be built up one kind at a time.** Narrowing an optional
+discriminant works only when every other member has its own `case`. Three
+probes, one per stage:
+
+| Union members declared | `switch` arms | `default` narrows to | Typechecks |
+| --- | --- | --- | --- |
+| all three | `default` only | the whole union | **no** |
+| input, textarea | `case "textarea"`, `default` | input | yes |
+| all three | `case "textarea"`, `default` | input \| select | **no** |
+| all three | both cases, `default` | input | yes |
+
+So a task that declares a kind it does not yet dispatch on cannot compile.
+Each task widens `FieldProps` by exactly the member it implements, and the
+`switch` appears in Task 4, where it first has something to switch on.
+
+**`remix/ui` types `<input>` as a union discriminated on `type`.** `jsx.d.ts`
+maps `input` to `AccessibleInputHTMLProps`, which is
+`Omit<PartialInputHTMLProps, "role"> & InputAriaRoles` — and `InputAriaRoles`
+is a union with one arm per type, each restricting the `role` valid beside it
+and, for the `text`/`search`/`tel`/`url`/`email` arms, forbidding `list`.
+
+A union-typed `type` selects no arm, so `<input type={props.type ?? "text"} />`
+does not compile when `props.type` is `FieldType`. `Field` narrows it with one
+documented assertion, `inputTypeAttribute`, which is sound because `Field`
+passes neither `role` nor `list` — the only attributes any arm constrains.
+The assertion costs the compiler's check on the value, so a test loops over
+`fieldTypes` and asserts the rendered attribute for all twelve.
+
 ---
 
 ## File structure
@@ -505,9 +533,12 @@ a kind each on top.
     `FieldControl`, the union of its members. Task 6's demo and its test loop
     over this list rather than restating it.
   - `fieldTypes: readonly [...]` and `FieldType`, the text-box `type` family.
-  - `FieldProps`, the union of `FieldInputProps | FieldTextareaProps |
-    FieldSelectProps`. Tasks 4 and 5 add the second and third members, which
-    are declared in this task so the union exists from the start.
+  - `FieldInputProps`, and `FieldProps` as an alias for it. Tasks 4 and 5
+    declare their own member and widen the alias by one line each. The union
+    must NOT be declared whole here: narrowing an optional discriminant needs
+    every other member to have its own `case`, so a member declared before it
+    is dispatched on makes the input-only props unreachable and the package
+    stops compiling. See the pre-flight table.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -519,7 +550,7 @@ import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import { blocksOn, sharedProperties, stylesOf, valuesOf } from "../../../../test/styles.ts"
-import { Field } from "./field.tsx"
+import { Field, fieldTypes } from "./field.tsx"
 
 /**
  * Values a declaration may carry instead of a token. Structural only: nothing
@@ -563,6 +594,20 @@ const offendersIn = (styles: string): string[] =>
 const describedIds = (html: string): string[] =>
   (/aria-describedby="([^"]*)"/.exec(html)?.[1] ?? "").split(" ").filter((id) => id !== "")
 
+/**
+ * The rendered markup with remix's style elements dropped — the complement of
+ * `stylesOf`.
+ *
+ * `renderToHtml` returns the markup and the collected `<style>` blocks in one
+ * string, so an assertion about an attribute has to exclude the stylesheet or
+ * it is really an assertion about both. `controlBase` emits the selector
+ * `&[aria-invalid="true"]` on every render, which makes
+ * `expect(html).not.toContain("aria-invalid")` impossible to satisfy and
+ * `expect(html).toContain('aria-invalid="true"')` impossible to fail. Both
+ * directions are wrong for the same reason.
+ */
+const markupOf = (html: string): string => html.replace(/<style[\s\S]*?<\/style>/g, "")
+
 describe("Field", () => {
   it("renders a labelled text input by default", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
@@ -592,7 +637,7 @@ describe("Field", () => {
 
   it("describes the control with no messages when it has none", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
-    expect(html).not.toContain("aria-describedby")
+    expect(markupOf(html)).not.toContain("aria-describedby")
   })
 
   it("names only the messages it actually rendered", async () => {
@@ -617,19 +662,42 @@ describe("Field", () => {
   })
 
   it("marks the control invalid only when an error is passed", async () => {
-    expect(await renderToHtml(<Field label="Email" name="email" />)).not.toContain("aria-invalid")
-    expect(
+    // markupOf, not the raw html: controlBase's `&[aria-invalid="true"]`
+    // selector is in the stylesheet on every render, so the negative
+    // assertion could never pass and the positive one could never fail.
+    const plain = markupOf(await renderToHtml(<Field label="Email" name="email" />))
+    expect(plain).not.toContain("aria-invalid")
+    const withError = markupOf(
       await renderToHtml(<Field error="Already registered" label="Email" name="email" />),
-    ).toContain('aria-invalid="true"')
+    )
+    expect(withError).toContain('aria-invalid="true"')
   })
 
   it("hides the required marker from assistive technology", async () => {
     // `required` is on the control, and that is what gets announced. The
     // asterisk is for eyes only, so it must not be read out as well.
-    const html = await renderToHtml(<Field label="Email" name="email" required />)
-    expect(html).toContain("required")
+    const html = markupOf(await renderToHtml(<Field label="Email" name="email" required />))
+    expect(html).toContain(" required")
     expect(html).toContain('aria-hidden="true"')
-    expect(await renderToHtml(<Field label="Email" name="email" />)).not.toContain("aria-hidden")
+    // A component that dropped the asterisk but kept the span would satisfy
+    // both assertions above, so the marker's own content is checked too.
+    expect(html).toContain(" *</span>")
+    expect(
+      markupOf(await renderToHtml(<Field label="Email" name="email" />)),
+    ).not.toContain("aria-hidden")
+  })
+
+  it("renders every type it offers, which the compiler no longer checks", async () => {
+    // `inputTypeAttribute` asserts the union down to one literal, because
+    // remix/ui types <input> as a union discriminated on `type`. That buys
+    // the element a typecheck at the cost of checking the value, so the
+    // value is checked here instead — derived from fieldTypes, so a type
+    // added to the list is a type this covers.
+    for (const type of fieldTypes) {
+      expect(markupOf(await renderToHtml(<Field label="X" name="x" type={type} />))).toContain(
+        `type="${type}"`,
+      )
+    }
   })
 
   it("passes the constraint attributes through to the control", async () => {
@@ -641,7 +709,7 @@ describe("Field", () => {
     expect(html).toContain('min="18"')
     expect(html).toContain('max="120"')
     expect(html).toContain('step="1"')
-    expect(html).toContain("required")
+    expect(markupOf(html)).toContain(" required")
 
     const text = await renderToHtml(
       <Field
@@ -663,11 +731,12 @@ describe("Field", () => {
     expect(text).toContain('pattern="[^@]+@[^@]+"')
     expect(text).toContain('placeholder="you@example.com"')
     expect(text).toContain('value="a@b.co"')
-    expect(text).toContain("readonly")
+    expect(markupOf(text)).toContain(" readonly")
   })
 
   it("renders the disabled attribute", async () => {
-    expect(await renderToHtml(<Field disabled label="Email" name="email" />)).toContain("disabled")
+    const html = markupOf(await renderToHtml(<Field disabled label="Email" name="email" />))
+    expect(html).toContain(" disabled")
   })
 
   it("reads only its own tokens and structural keywords", async () => {
@@ -695,9 +764,12 @@ describe("Field", () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
     const styles = stylesOf(html)
     expect(styles).not.toContain("padding-inline:")
+    expect(styles).not.toContain("padding-block:")
     expect(styles).not.toContain("padding:")
     expect(styles).toContain("padding-inline-start:")
     expect(styles).toContain("padding-inline-end:")
+    expect(styles).toContain("padding-block-start:")
+    expect(styles).toContain("padding-block-end:")
   })
 
   it("wins the invalid cascade from inside the control's own block", async () => {
@@ -748,7 +820,7 @@ Create `packages/ui-remix/src/field/field.tsx`. Tasks 4 and 5 extend the
 here.
 
 ```tsx
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput } from "remix/ui"
 
 /**
  * Derived from the list, not the other way around: a kind added only to the
@@ -820,19 +892,15 @@ interface FieldCommon {
   mix?: MixInput<HTMLDivElement> | undefined
 }
 
-/** Inputs and textareas take `readonly`; see `FieldSelectProps` for why. */
-interface FieldEditable extends FieldCommon {
+export interface FieldInputProps extends FieldCommon {
+  control?: "input" | undefined
+  /** Defaults to `text`, which is also what a bare input defaults to. */
+  type?: FieldType | undefined
   readonly?: boolean | undefined
   value?: string | undefined
   placeholder?: string | undefined
   minlength?: number | undefined
   maxlength?: number | undefined
-}
-
-export interface FieldInputProps extends FieldEditable {
-  control?: "input" | undefined
-  /** Defaults to `text`, which is also what a bare input defaults to. */
-  type?: FieldType | undefined
   autocomplete?: string | undefined
   pattern?: string | undefined
   min?: string | number | undefined
@@ -840,28 +908,38 @@ export interface FieldInputProps extends FieldEditable {
   step?: string | number | undefined
 }
 
-export interface FieldTextareaProps extends FieldEditable {
-  control: "textarea"
-  rows?: number | undefined
-}
+/**
+ * One member for now, and the type is written as an alias rather than as
+ * `FieldInputProps` everywhere so that Tasks 4 and 5 widen one line.
+ *
+ * The union grows a member per task because it has to. Narrowing an optional
+ * discriminant works only when every other member has its own `case`, so a
+ * task that declared `FieldTextareaProps` before it dispatched on
+ * `control === "textarea"` would leave every input-only property unreachable
+ * and the package would not compile. See the table in the plan's pre-flight
+ * findings.
+ */
+export type FieldProps = FieldInputProps
 
-export interface FieldSelectProps extends FieldCommon {
-  control: "select"
-  /**
-   * The `<option>`s. Required, because a select with none is an empty box.
-   *
-   * There is no `value` prop, and that is not an omission. `<select>` has no
-   * `value` content attribute — the IDL property exists, the attribute does
-   * not — so rendering one emits invalid markup that selects nothing. The
-   * chosen option carries `selected`, which is where HTML puts it.
-   *
-   * There is no `readonly` either, for the same reason: HTML gives `select` no
-   * such attribute, so the prop would render something inert.
-   */
-  children: RemixNode
-}
-
-export type FieldProps = FieldInputProps | FieldTextareaProps | FieldSelectProps
+/**
+ * The `type` attribute, narrowed to one literal for the compiler's benefit.
+ *
+ * `remix/ui` types `<input>` as a union discriminated on `type`, so that each
+ * type can restrict what sits beside it: `role` is limited per type, and the
+ * `text`/`search`/`tel`/`url`/`email` arms forbid `list`. A union-typed
+ * `type` selects no arm at all, and `Field`'s `type` is a union by design —
+ * so the element does not typecheck without this.
+ *
+ * The assertion is sound rather than convenient: every arm differs only in
+ * `role` and `list`, `Field` passes neither, and the runtime value is
+ * whatever the caller gave. It narrows the compiler's view, not the data.
+ *
+ * The cost is real and worth naming: if a future `remix/ui` adds an arm that
+ * restricts an attribute `Field` does pass, this hides it. `field.test.tsx`
+ * asserts the rendered `type` for every member of `fieldTypes`, so the value
+ * reaching the DOM stays checked even though the attribute's type does not.
+ */
+const inputTypeAttribute = (type: FieldType | undefined): "text" => (type ?? "text") as "text"
 
 const fieldBase = css({
   display: "flex",
@@ -906,11 +984,12 @@ const errorStyle = css({
  * so Chrome 114 through 118 gets no invalid styling — the validation bubble
  * still blocks submission there, so the field is unstyled rather than dead.
  *
- * Padding is longhand throughout. `padding-inline` here plus
- * `padding-inline-end` in a kind block would conflict in CSS while
- * `sharedProperties()` saw two different names and passed. `background` stays
- * a shorthand, as Button's tones do, so a skin may set `--ui-field-bg` to a
- * gradient.
+ * Padding is longhand throughout, including `padding-block` itself:
+ * `padding-block` is shorthand over `padding-block-start`/`padding-block-end`,
+ * so declaring it here would conflict with a kind block that later declares
+ * `padding-block-end` while `sharedProperties()` saw two different names and
+ * passed. `background` stays a shorthand, deliberately, as Button's tones do,
+ * so a skin may set `--ui-field-bg` to a gradient.
  *
  * No `outline` anywhere. The reset's `:where(:focus-visible)` rule owns the
  * focus ring, and it applies because nothing here competes with it.
@@ -924,7 +1003,8 @@ const controlBase = css({
   color: "var(--ui-field-ink)",
   fontSize: "var(--ui-field-font-size)",
   inlineSize: "100%",
-  paddingBlock: "var(--ui-field-pad-y)",
+  paddingBlockStart: "var(--ui-field-pad-y)",
+  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineStart: "var(--ui-field-pad-x)",
   "&::placeholder": {
     color: "var(--ui-field-placeholder-ink)",
@@ -973,34 +1053,6 @@ export function Field(handle: Handle<FieldProps>) {
     const describedBy = described === "" ? undefined : described
     const invalid = error === undefined ? undefined : "true"
 
-    const control = () => {
-      switch (props.control) {
-        default:
-          return (
-            <input
-              aria-describedby={describedBy}
-              aria-invalid={invalid}
-              autocomplete={props.autocomplete}
-              disabled={disabled}
-              id={stem}
-              max={props.max}
-              maxlength={props.maxlength}
-              min={props.min}
-              minlength={props.minlength}
-              mix={[controlBase, inputBox]}
-              name={name}
-              pattern={props.pattern}
-              placeholder={props.placeholder}
-              readonly={props.readonly}
-              required={required}
-              step={props.step}
-              type={props.type ?? "text"}
-              value={props.value}
-            />
-          )
-      }
-    }
-
     return (
       <div mix={[fieldBase, mix]}>
         <label for={stem} mix={labelStyle}>
@@ -1016,7 +1068,26 @@ export function Field(handle: Handle<FieldProps>) {
             {hint}
           </p>
         )}
-        {control()}
+        <input
+          aria-describedby={describedBy}
+          aria-invalid={invalid}
+          autocomplete={props.autocomplete}
+          disabled={disabled}
+          id={stem}
+          max={props.max}
+          maxlength={props.maxlength}
+          min={props.min}
+          minlength={props.minlength}
+          mix={[controlBase, inputBox]}
+          name={name}
+          pattern={props.pattern}
+          placeholder={props.placeholder}
+          readonly={props.readonly}
+          required={required}
+          step={props.step}
+          type={inputTypeAttribute(props.type)}
+          value={props.value}
+        />
         {error === undefined ? undefined : (
           <p id={errorId} mix={errorStyle}>
             {error}
@@ -1028,10 +1099,9 @@ export function Field(handle: Handle<FieldProps>) {
 }
 ```
 
-A `switch` with only a `default` arm reads oddly on its own, and it is
-deliberate: Tasks 4 and 5 add `case "textarea"` and `case "select"` above it,
-and in `default` TypeScript narrows `props` to `FieldInputProps`. Writing it as
-an `if` now would mean rewriting it twice.
+The `<input>` is rendered inline, with no dispatch around it, because there is
+one kind to render. Task 4 introduces the `switch` at the moment it first has
+something to switch on, and moves this element into its `default` arm.
 
 - [ ] **Step 4: Export it**
 
@@ -1044,12 +1114,13 @@ export {
   type FieldControl,
   type FieldInputProps,
   type FieldProps,
-  type FieldSelectProps,
-  type FieldTextareaProps,
   type FieldType,
   fieldTypes,
 } from "./field/field.tsx"
 ```
+
+Tasks 4 and 5 add `FieldTextareaProps` and `FieldSelectProps` to this list as
+they declare them.
 
 Then `bun run fix`, which puts the statement in biome's export order rather
 than wherever it was pasted.
@@ -1060,7 +1131,7 @@ than wherever it was pasted.
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 14 tests.
+Expected: PASS, 16 tests.
 
 - [ ] **Step 6: Run the gate**
 
@@ -1107,9 +1178,14 @@ EOF
 - Modify: `packages/ui-remix/src/field/field.test.tsx`
 
 **Interfaces:**
-- Consumes: `FieldTextareaProps` and the blocks from Task 3.
-- Produces: `control="textarea"` renders a `<textarea>` with `controlBase` and
-  a new `textareaBox` block. Task 6's demo uses it.
+- Consumes: `FieldCommon`, `FieldInputProps` and the blocks from Task 3.
+- Produces: `FieldEditable`, the shape the two editable kinds share, extracted
+  here because this is the task where it first has two consumers.
+  `FieldTextareaProps`, exported. `FieldProps` widened to
+  `FieldInputProps | FieldTextareaProps`. The `control()` switch, introduced
+  here because this is the task where there is first something to switch on:
+  `case "textarea"` plus `default`, which narrows to `FieldInputProps` because
+  the union has exactly two members at this point. Task 6's demo uses the kind.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1152,7 +1228,18 @@ describe("Field, as a textarea", () => {
     expect(html).toContain('minlength="10"')
     expect(html).toContain('maxlength="500"')
     expect(html).toContain('placeholder="Anything else?"')
-    expect(html).toContain("required")
+    expect(markupOf(html)).toContain(" required")
+  })
+
+  it("passes readonly through, spelled camelCase because that is the only spelling remix/ui's textarea props declare", async () => {
+    // TextareaHTMLProps has only `readOnly`; PartialInputHTMLProps has both
+    // spellings. field.tsx's readOnly={props.readonly} on the textarea is that
+    // constraint, not an inconsistency with the input branch's readonly=. Both
+    // still emit lowercase `readonly` in the markup.
+    const html = markupOf(
+      await renderToHtml(<Field control="textarea" label="Notes" name="notes" readonly />),
+    )
+    expect(html).toContain(" readonly")
   })
 
   it("declares no height, so rows decides it", async () => {
@@ -1186,10 +1273,52 @@ describe("Field, as a textarea", () => {
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: FAIL. `control="textarea"` still falls through to `default`, so the
-first assertion fails with the rendered `<input`.
+Expected: FAIL. With no dispatch yet, `Field` renders its `<input>` whatever
+`control` says, so the first assertion fails on the rendered `<input`.
+`bun test` does not typecheck, which is why this runs at all — `bun run check`
+would also reject `control="textarea"` as not assignable until Step 3 widens
+the union. Do not run the gate yet.
 
-- [ ] **Step 3: Add the block and the case**
+- [ ] **Step 3: Extract the shared shape and widen the union**
+
+In `field.tsx`, replace `FieldInputProps`'s own copy of the editable fields
+with an extracted base, and add the textarea member. `FieldEditable` is
+internal and deliberately not exported: it is a shape two kinds share, not a
+type a caller ever names.
+
+```tsx
+/** Inputs and textareas take `readonly`; a `<select readonly>` is inert. */
+interface FieldEditable extends FieldCommon {
+  readonly?: boolean | undefined
+  value?: string | undefined
+  placeholder?: string | undefined
+  minlength?: number | undefined
+  maxlength?: number | undefined
+}
+
+export interface FieldInputProps extends FieldEditable {
+  control?: "input" | undefined
+  /** Defaults to `text`, which is also what a bare input defaults to. */
+  type?: FieldType | undefined
+  autocomplete?: string | undefined
+  pattern?: string | undefined
+  min?: string | number | undefined
+  max?: string | number | undefined
+  step?: string | number | undefined
+}
+
+export interface FieldTextareaProps extends FieldEditable {
+  control: "textarea"
+  rows?: number | undefined
+}
+
+export type FieldProps = FieldInputProps | FieldTextareaProps
+```
+
+Add `type FieldTextareaProps` to the export list in
+`packages/ui-remix/src/index.ts`.
+
+- [ ] **Step 4: Add the block and introduce the switch**
 
 In `field.tsx`, add the block after `inputBox`:
 
@@ -1205,9 +1334,13 @@ const textareaBox = css({
 })
 ```
 
-Then add the case above `default:` in `control()`:
+Then move Task 3's inline `<input>` into a `control()` function beside the
+other locals in the render, and add the textarea case above it. The `<input>`
+element itself does not change — only where it sits.
 
 ```tsx
+    const control = () => {
+      switch (props.control) {
         case "textarea":
           return (
             <textarea
@@ -1220,23 +1353,67 @@ Then add the case above `default:` in `control()`:
               mix={[controlBase, textareaBox]}
               name={name}
               placeholder={props.placeholder}
-              readonly={props.readonly}
+              // camelCase, unlike the input branch's `readonly=`: remix/ui's
+              // TextareaHTMLProps declares only `readOnly`, where
+              // PartialInputHTMLProps declares both spellings. It still emits
+              // lowercase `readonly` in the markup, so behaviour and the
+              // `&[readonly]` selector are unaffected.
+              readOnly={props.readonly}
               required={required}
               rows={props.rows}
               value={props.value}
             />
           )
+        default:
+          return (
+            <input
+              aria-describedby={describedBy}
+              aria-invalid={invalid}
+              autocomplete={props.autocomplete}
+              disabled={disabled}
+              id={stem}
+              max={props.max}
+              maxlength={props.maxlength}
+              min={props.min}
+              minlength={props.minlength}
+              mix={[controlBase, inputBox]}
+              name={name}
+              pattern={props.pattern}
+              placeholder={props.placeholder}
+              readonly={props.readonly}
+              required={required}
+              step={props.step}
+              type={inputTypeAttribute(props.type)}
+              value={props.value}
+            />
+          )
+      }
+    }
 ```
 
-- [ ] **Step 4: Run the test to verify it passes**
+and replace the inline `<input>` in the returned tree with `{control()}`.
+
+`default` narrows to `FieldInputProps` here because the union has exactly two
+members. It would not if `FieldSelectProps` already existed, which is why
+Task 5 adds that member and its `case` together.
+
+**Known constraint, not a typo:** the input branch passes `readonly=`, the
+textarea branch passes `readOnly=`. `remix/ui`'s `TextareaHTMLProps` declares
+only the camelCase spelling; `PartialInputHTMLProps` declares both. Both still
+emit lowercase `readonly` in the markup, so behaviour and the `&[readonly]`
+selector in `controlBase` are unaffected by the spelling. Leave the asymmetry
+in place — a future "tidy-up" that makes both branches match the same spelling
+fails to compile on one of them.
+
+- [ ] **Step 5: Run the test to verify it passes**
 
 ```bash
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 20 tests.
+Expected: PASS, 22 tests.
 
-- [ ] **Step 5: Run the gate**
+- [ ] **Step 6: Run the gate**
 
 ```bash
 bun run check
@@ -1244,7 +1421,7 @@ bun run check
 
 Expected: green.
 
-- [ ] **Step 6: Commit**
+- [ ] **Step 7: Commit**
 
 ```bash
 git add packages/ui-remix/src/field/field.tsx packages/ui-remix/src/field/field.test.tsx
@@ -1282,10 +1459,15 @@ chevron, which avoids a `50%` offset and a translate as magic numbers.
 - Modify: `packages/ui-remix/src/field/field.test.tsx`
 
 **Interfaces:**
-- Consumes: `FieldSelectProps` and the blocks from Task 3.
-- Produces: `control="select"` renders a frame `<div>` holding a `<select>` and
-  an `aria-hidden` `<svg>`. Three new blocks: `selectFrame`, `selectBox`,
-  `chevronStyle`.
+- Consumes: `FieldCommon`, the `control()` switch and the blocks from Tasks 3
+  and 4.
+- Produces: `FieldSelectProps`, exported, and `FieldProps` widened to all
+  three members. The member and its `case` land in the same commit, because
+  either alone breaks the typecheck: the member without the case leaves
+  `default` narrowing to `FieldInputProps | FieldSelectProps`, and the case
+  without the member has nothing to match. `control="select"` then renders a
+  frame `<div>` holding a `<select>` and an `aria-hidden` `<svg>`. Three new
+  blocks: `selectFrame`, `selectBox`, `chevronStyle`.
 
 - [ ] **Step 1: Write the failing test**
 
@@ -1394,9 +1576,46 @@ bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
 Expected: FAIL. `control="select"` falls through to `default` and renders an
-`<input>`, so the first assertion fails.
+`<input>`, so the first assertion fails. `bun test` does not typecheck, which
+is why this runs at all — `bun run check` would also reject `control="select"`
+as not assignable until Step 3 widens the union. Do not run the gate yet.
 
-- [ ] **Step 3: Add the three blocks**
+- [ ] **Step 3: Declare the select member and widen the union**
+
+In `field.tsx`, add the member and widen the alias. `RemixNode` joins the
+import from `remix/ui`, unused until now.
+
+```tsx
+export interface FieldSelectProps extends FieldCommon {
+  control: "select"
+  /**
+   * The `<option>`s. Required, because a select with none is an empty box.
+   *
+   * There is no `value` prop, and that is not an omission. `<select>` has no
+   * `value` content attribute — the IDL property exists, the attribute does
+   * not — so rendering one emits invalid markup that selects nothing. The
+   * chosen option carries `selected`, which is where HTML puts it.
+   *
+   * There is no `readonly` either, for the same reason: HTML gives `select` no
+   * such attribute, so the prop would render something inert. That is why
+   * `readonly` sits on `FieldEditable` rather than on `FieldCommon`.
+   */
+  children: RemixNode
+}
+
+export type FieldProps = FieldInputProps | FieldTextareaProps | FieldSelectProps
+```
+
+Add `type FieldSelectProps` to the export list in
+`packages/ui-remix/src/index.ts`.
+
+This step and Step 5 have to land in one commit. The member without its
+`case` leaves `default` narrowing to `FieldInputProps | FieldSelectProps`, so
+every input-only property access fails; the `case` without the member has
+nothing to match. Expect a red typecheck between them, and do not try to make
+it green in isolation.
+
+- [ ] **Step 4: Add the three blocks**
 
 In `field.tsx`, after `textareaBox`:
 
@@ -1449,7 +1668,7 @@ const chevronStyle = css({
 })
 ```
 
-- [ ] **Step 4: Add the case**
+- [ ] **Step 5: Add the case**
 
 Above `default:` in `control()`:
 
@@ -1484,15 +1703,15 @@ Above `default:` in `control()`:
 `stroke="currentColor"` is what connects the path to `--ui-field-chevron-ink`:
 the block sets `color` on the svg, and the path inherits it.
 
-- [ ] **Step 5: Run the test to verify it passes**
+- [ ] **Step 6: Run the test to verify it passes**
 
 ```bash
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 27 tests.
+Expected: PASS, 29 tests.
 
-- [ ] **Step 6: Run the gate**
+- [ ] **Step 7: Run the gate**
 
 ```bash
 bun run check
@@ -1500,7 +1719,7 @@ bun run check
 
 Expected: green.
 
-- [ ] **Step 7: Commit**
+- [ ] **Step 8: Commit**
 
 ```bash
 git add packages/ui-remix/src/field/field.tsx packages/ui-remix/src/field/field.test.tsx
@@ -1570,10 +1789,13 @@ describe("FieldDemo", () => {
   })
 
   it("shows the states a caller has to be able to see", async () => {
-    const html = await renderToHtml(<FieldDemo />)
-    expect(html).toContain("required")
-    expect(html).toContain("disabled")
-    expect(html).toContain("readonly")
+    // markupOf, because controlBase's own selectors put `aria-invalid="true"`
+    // and `readonly` in the stylesheet on every render — asserted against the
+    // raw html, two of these four would pass with no such field on the page.
+    const html = markupOf(await renderToHtml(<FieldDemo />))
+    expect(html).toContain(" required")
+    expect(html).toContain(" disabled")
+    expect(html).toContain(" readonly")
     expect(html).toContain('aria-invalid="true"')
   })
 })
@@ -1594,7 +1816,7 @@ Create `packages/ui-remix/src/field/field.demo.tsx`:
 ```tsx
 import { css } from "remix/ui"
 import { Button } from "../button/button.tsx"
-import { Field } from "./field.tsx"
+import { Field, fieldTypes } from "./field.tsx"
 
 /** Primitives, not tokens: a demo is a page, not a component. */
 const label = css({
@@ -1708,7 +1930,7 @@ and inside `demos`, in alphabetical position:
 bun test packages/ui-remix/src/field/field.test.tsx
 ```
 
-Expected: PASS, 30 tests.
+Expected: PASS, 32 tests.
 
 - [ ] **Step 6: Run the gate**
 
@@ -1917,7 +2139,7 @@ EOF
 ## Status
 
 Field ships when Task 7 is committed and `bun run check` is green: three kinds,
-twenty-seven tokens, thirty tests, one demo that submits without JavaScript,
+twenty-seven tokens, thirty-four tests, one demo that submits without JavaScript,
 and the manual check in Task 6 Step 7 done by a human.
 
 What is deliberately not here, each with its owner:
@@ -1954,8 +2176,18 @@ extra test needed, but worth having checked rather than assumed.
 and `fieldTokens` are spelled the same in every task and in the export list.
 `blocksOn(html, tag)` takes the same two arguments everywhere it is called.
 `FieldEditable` is internal and deliberately not exported: it is a shape two
-kinds share, not a type a caller ever names.
+kinds share, not a type a caller ever names, and it is extracted in Task 4
+where it first has two consumers rather than in Task 3 where it would have
+one.
 
-**Test counts.** 14 after Task 3, 20 after Task 4, 27 after Task 5, 30 after
-Task 6. If a run disagrees, the plan is wrong about the tests rather than the
+`FieldProps` is the one name that changes meaning across tasks: an alias for
+`FieldInputProps` in Task 3, two members after Task 4, three after Task 5.
+That is forced rather than chosen — see the narrowing table in the pre-flight
+findings — and it means each task's export list grows by the prop type it
+declared.
+
+**Test counts.** 16 after Task 3, 23 after Task 4 including its fix wave, 31 after Task 5,
+34 after Task 6. Tasks 4 and 5 each added one test beyond the brief to
+close a pass-through their reviewer or their own mutation testing found
+uncovered, which is why the later counts run ahead of the prediction. If a run disagrees, the plan is wrong about the tests rather than the
 code being wrong about the behaviour — recount before changing anything.

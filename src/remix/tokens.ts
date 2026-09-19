@@ -1,5 +1,6 @@
 import { badgeTokens } from "./badge/tokens.ts"
 import { buttonTokens } from "./button/tokens.ts"
+import { dialogTokens } from "./dialog/tokens.ts"
 import { eyebrowTokens } from "./eyebrow/tokens.ts"
 import { fieldTokens } from "./field/tokens.ts"
 import { headingTokens } from "./heading/tokens.ts"
@@ -15,6 +16,7 @@ import { textTokens } from "./text/tokens.ts"
 export const componentTokens = {
   ...badgeTokens,
   ...buttonTokens,
+  ...dialogTokens,
   ...eyebrowTokens,
   ...fieldTokens,
   ...headingTokens,

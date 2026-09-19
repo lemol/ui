@@ -56,4 +56,23 @@ describe("blocksOn", () => {
   it("returns nothing for an element remix gave no class", () => {
     expect(blocksOn(html, "svg")).toEqual([])
   })
+
+  const twoDivs =
+    "<head>" +
+    styleElement("rmxc-eee", "display: flex") +
+    styleElement("rmxc-fff", "display: grid") +
+    "</head>" +
+    '<div class="rmxc-eee"><div class="rmxc-fff"></div></div>'
+
+  it("reads the nth occurrence of the tag when given one", () => {
+    expect(blocksOn(twoDivs, "div", 1)).toEqual([block("rmxc-fff", "display: grid")])
+  })
+
+  it("defaults to the first occurrence when none is given", () => {
+    expect(blocksOn(twoDivs, "div")).toEqual([block("rmxc-eee", "display: flex")])
+  })
+
+  it("returns nothing for an occurrence past the last match", () => {
+    expect(blocksOn(twoDivs, "div", 5)).toEqual([])
+  })
 })

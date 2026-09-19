@@ -2139,7 +2139,7 @@ EOF
 ## Status
 
 Field ships when Task 7 is committed and `bun run check` is green: three kinds,
-twenty-seven tokens, thirty-two tests, one demo that submits without JavaScript,
+twenty-seven tokens, thirty-four tests, one demo that submits without JavaScript,
 and the manual check in Task 6 Step 7 done by a human.
 
 What is deliberately not here, each with its owner:
@@ -2186,6 +2186,8 @@ That is forced rather than chosen — see the narrowing table in the pre-flight
 findings — and it means each task's export list grows by the prop type it
 declared.
 
-**Test counts.** 16 after Task 3, 22 after Task 4, 29 after Task 5, 32 after
-Task 6. If a run disagrees, the plan is wrong about the tests rather than the
+**Test counts.** 16 after Task 3, 23 after Task 4 including its fix wave, 31 after Task 5,
+34 after Task 6. Tasks 4 and 5 each added one test beyond the brief to
+close a pass-through their reviewer or their own mutation testing found
+uncovered, which is why the later counts run ahead of the prediction. If a run disagrees, the plan is wrong about the tests rather than the
 code being wrong about the behaviour — recount before changing anything.

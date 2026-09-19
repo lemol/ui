@@ -81,25 +81,33 @@ says nothing at all.
 
 Measured against `mini`'s theme as it stands, at the 4.5:1 AA threshold for
 normal text — badge text is `fs-xs`, so the large-text threshold does not
-apply:
+apply. Both axes, because a theme's dark values are values too:
 
-| tone    | `<tone>-ink` on `<tone>` | `<tone>` on `<tone>-subtle` |
-| ------- | ------------------------ | --------------------------- |
-| success | 5.03                     | **4.42**                    |
-| warning | **4.21**                 | **3.76**                    |
-| danger  | 5.93                     | 5.09                        |
-| info    | 7.00                     | 6.08                        |
-| accent  | 6.33                     | 5.42                        |
+| tone    | light: ink on tone | light: tone on subtle | dark: ink on tone | dark: tone on subtle |
+| ------- | ------------------ | --------------------- | ----------------- | -------------------- |
+| success | 5.03               | **4.42**              | 5.49              | 4.74                 |
+| warning | **4.21**           | **3.76**              | 6.88              | 5.83                 |
+| danger  | 5.93               | 5.09                  | 5.24              | 4.61                 |
+| info    | 7.00               | 6.08                  | 5.99              | 5.13                 |
+| accent  | 6.33               | 5.42                  | 5.24              | **4.20**             |
 
-Two findings, and they point the same way.
+Three findings, and they point the same way.
 
-The subtle pair fails for `success` and `warning`, which is what an unnamed
-promise looks like when nothing has been checking it.
+The subtle pair fails for light `success` and light `warning`, which is what an
+unnamed promise looks like when nothing has been checking it.
 
-`warning` also fails on the pair the schema *does* promise, at 4.21. Nothing
-has ever consumed `warning`, so nobody has ever looked. That is this
+It fails for dark `accent` too, at 4.20 — a tone nothing reads on either arm,
+in the axis a light-mode eye never looks at.
+
+And light `warning` fails on the pair the schema *does* promise, at 4.21.
+Nothing has ever consumed `warning`, so nobody has ever looked. That is this
 repository's own line about unconsumed primitives, landing on the schema
 itself.
+
+`accent` is in the table and in the test despite `Badge` having no accent tone.
+The promise being named is about `-subtle` arms, and `accent` has one. Scoping
+the check to the four tones this component happens to render would be writing
+the test around the component rather than around the guarantee.
 
 So this task does three things beyond the component:
 
@@ -107,11 +115,14 @@ So this task does three things beyond the component:
    first: a theme must make `<tone>` readable on `<tone>-subtle`, as well as
    `<tone>-ink` readable on `<tone>`. Two fills, two promises.
 2. **Makes both checkable.** A contrast assertion over `mini`'s theme values
-   covering both pairs for all five tones, in `src/mini/theme.test.ts`. It is
-   `mini`'s test because `mini` holds the values; `design` holds no values and
-   has nothing to assert about.
-3. **Retunes `success` and `warning`** until it passes. Both are darkened. No
-   component reads either today, so nothing moves visually as a result.
+   covering both pairs for all five tones in both axes, in
+   `src/mini/theme.test.ts`. It is `mini`'s test because `mini` holds the
+   values; `design` holds no values and has nothing to assert about.
+3. **Retunes three values** until it passes: light `success` to `#2A7146`,
+   light `warning` to `#8A5A09`, and dark `accent-subtle` to `#12201C`. Each
+   is chosen with headroom rather than parked on 4.5. No component reads
+   `success`, `warning` or `accent-subtle` today, so nothing moves visually as
+   a result.
 
 A contrast helper is a handful of lines of sRGB luminance arithmetic and lives
 in the test file. It is not a runtime export: nothing at runtime needs to know
@@ -242,5 +253,9 @@ Styled from primitives, as every demo is. A demo is a page, not a component.
 - A count or numeric badge with its own metrics. The tokens render one today;
   if counts need different padding they need their own component, not a size
   axis here.
-- Retuning any tone value other than `success` and `warning`. `danger`, `info`
-  and `accent` pass both pairs already.
+- Retuning any tone value beyond the three named above. `danger` and `info`
+  pass both pairs in both axes already.
+- Non-text contrast for `<tone>-border`. WCAG 1.4.11 governs the boundary of a
+  UI component or a graphical object carrying meaning; a badge is neither, and
+  its tone is carried by text that already passes. A border ratio would be a
+  number with no requirement behind it.

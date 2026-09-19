@@ -51,6 +51,10 @@ describe("overlay", () => {
   })
 
   it("keeps two overlays apart", async () => {
+    // Both halves of both overlays, not just the triggers: the invocations are
+    // minted inside overlay(), and a `close` hoisted to shared scope would
+    // hand two dialogs the same dismissal target — a button that closes the
+    // wrong one. Comparing only the triggers cannot see that.
     const First = overlay("first")
     const Second = overlay("second")
     const markup = markupOf(
@@ -58,11 +62,13 @@ describe("overlay", () => {
         <>
           <First.Trigger>One</First.Trigger>
           <Second.Trigger>Two</Second.Trigger>
+          <First.Close>Cancel one</First.Close>
+          <Second.Close>Cancel two</Second.Close>
         </>,
       ),
     )
-    expect(markup).toContain('commandfor="first"')
-    expect(markup).toContain('commandfor="second"')
+    const targets = [...markup.matchAll(/commandfor="([^"]*)"/g)].map((match) => match[1])
+    expect(targets).toEqual(["first", "second", "first", "second"])
   })
 
   it("renders complete markup with no script", async () => {

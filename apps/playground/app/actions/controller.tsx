@@ -1,5 +1,5 @@
 import * as path from "node:path"
-import { demos, isDemoName } from "@lemol/ui-remix/demos"
+import { demos, isDemoName } from "@lemol/ui/remix/demos"
 import { createController } from "remix/router"
 import { assetServer } from "../assets.ts"
 import { routes } from "../routes.ts"

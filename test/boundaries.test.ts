@@ -3,19 +3,31 @@ import { readdirSync, readFileSync } from "node:fs"
 import { dirname, join, relative, resolve, sep } from "node:path"
 import { Glob } from "bun"
 
-const packagesRoot = resolve(import.meta.dir, "..", "packages")
+const root = resolve(import.meta.dir, "..")
+const srcRoot = join(root, "src")
 const harnesses = [resolve(import.meta.dir, "render.ts"), resolve(import.meta.dir, "styles.ts")]
 
-// The dependency graph from docs/architecture.md. Each package may import its own
-// files under src/, plus the specifiers listed here. An entry matches exactly or as
-// a prefix, so "remix/ui" also allows "remix/ui/server".
+// The dependency graph from docs/architecture.md, now as layers inside one
+// package. Each layer may import its own files under src/<layer>/, plus the
+// specifiers listed here. An entry matches exactly or as a prefix, so
+// "remix/ui" also allows "remix/ui/server".
 //
-// ui-design allows nothing: it is strings and data, and the day it knows about a
-// renderer is the day @lemol/ui-opentui cannot reuse it.
+// design allows nothing: it is strings and data, and the day it knows about a
+// renderer is the day a future opentui layer cannot reuse it.
 const allowed: Record<string, string[]> = {
-  "ui-design": [],
-  "ui-remix": ["remix/ui", "@lemol/ui-design"],
-  "ui-remix-mini": ["remix/ui", "@lemol/ui-design", "@lemol/ui-remix"],
+  design: [],
+  remix: ["remix/ui"],
+  mini: ["remix/ui"],
+}
+
+// Which layers each one may reach, and in which direction. Collapsing three
+// packages into one turned these edges from `dependencies` into relative
+// imports, so the check that used to be "does package.json record it" is now
+// "does it go through a published entry point" — see entriesOf below.
+const reachable: Record<string, string[]> = {
+  design: [],
+  remix: ["design"],
+  mini: ["design", "remix"],
 }
 
 // The imports the spec names, denied even if an allow-list above grows to cover
@@ -32,9 +44,33 @@ const denied = [
 ]
 
 // Tests live beside the component they cover, so they need the runner and the
-// shared server-render harness. Nothing else in a package may reach for either.
+// shared server-render harness. Nothing else in src may reach for either.
 const testPackages = ["bun:test"]
 const isTest = (file: string) => file.includes(".test.")
+
+type Manifest = { exports: Record<string, string> }
+const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as Manifest
+
+/**
+ * The files the exports map publishes, grouped by layer. A layer's entry points
+ * are its whole surface: reaching past one from another layer would import a
+ * file no consumer can import, which is how the design/renderer split rots.
+ */
+const entriesOf = (): Map<string, Set<string>> => {
+  const byLayer = new Map<string, Set<string>>()
+  for (const target of Object.values(manifest.exports)) {
+    const absolute = resolve(root, target)
+    const inside = relative(srcRoot, absolute)
+    if (inside.startsWith("..")) continue
+    const layer = inside.split(sep)[0] ?? ""
+    const set = byLayer.get(layer) ?? new Set<string>()
+    set.add(absolute)
+    byLayer.set(layer, set)
+  }
+  return byLayer
+}
+
+const entries = entriesOf()
 
 const importPattern =
   /(?:^|[\s;])(?:import|export)\s+(?:type\s+)?(?:[\w*{}\s,$]+\s+from\s+)?["']([^"']+)["']|import\(\s*["']([^"']+)["']\s*\)/g
@@ -47,21 +83,30 @@ const matches = (entry: string, specifier: string) =>
     ? specifier.startsWith(entry)
     : specifier === entry || specifier.startsWith(`${entry}/`)
 
-/** Returns a message for each import in `source` that breaks the rules. `file` is relative to packages. */
+/** Returns a message for each import in `source` that breaks the rules. `file` is relative to src. */
 export const violations = (file: string, source: string): string[] => {
-  const pkg = file.split(sep)[0] ?? ""
-  const allow = allowed[pkg]
-  if (allow === undefined) return [`${file}: not inside a known package`]
+  const layer = file.split(sep)[0] ?? ""
+  const allow = allowed[layer]
+  const reach = reachable[layer]
+  if (allow === undefined || reach === undefined) return [`${file}: not inside a known layer`]
 
   return specifiersOf(source).flatMap((specifier) => {
     if (specifier.startsWith(".")) {
-      const target = resolve(packagesRoot, dirname(file), specifier)
+      const target = resolve(srcRoot, dirname(file), specifier)
       if (harnesses.includes(target)) {
         return isTest(file) ? [] : [`${file}: runtime code imports the test harness (${specifier})`]
       }
-      // A sibling package is reached by name, so that package.json records the edge.
-      const inside = relative(join(packagesRoot, pkg, "src"), target)
-      if (inside.startsWith("..")) return [`${file}: imports ${specifier}, outside ${pkg}/src`]
+      const inside = relative(srcRoot, target)
+      if (inside.startsWith("..")) return [`${file}: imports ${specifier}, outside src`]
+
+      const other = inside.split(sep)[0] ?? ""
+      if (other === layer) return []
+      if (!reach.includes(other)) return [`${file}: ${layer} must not import ${other}`]
+      // A layer is reached only where the exports map publishes it, so
+      // package.json still records every edge in the graph.
+      if (!entries.get(other)?.has(target)) {
+        return [`${file}: imports ${specifier}, which ${other} does not export`]
+      }
       return []
     }
     if (isTest(file) && testPackages.includes(specifier)) return []
@@ -69,30 +114,37 @@ export const violations = (file: string, source: string): string[] => {
       return [`${file}: ${specifier} is not SPA-safe`]
     }
     if (allow.some((entry) => matches(entry, specifier))) return []
-    return [`${file}: ${pkg} must not import ${specifier}`]
+    return [`${file}: ${layer} must not import ${specifier}`]
   })
 }
 
 const sourceFiles = () =>
-  ["*/src/**/*.ts", "*/src/**/*.tsx"].flatMap((pattern) => [
-    ...new Glob(pattern).scanSync({ cwd: packagesRoot, onlyFiles: true }),
+  ["*/**/*.ts", "*/**/*.tsx"].flatMap((pattern) => [
+    ...new Glob(pattern).scanSync({ cwd: srcRoot, onlyFiles: true }),
   ])
 
 describe("the SPA import boundary", () => {
-  // A package missing from `allowed` would otherwise be checked against nothing.
-  test("covers every package in the workspace", () => {
-    const dirs = readdirSync(packagesRoot, { withFileTypes: true })
+  // A layer missing from `allowed` would otherwise be checked against nothing.
+  test("covers every layer under src", () => {
+    const dirs = readdirSync(srcRoot, { withFileTypes: true })
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort()
     expect(dirs).toEqual(Object.keys(allowed).sort())
   })
 
-  test("every package source file imports only what the graph allows", () => {
+  // The graph is only enforceable where the exports map names a way in.
+  test("gives every reachable layer at least one entry point", () => {
+    for (const layer of new Set(Object.values(reachable).flat())) {
+      expect([layer, entries.get(layer)?.size ?? 0]).not.toEqual([layer, 0])
+    }
+  })
+
+  test("every source file imports only what the graph allows", () => {
     const files = sourceFiles()
     expect(files.length).toBeGreaterThan(0)
     const found = files.flatMap((file) =>
-      violations(file, readFileSync(join(packagesRoot, file), "utf8")),
+      violations(file, readFileSync(join(srcRoot, file), "utf8")),
     )
     expect(found).toEqual([])
   })
@@ -101,7 +153,7 @@ describe("the SPA import boundary", () => {
   describe("the checker", () => {
     const at = (...parts: string[]) => join(...parts)
 
-    test("rejects the server-only imports in every package", () => {
+    test("rejects the server-only imports in every layer", () => {
       const source = [
         'import { readFile } from "node:fs/promises"',
         'import { Glob } from "bun"',
@@ -112,8 +164,8 @@ describe("the SPA import boundary", () => {
         'import { assets } from "remix/assets"',
         'import { run } from "remix/spa"',
       ].join("\n")
-      for (const pkg of Object.keys(allowed)) {
-        const file = at(pkg, "src", "index.ts")
+      for (const layer of Object.keys(allowed)) {
+        const file = at(layer, "index.ts")
         expect(violations(file, source)).toEqual([
           `${file}: node:fs/promises is not SPA-safe`,
           `${file}: bun is not SPA-safe`,
@@ -135,62 +187,67 @@ describe("the SPA import boundary", () => {
         'export * from "./tokens.ts"',
         'import { buttonTokens } from "../button/tokens.ts"',
       ].join("\n")
-      expect(violations(at("ui-remix", "src", "dialog", "dialog.tsx"), source)).toEqual([])
+      expect(violations(at("remix", "dialog", "dialog.tsx"), source)).toEqual([])
     })
 
-    test("keeps ui-design renderer-agnostic", () => {
-      const file = at("ui-design", "src", "css", "emit.ts")
+    test("keeps design renderer-agnostic", () => {
+      const file = at("design", "css", "emit.ts")
       expect(violations(file, 'import { css } from "remix/ui"')).toEqual([
-        `${file}: ui-design must not import remix/ui`,
+        `${file}: design must not import remix/ui`,
       ])
       expect(violations(file, 'import { theme } from "../theme.ts"')).toEqual([])
     })
 
-    test("lets each package import only the ones below it", () => {
-      const design = 'import { v } from "@lemol/ui-design"'
-      const remix = 'import { Button } from "@lemol/ui-remix"'
-      const mini = 'import { AppShell } from "@lemol/ui-remix-mini"'
+    test("lets each layer import only the ones below it", () => {
+      const design = 'import { v } from "../design/index.ts"'
+      const remix = 'import { Button } from "../remix/index.ts"'
 
-      expect(violations(at("ui-remix-mini", "src", "shell.tsx"), `${design}\n${remix}`)).toEqual([])
-      expect(violations(at("ui-remix", "src", "theme-style.tsx"), design)).toEqual([])
-      expect(violations(at("ui-remix", "src", "theme-style.tsx"), mini)).toEqual([
-        `${at("ui-remix", "src", "theme-style.tsx")}: ui-remix must not import @lemol/ui-remix-mini`,
-      ])
-      expect(violations(at("ui-design", "src", "theme.ts"), design)).toEqual([
-        `${at("ui-design", "src", "theme.ts")}: ui-design must not import @lemol/ui-design`,
-      ])
+      expect(violations(at("mini", "shell.tsx"), `${design}\n${remix}`)).toEqual([])
+      expect(violations(at("remix", "theme-style.tsx"), design)).toEqual([])
+      expect(
+        violations(at("remix", "theme-style.tsx"), 'import { m } from "../mini/index.ts"'),
+      ).toEqual([`${at("remix", "theme-style.tsx")}: remix must not import mini`])
+      expect(violations(at("design", "theme.ts"), 'import { R } from "../remix/index.ts"')).toEqual(
+        [`${at("design", "theme.ts")}: design must not import remix`],
+      )
     })
 
-    test("sends cross-package imports through the package name", () => {
-      const file = at("ui-remix", "src", "button", "button.tsx")
-      expect(violations(file, 'import { v } from "../../../ui-design/src/index.ts"')).toEqual([
-        `${file}: imports ../../../ui-design/src/index.ts, outside ui-remix/src`,
+    test("sends cross-layer imports through a published entry point", () => {
+      const file = at("remix", "button", "button.tsx")
+      expect(violations(file, 'import { v } from "../../design/ref.ts"')).toEqual([
+        `${file}: imports ../../design/ref.ts, which design does not export`,
       ])
-      expect(violations(file, 'const lazy = import("../../package.json")')).toEqual([
-        `${file}: imports ../../package.json, outside ui-remix/src`,
+      expect(violations(file, 'import { v } from "../../design/index.ts"')).toEqual([])
+      expect(violations(file, 'import { emit } from "../../design/css/index.ts"')).toEqual([])
+    })
+
+    test("keeps relative imports inside src", () => {
+      const file = at("remix", "button", "button.tsx")
+      expect(violations(file, 'const lazy = import("../../../package.json")')).toEqual([
+        `${file}: imports ../../../package.json, outside src`,
       ])
     })
 
     test("gives tests the runner and the harness, and runtime code neither", () => {
-      const spec = at("ui-remix", "src", "button", "button.test.tsx")
+      const spec = at("remix", "button", "button.test.tsx")
       const source = [
         'import { expect, test } from "bun:test"',
-        'import { renderToHtml } from "../../../../test/render.ts"',
-        'import { styleBlocksOf } from "../../../../test/styles.ts"',
+        'import { renderToHtml } from "../../../test/render.ts"',
+        'import { styleBlocksOf } from "../../../test/styles.ts"',
       ].join("\n")
       expect(violations(spec, source)).toEqual([])
 
-      const runtime = at("ui-remix", "src", "button", "button.tsx")
+      const runtime = at("remix", "button", "button.tsx")
       expect(violations(runtime, source)).toEqual([
         `${runtime}: bun:test is not SPA-safe`,
-        `${runtime}: runtime code imports the test harness (../../../../test/render.ts)`,
-        `${runtime}: runtime code imports the test harness (../../../../test/styles.ts)`,
+        `${runtime}: runtime code imports the test harness (../../../test/render.ts)`,
+        `${runtime}: runtime code imports the test harness (../../../test/styles.ts)`,
       ])
     })
 
-    test("rejects files outside a known package", () => {
-      expect(violations(at("ui-future", "src", "index.ts"), "")).toEqual([
-        `${at("ui-future", "src", "index.ts")}: not inside a known package`,
+    test("rejects files outside a known layer", () => {
+      expect(violations(at("opentui", "index.ts"), "")).toEqual([
+        `${at("opentui", "index.ts")}: not inside a known layer`,
       ])
     })
   })

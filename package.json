@@ -2,18 +2,27 @@
   "name": "@lemol/ui",
   "version": "0.1.0",
   "private": true,
-  "description": "UI packages shared by lemol projects: design tokens, Remix 3 components, and a minimal reference design",
+  "description": "UI for lemol projects: renderer-agnostic design tokens, Remix 3 components, and one minimal reference design",
   "type": "module",
   "workspaces": [
-    "packages/*",
     "apps/*"
   ],
+  "exports": {
+    "./design": "./src/design/index.ts",
+    "./design/css": "./src/design/css/index.ts",
+    "./remix": "./src/remix/index.ts",
+    "./remix/compat": "./src/remix/compat.ts",
+    "./remix/runtime": "./src/remix/runtime.ts",
+    "./remix/demos": "./src/remix/demos.ts",
+    "./mini": "./src/mini/index.ts"
+  },
   "scripts": {
     "check": "bun run lint && bun run typecheck && bun run test",
     "lint": "biome check .",
     "fix": "biome check --write .",
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun test",
+    "test:git-consumer": "bun test test/git-consumer.test.ts",
     "playground": "bun --filter @lemol/ui-playground dev"
   },
   "peerDependencies": {

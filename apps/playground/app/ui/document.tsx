@@ -1,5 +1,5 @@
-import { ThemeStyle } from "@lemol/ui-remix"
-import { miniTheme } from "@lemol/ui-remix-mini"
+import { miniTheme } from "@lemol/ui/mini"
+import { ThemeStyle } from "@lemol/ui/remix"
 import type { ScriptEntry } from "remix/assets"
 import type { Handle, RemixNode } from "remix/ui"
 import { ImportMap } from "remix/ui/server"

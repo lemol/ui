@@ -116,10 +116,10 @@ export const sharedProperties = (blocks: string[]): string[] => {
  * `auto`. Each component states its own, because a keyword allowed everywhere
  * is a keyword nobody argued for.
  *
- * `primitives` is passed in rather than imported. `@lemol/ui-design` does not
- * resolve from this directory — the workspace symlink exists only inside the
- * packages that depend on it — and a generic CSS-assertion harness has no
- * business knowing a token schema exists either way.
+ * `primitives` is passed in rather than imported. The harness sits outside
+ * `src/`, so reaching the schema would mean a relative path into the design
+ * layer — and a generic CSS-assertion harness has no business knowing a token
+ * schema exists either way.
  *
  * Returns the offending values, empty when the component is clean.
  */

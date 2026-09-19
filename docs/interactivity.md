@@ -66,8 +66,8 @@ means one standard vocabulary instead of a private one. For comparison,
 ## The complete list of hand-written client JS
 
 ```
-@lemol/ui-remix/compat     Invoker Commands backfill
-@lemol/ui-remix/runtime    the capture-phase listener, dispatching:
+@lemol/ui/remix/compat     Invoker Commands backfill
+@lemol/ui/remix/runtime    the capture-phase listener, dispatching:
   --live-submit     debounced auto-submit for filter forms
   --copy            clipboard write + in-place confirm
   --set-scheme      persist the light/dark choice
@@ -112,7 +112,7 @@ lower floor:
 | Feature | Availability | How it is used |
 | --- | --- | --- |
 | Popover API | Chrome 114, Safari 17, Firefox 125 | Relied on directly. **This sets the floor.** |
-| Invoker Commands | Baseline Dec 2025 (Chrome 135+, Safari 26, Firefox late 2025) | Native, with `@lemol/ui-remix/compat` backfilling older engines in ~15 lines. Identical markup either way. |
+| Invoker Commands | Baseline Dec 2025 (Chrome 135+, Safari 26, Firefox late 2025) | Native, with `@lemol/ui/remix/compat` backfilling older engines in ~15 lines. Identical markup either way. |
 | CSS anchor positioning | Baseline Jan 2026 (Chrome 125+, Safari 26, Firefox 147+) | Behind `@supports (anchor-name: --a)`. |
 
 **Why the floor is the Popover API.** Below it you must reimplement top layer

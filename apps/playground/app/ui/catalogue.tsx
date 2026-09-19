@@ -1,4 +1,4 @@
-import type { DemoEntry } from "@lemol/ui-remix/demos"
+import type { DemoEntry } from "@lemol/ui/remix/demos"
 import { css, type Handle } from "remix/ui"
 
 export interface CataloguePageProps {

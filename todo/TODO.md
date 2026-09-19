@@ -6,7 +6,6 @@
 - [ ] [17 - Dialog, overlay() and the Invoker Commands compat shim](./m1-foundation-and-contract-proof/17-dialog-overlay-and-the-invoker-commands-compat-shim.md)
 - [ ] [18 - mini: Document, AppShell, Nav and the state components](./m1-foundation-and-contract-proof/18-mini-document-appshell-nav-and-the-state-components.md)
 - [ ] [19 - Playground: catalogue, page recipe, switchers, no-JS toggle and SPA route](./m1-foundation-and-contract-proof/19-playground-catalogue-page-recipe-switchers-no-js-toggle-and-spa-route.md)
-- [ ] [20 - Ship ui as one git-installable package](./m1-foundation-and-contract-proof/20-ship-ui-as-one-git-installable-package.md)
 
 
 ## M2 — Catalogue

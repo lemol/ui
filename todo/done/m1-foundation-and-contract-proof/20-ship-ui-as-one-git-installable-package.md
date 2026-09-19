@@ -1,6 +1,9 @@
 ---
 title: Ship ui as one git-installable package
 tags: [packaging]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-19T17:57:55Z
+outcome: completed
 ---
 Every other lemol repository can be taken as a dependency. `@lemol/framework`
 and `@lemol/todo-md` are each one package at the repository root with subpath

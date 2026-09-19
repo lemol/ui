@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { blocksOn } from "./styles.ts"
+import { blocksOn, markupOf } from "./styles.ts"
 
 /**
  * A document shaped exactly as `remix/ui` writes one: the hash is both the
@@ -74,5 +74,43 @@ describe("blocksOn", () => {
 
   it("returns nothing for an occurrence past the last match", () => {
     expect(blocksOn(twoDivs, "div", 5)).toEqual([])
+  })
+})
+
+describe("markupOf", () => {
+  it("strips a single style block, leaving the markup around it", () => {
+    const withStyle = `${styleElement("rmxc-aaa", "color: red")}<div class="rmxc-aaa">hi</div>`
+    expect(markupOf(withStyle)).toBe('<div class="rmxc-aaa">hi</div>')
+  })
+
+  it("strips multiple separate style blocks and leaves the markup between them intact", () => {
+    // A greedy `<style>[\s\S]*<\/style>` would span from the first opening
+    // tag to the *last* closing tag, swallowing the markup in between along
+    // with it. The markup between the two style blocks below has to survive.
+    const doc =
+      styleElement("rmxc-aaa", "color: red") +
+      "<div>between the style blocks</div>" +
+      styleElement("rmxc-bbb", "gap: 1px") +
+      "<p>after</p>"
+    const stripped = markupOf(doc)
+    expect(stripped).toContain("<div>between the style blocks</div>")
+    expect(stripped).toContain("<p>after</p>")
+    expect(stripped).not.toContain("<style")
+    expect(stripped).not.toContain("color: red")
+    expect(stripped).not.toContain("gap: 1px")
+  })
+
+  it("leaves markup with no style block untouched", () => {
+    expect(markupOf("<div>plain</div>")).toBe("<div>plain</div>")
+  })
+
+  it("does not touch an aria-invalid attribute that isn't inside a style block", () => {
+    // The reason markupOf exists at all: controlBase's own selector text,
+    // `&[aria-invalid="true"]`, sits inside every rendered stylesheet, which
+    // would make a raw-html assertion about aria-invalid unfalsifiable in
+    // both directions. This pins that the attribute survives when it is on
+    // the actual markup, not just inside a <style> block.
+    const html = `${styleElement("rmxc-aaa", "color: red")}<input aria-invalid="true" />`
+    expect(markupOf(html)).toContain('aria-invalid="true"')
   })
 })

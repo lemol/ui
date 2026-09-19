@@ -8,6 +8,8 @@ export {
 } from "./theme.ts"
 export {
   groupOf,
+  type HeadingLevel,
+  headingScale,
   type PrimitiveName,
   type PrimitiveTokens,
   primitiveNames,

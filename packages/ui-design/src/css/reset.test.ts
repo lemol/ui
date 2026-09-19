@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { primitiveNames, schema } from "../tokens.ts"
+import { headingScale, primitiveNames, schema } from "../tokens.ts"
 import { reducedMotionCss, resetCss, unlayeredCss } from "./reset.ts"
 
 const durationNames = schema.motion.filter((name) => name.startsWith("dur-"))
@@ -43,6 +43,18 @@ describe("the reset", () => {
     // child combinator would ship broken.
     expect(resetCss).not.toContain("&")
     expect(resetCss).not.toContain(">")
+  })
+
+  it("sizes every bare heading from the scale", () => {
+    // Both this test and resetCss derive from headingScale, so editing the
+    // scale updates both and this stays green — it is not a drift check across
+    // packages. What it catches is reset.ts being rewritten to emit these rules
+    // by hand, or with a template that no longer matches the scale.
+    for (const [level, name] of Object.entries(headingScale)) {
+      expect(resetCss).toMatch(
+        new RegExp(`:where\\(h${level}\\)\\s*\\{[^}]*font-size:\\s*var\\(--${name}\\)`),
+      )
+    }
   })
 })
 

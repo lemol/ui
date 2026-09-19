@@ -2,6 +2,9 @@
 title: 'Typography: Heading, Text, Eyebrow and the type scale'
 tags: [ui-remix]
 depends_on: [12]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-18T23:00:31Z
+outcome: completed
 ---
 `Heading`, `Text`, `Eyebrow` — the type scale expressed as a contract.
 

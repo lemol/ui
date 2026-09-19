@@ -55,12 +55,15 @@ one token and never touching the component:
   "linear-gradient(180deg, var(--accent-highlight), var(--accent) 65%, var(--accent-bronze))",
 ```
 
-A default that cannot name a primitive is an exception, not a pattern.
-`--ui-btn-border-width: 1px` is the only one at present: `hairline` is a
-colour, there is no border-width primitive, and one property does not justify
-widening a schema every theme has to satisfy. The exception is allow-listed in
-`ui-remix/src/tokens.test.ts` rather than tolerated, so adding a second one
-means editing a list and arguing for it.
+A default that cannot name a primitive is an exception, not a pattern, and the
+allow-list in `ui-remix/src/tokens.test.ts` holds every one: `1px` for
+`--ui-btn-border-width`, because `hairline` is a colour and there is no
+border-width primitive; `transparent` for the ghost tone, which keeps a ghost
+button the same size as a filled one; and `uppercase` for
+`--ui-eyebrow-transform`, because caps are taste rather than structure and a
+brand that sets things in sentence case must be able to say `none` instead of
+forking the component. Adding a fourth means editing that list and arguing for
+it.
 
 **Naming.** Ramps you do arithmetic on are numeric, and the number is a
 multiplier: `sp-4` is four 4px units. Sets you choose from are t-shirt sized:
@@ -85,6 +88,16 @@ and `danger` are the colours something hovers, so each names its own hover
 value. `success`, `warning` and `info` are read on static elements — a badge,
 not a button — and get none until something needs one. A component deriving a
 hover from a fill is the same violation as deriving a subtle from a tone.
+
+**A property can belong to both tiers at once.** This is rare, not disallowed:
+it happens when the element is ordinary markup someone else may author
+directly, not only through the component. The reset's `:where(h1, …, h6)`
+rule is the floor for a bare heading nobody wrapped; `heading/tokens.ts` is the
+retheming surface for one that went through `Heading`. Where the two describe
+the same property, they must share the data that produces it — `headingScale`
+is what keeps a `Heading`'s size and a bare `<h2>`'s size from drifting apart —
+because a floor and a retheming surface that happen to agree today, with
+nothing tying them together, are one edit away from disagreeing tomorrow.
 
 ## Emission order
 

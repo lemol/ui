@@ -1,5 +1,16 @@
-import { schema } from "../tokens.ts"
+import { headingScale, schema } from "../tokens.ts"
 import { base } from "./layers.ts"
+
+/**
+ * One rule per heading element, derived rather than written out.
+ *
+ * Flat and separate, not a grouped :where() list, because each element takes a
+ * different size — and flat because a nested rule arrives at the browser broken
+ * when the sheet ships as style-element text.
+ */
+const headingSizeRules = Object.entries(headingScale)
+  .map(([level, name]) => `  :where(h${level}) {\n    font-size: var(--${name});\n  }`)
+  .join("\n\n")
 
 /**
  * Element defaults, in @layer base.
@@ -46,6 +57,8 @@ export const resetCss = base(`  *,
     letter-spacing: var(--tr-tight);
     line-height: var(--lh-tight);
   }
+
+${headingSizeRules}
 
   :where(img, svg, video, canvas) {
     display: block;

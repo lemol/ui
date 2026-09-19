@@ -1106,31 +1106,7 @@ EOF
     `EyebrowProps { mix?: MixInput<HTMLParagraphElement> | undefined; children?: RemixNode | undefined }`.
   - `EyebrowDemo()`. Catalogue key `eyebrow`.
 
-- [ ] **Step 1: Write the failing allow-list test**
-
-The aggregate test rejects a default that is not `var(--primitive)` unless the
-value is allow-listed. Add `uppercase` to `allowedLiterals` in
-`packages/ui-remix/src/tokens.test.ts`, extending the comment above it:
-
-```ts
-/**
- * Values a default may be even though they are not a var(). Every entry has to
- * be argued for in review; the list existing is what keeps "just this once"
- * from becoming the norm.
- *
- * - `transparent` keeps a ghost control the same size as a filled one, so a
- *   toolbar does not reflow when a tone changes.
- * - `1px` is a border width, and the schema has no border-width primitive.
- *   Named here rather than written into button.tsx, so a skin can change it.
- * - `uppercase` is Eyebrow's whole look. `display: inline-flex` in Button is
- *   structural — change it and the component stops working — but caps are
- *   taste, and a brand that sets things in sentence case has to be able to say
- *   `--ui-eyebrow-transform: none` rather than fork the component.
- */
-const allowedLiterals = new Set(["transparent", "1px", "uppercase"])
-```
-
-- [ ] **Step 2: Write the token record**
+- [ ] **Step 1: Write the token record**
 
 Create `packages/ui-remix/src/eyebrow/tokens.ts`:
 
@@ -1155,7 +1131,7 @@ export const eyebrowTokens = {
 } as const
 ```
 
-- [ ] **Step 3: Aggregate it and run the token test**
+- [ ] **Step 2: Aggregate it and watch the token test fail**
 
 In `packages/ui-remix/src/tokens.ts`:
 
@@ -1176,9 +1152,39 @@ export const componentTokens = {
 bun test packages/ui-remix/src/tokens.test.ts
 ```
 
-Expected: PASS. Revert the `allowedLiterals` edit locally for one run if you
-want to see it fail first — it reports
+Expected: FAIL —
 `ui-eyebrow-transform: uppercase is neither var(--primitive) nor an allowed literal`.
+That failure is the gate working: a non-primitive default has to be argued for
+before it ships.
+
+- [ ] **Step 3: Make the argument, in the allow-list**
+
+Add `uppercase` to `allowedLiterals` in
+`packages/ui-remix/src/tokens.test.ts`, extending the comment above it:
+
+```ts
+/**
+ * Values a default may be even though they are not a var(). Every entry has to
+ * be argued for in review; the list existing is what keeps "just this once"
+ * from becoming the norm.
+ *
+ * - `transparent` keeps a ghost control the same size as a filled one, so a
+ *   toolbar does not reflow when a tone changes.
+ * - `1px` is a border width, and the schema has no border-width primitive.
+ *   Named here rather than written into button.tsx, so a skin can change it.
+ * - `uppercase` is Eyebrow's whole look. `display: inline-flex` in Button is
+ *   structural — change it and the component stops working — but caps are
+ *   taste, and a brand that sets things in sentence case has to be able to say
+ *   `--ui-eyebrow-transform: none` rather than fork the component.
+ */
+const allowedLiterals = new Set(["transparent", "1px", "uppercase"])
+```
+
+```bash
+bun test packages/ui-remix/src/tokens.test.ts
+```
+
+Expected: PASS.
 
 - [ ] **Step 4: Write the failing component test**
 

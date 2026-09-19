@@ -69,7 +69,6 @@ interface FieldCommon {
   id?: string | undefined
   required?: boolean | undefined
   disabled?: boolean | undefined
-  readonly?: boolean | undefined
   /** Applies to the wrapper, not the control. See below. */
   mix?: MixInput<HTMLDivElement> | undefined
 }
@@ -84,9 +83,14 @@ property rather than a modifier because a `?` follows.
 
 | Kind | Adds |
 | --- | --- |
-| `input`, the default | `type`, `value`, `placeholder`, `autocomplete`, `pattern`, `minlength`, `maxlength`, `min`, `max`, `step` |
-| `textarea` | `value`, `placeholder`, `rows`, `minlength`, `maxlength` |
+| `input`, the default | `type`, `value`, `placeholder`, `autocomplete`, `pattern`, `minlength`, `maxlength`, `min`, `max`, `step`, `readonly` |
+| `textarea` | `value`, `placeholder`, `rows`, `minlength`, `maxlength`, `readonly` |
 | `select` | `children`, the `<option>`s, required |
+
+`readonly` is on two kinds rather than in `FieldCommon`, because `<select
+readonly>` is inert: HTML gives `select` no `readonly` attribute, so offering
+the prop there would render an attribute that does nothing. `&[readonly]` in
+the control block therefore only ever matches an input or a textarea.
 
 `type` is the text-box family and nothing else: `text`, `email`, `url`, `tel`,
 `password`, `search`, `number`, `date`, `time`, `datetime-local`, `month`,

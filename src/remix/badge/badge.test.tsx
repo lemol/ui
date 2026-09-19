@@ -84,6 +84,26 @@ describe("Badge", () => {
     }
   })
 
+  it("wires each semantic tone to the contrast pair mini's theme test holds", () => {
+    // This is what connects Badge's contract to the contrast promise held by
+    // src/mini/theme.test.ts ("keeps <tone> readable on <tone>-subtle"): that
+    // test checks the theme's <tone>/<tone>-subtle pair is readable, but never
+    // looks at which values Badge actually reaches for. Reading badgeTokens
+    // directly, not rendered output, because the claim is about the contract's
+    // values. Derived from the tone list, not written by hand, so a fifth
+    // semantic tone added later is covered automatically. Without this test, a
+    // one-token edit like ui-badge-success-bg reading var(--success) instead
+    // of var(--success-subtle) leaves the whole suite green while producing
+    // invisible text: the tone-on-fill or ink-on-subtle pair Badge would then
+    // render fails contrast even though the theme's own values are fine.
+    const semanticTones: Exclude<BadgeTone, "neutral">[] = ["success", "warning", "danger", "info"]
+    for (const tone of semanticTones) {
+      expect(badgeTokens[`ui-badge-${tone}-bg`]).toBe(`var(--${tone}-subtle)`)
+      expect(badgeTokens[`ui-badge-${tone}-ink`]).toBe(`var(--${tone})`)
+      expect(badgeTokens[`ui-badge-${tone}-border`]).toBe(`var(--${tone}-border)`)
+    }
+  })
+
   it("defaults to neutral, so a badge with no status has one to use", async () => {
     const styles = stylesOf(await renderToHtml(<Badge>v2.1</Badge>))
     expect(styles).toContain("background: var(--ui-badge-neutral-bg)")

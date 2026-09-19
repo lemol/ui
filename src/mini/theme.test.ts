@@ -44,6 +44,23 @@ describe("miniTheme", () => {
     expect(miniTheme.dark?.["shadow-md"]).not.toBe(miniTheme.base["shadow-md"])
   })
 
+  it("gives every subtle-bearing tone its own dark override, not a light fallback", () => {
+    // The dark contrast axis below is built as `{ ...base, ...dark }`, which is
+    // correct only as long as every tone in tonesWithSubtle actually appears in
+    // darkPrimitives. If a future edit dropped a tone's dark overrides, the
+    // spread would silently fall back to the base value for that tone, and the
+    // contrast test would go on reporting the dark axis as passing while
+    // really testing the light one twice. Built the same way as the contrast
+    // axis below, not compared against miniTheme.dark directly, because a
+    // dropped override is invisible on the raw dark object's own shape — it
+    // only shows up once the spread has papered over it. Same reasoning as
+    // "retunes the dark axis rather than reusing light shadows", applied to
+    // every tone.
+    const darkAxis = { ...miniTheme.base, ...miniTheme.dark }
+    const fellBackToBase = tonesWithSubtle.filter((tone) => darkAxis[tone] === miniTheme.base[tone])
+    expect(fellBackToBase).toEqual([])
+  })
+
   it("emits without the emitter rejecting a value", () => {
     expect(() => emitTokensCss(miniTheme, { componentTokens })).not.toThrow()
   })

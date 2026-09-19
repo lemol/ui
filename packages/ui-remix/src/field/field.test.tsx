@@ -329,3 +329,111 @@ describe("Field, as a textarea", () => {
     expect(offendersIn(stylesOf(html))).toEqual([])
   })
 })
+
+describe("Field, as a select", () => {
+  const plans = (
+    <>
+      <option value="free">Free</option>
+      <option selected value="team">
+        Team
+      </option>
+    </>
+  )
+
+  it("renders a labelled select carrying its options", async () => {
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(html).toContain("<select")
+    expect(html).toContain('id="plan"')
+    expect(html).toContain('for="plan"')
+    expect(html).toContain('<option value="free"')
+    expect(html).toContain("selected")
+  })
+
+  it("passes required and disabled through to the select", async () => {
+    // markupOf, not the raw html: controlBase's &:disabled selector is in the
+    // stylesheet on every render, so an unqualified assertion could not fail.
+    const html = markupOf(
+      await renderToHtml(
+        <Field control="select" disabled label="Plan" name="plan" required>
+          {plans}
+        </Field>,
+      ),
+    )
+    expect(html).toContain(" required")
+    expect(html).toContain(" disabled")
+  })
+
+  it("drops the native appearance and draws a chevron instead", async () => {
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(stylesOf(html)).toContain("appearance: none")
+    expect(html).toContain("<svg")
+    expect(html).toContain("<path")
+  })
+
+  it("hides the chevron from assistive technology and from the pointer", async () => {
+    // It is decoration over a control: announcing it adds noise, and catching
+    // a click on it would swallow the click that opens the select.
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(/<svg[^>]*aria-hidden="true"/.test(html)).toBe(true)
+    expect(stylesOf(html)).toContain("pointer-events: none")
+  })
+
+  it("colours the chevron from a token, so it follows a dark scheme", async () => {
+    // The reason it is markup rather than a background-image data URI: var()
+    // does not resolve inside url(), so that arrow's colour is a literal no
+    // theme can reach.
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    const blocks = blocksOn(html, "svg")
+    expect(blocks.length).toBe(1)
+    expect(blocks[0]).toContain("color: var(--ui-field-chevron-ink)")
+  })
+
+  it("leaves room for the chevron in the control's end padding", async () => {
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(stylesOf(html)).toContain(
+      "padding-inline-end: calc(var(--ui-field-pad-x) + var(--ui-field-chevron-space))",
+    )
+  })
+
+  it("keeps the select's blocks property-disjoint", async () => {
+    const html = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    const blocks = blocksOn(html, "select")
+    expect(blocks.length).toBeGreaterThan(1)
+    expect(sharedProperties(blocks)).toEqual([])
+  })
+
+  it("reads only its own tokens and structural keywords, calc included", async () => {
+    // offendersIn() decomposes a calc() rather than waving it through, so a
+    // literal hidden inside the end padding is still an offender.
+    const html = await renderToHtml(
+      <Field control="select" error="Pick one" hint="Change anytime" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(offendersIn(stylesOf(html))).toEqual([])
+  })
+})

@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
 
 /**
  * Derived from the list, not the other way around: a kind added only to the
@@ -95,6 +95,23 @@ export interface FieldTextareaProps extends FieldEditable {
   rows?: number | undefined
 }
 
+export interface FieldSelectProps extends FieldCommon {
+  control: "select"
+  /**
+   * The `<option>`s. Required, because a select with none is an empty box.
+   *
+   * There is no `value` prop, and that is not an omission. `<select>` has no
+   * `value` content attribute — the IDL property exists, the attribute does
+   * not — so rendering one emits invalid markup that selects nothing. The
+   * chosen option carries `selected`, which is where HTML puts it.
+   *
+   * There is no `readonly` either, for the same reason: HTML gives `select` no
+   * such attribute, so the prop would render something inert. That is why
+   * `readonly` sits on `FieldEditable` rather than on `FieldCommon`.
+   */
+  children: RemixNode
+}
+
 /**
  * The union grows a member per task because it has to. Narrowing an optional
  * discriminant works only when every other member has its own `case`, so a
@@ -102,7 +119,7 @@ export interface FieldTextareaProps extends FieldEditable {
  * `control === "select"` would leave every input-only property unreachable
  * and the package would not compile.
  */
-export type FieldProps = FieldInputProps | FieldTextareaProps
+export type FieldProps = FieldInputProps | FieldTextareaProps | FieldSelectProps
 
 /**
  * The `type` attribute, narrowed to one literal for the compiler's benefit.
@@ -233,6 +250,53 @@ const textareaBox = css({
   resize: "vertical",
 })
 
+/**
+ * The frame that lets the chevron overlay the control.
+ *
+ * A grid with one implicit cell, rather than `position: relative` with an
+ * absolutely positioned chevron: both the control and the glyph take
+ * `grid-area: 1 / 1`, so centring is `align-self` instead of a `50%` offset
+ * and a translate. No stacking context, and no magic numbers.
+ */
+const selectFrame = css({
+  display: "grid",
+})
+
+/**
+ * `appearance: none` is what lets a select match an input, and it takes the
+ * disclosure arrow with it — hence the chevron below.
+ *
+ * The end padding is the one calc() in the component, and both of its terms
+ * are tokens. field.test.tsx decomposes a calc() rather than allowing it
+ * wholesale, so a literal smuggled in here still fails.
+ */
+const selectBox = css({
+  gridArea: "1 / 1",
+  appearance: "none",
+  height: "var(--ui-field-height)",
+  paddingInlineEnd: "calc(var(--ui-field-pad-x) + var(--ui-field-chevron-space))",
+})
+
+/**
+ * The chevron. Real markup, so its colour is a token like every other
+ * property and a dark scheme reaches it. A `background-image` data URI could
+ * not: `var()` does not resolve inside `url()`, so that arrow's colour would
+ * be a literal no theme can retune.
+ *
+ * `pointer-events: none` because a click on the glyph is a click meant for the
+ * select underneath it.
+ */
+const chevronStyle = css({
+  gridArea: "1 / 1",
+  alignSelf: "center",
+  justifySelf: "end",
+  marginInlineEnd: "var(--ui-field-pad-x)",
+  inlineSize: "var(--ui-field-chevron-size)",
+  blockSize: "var(--ui-field-chevron-size)",
+  color: "var(--ui-field-chevron-ink)",
+  pointerEvents: "none",
+})
+
 export function Field(handle: Handle<FieldProps>) {
   return () => {
     const props = handle.props
@@ -273,6 +337,31 @@ export function Field(handle: Handle<FieldProps>) {
               rows={props.rows}
               value={props.value}
             />
+          )
+        case "select":
+          return (
+            <div mix={selectFrame}>
+              <select
+                aria-describedby={describedBy}
+                aria-invalid={invalid}
+                disabled={disabled}
+                id={stem}
+                mix={[controlBase, selectBox]}
+                name={name}
+                required={required}
+              >
+                {props.children}
+              </select>
+              <svg aria-hidden="true" fill="none" mix={chevronStyle} viewBox="0 0 12 12">
+                <path
+                  d="M3 4.5L6 7.5L9 4.5"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="1.5"
+                />
+              </svg>
+            </div>
           )
         default:
           return (

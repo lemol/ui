@@ -49,6 +49,65 @@ describe("miniTheme", () => {
   })
 })
 
+/**
+ * sRGB relative luminance, per WCAG 2.1. Local to this file on purpose: the
+ * schema forbids a component deriving one colour from another, and an
+ * exported contrast helper is an invitation to do it at render time.
+ */
+const luminance = (hex: string): number => {
+  const int = Number.parseInt(hex.slice(1), 16)
+  const channels = [(int >> 16) & 255, (int >> 8) & 255, int & 255].map((value) => {
+    const srgb = value / 255
+    return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4
+  })
+  return 0.2126 * (channels[0] ?? 0) + 0.7152 * (channels[1] ?? 0) + 0.0722 * (channels[2] ?? 0)
+}
+
+const contrast = (a: string, b: string): number => {
+  const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+  return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05)
+}
+
+/** Every tone that names a full set of arms: a fill, an ink, and a subtle. */
+const tonesWithSubtle = ["accent", "success", "warning", "danger", "info"] as const
+
+/**
+ * AA for normal text. Badge sets fs-xs, so the 3:1 large-text threshold is
+ * not available to it, and nothing else reading these pairs is large either.
+ */
+const aaNormal = 4.5
+
+describe("miniTheme colour contrast", () => {
+  const axes = [
+    { name: "base", values: miniTheme.base },
+    { name: "dark", values: { ...miniTheme.base, ...miniTheme.dark } },
+  ] as const
+
+  it("keeps <tone>-ink readable on <tone>", () => {
+    // The promise docs/design-system.md has always made. warning has never
+    // had a consumer, so this pair has never been looked at.
+    const failures = axes.flatMap(({ name, values }) =>
+      tonesWithSubtle.flatMap((tone) => {
+        const ratio = contrast(values[`${tone}-ink`], values[tone])
+        return ratio >= aaNormal ? [] : [`${name}/${tone}: ink on fill is ${ratio.toFixed(2)}`]
+      }),
+    )
+    expect(failures).toEqual([])
+  })
+
+  it("keeps <tone> readable on <tone>-subtle", () => {
+    // The second promise, named in docs/design-system.md alongside the first
+    // because a subtle-filled Badge reads this pair and nothing else.
+    const failures = axes.flatMap(({ name, values }) =>
+      tonesWithSubtle.flatMap((tone) => {
+        const ratio = contrast(values[tone], values[`${tone}-subtle`])
+        return ratio >= aaNormal ? [] : [`${name}/${tone}: fill on subtle is ${ratio.toFixed(2)}`]
+      }),
+    )
+    expect(failures).toEqual([])
+  })
+})
+
 describe("a skin is a set of token values", () => {
   it("takes a gradient for a tone background, with no component edit", () => {
     // The second "done when" of the task. The component reads `background`

@@ -83,6 +83,14 @@ same kind of bug as a literal `200ms`: correct today, and impossible to retune
 centrally. A theme that wants derived values may compute them itself; that is
 a theme's business.
 
+**A theme owes two contrast pairs per tone, not one.** `<tone>-ink` must be
+readable on `<tone>`, which is the pair a solid fill uses. `<tone>` must also
+be readable on `<tone>-subtle`, which is the pair a subtle fill uses — a
+`Badge`, a callout, an inline status. Both are AA for normal text, 4.5:1, and
+both are asserted over `mini`'s values in `src/mini/theme.test.ts`, in the
+base axis and the dark one. A theme cannot satisfy the second by computing it:
+that is the same `color-mix()` this section already rules out, one tier up.
+
 **Interactive colours get a `-hover`; status colours do not.** `accent`, `link`
 and `danger` are the colours something hovers, so each names its own hover
 value. `success`, `warning` and `info` are read on static elements — a badge,

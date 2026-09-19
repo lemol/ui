@@ -39,11 +39,15 @@ const basePrimitives: PrimitiveTokens = {
   link: "#1B5E52",
   "link-hover": "#124338",
 
-  success: "#2F7D51",
+  // Every tone here satisfies two pairs, both asserted in theme.test.ts:
+  // <tone>-ink on <tone>, and <tone> on <tone>-subtle. The second is what a
+  // subtle-filled Badge reads. success and warning are darker than a first
+  // pass would pick because of it, and that is the check doing its job.
+  success: "#2A7146",
   "success-ink": "#FFFFFF",
   "success-subtle": "#E7F3EC",
   "success-border": "#B7D9C4",
-  warning: "#A8700F",
+  warning: "#8A5A09",
   "warning-ink": "#FFFFFF",
   "warning-subtle": "#FBF1DF",
   "warning-border": "#E8CF9B",
@@ -153,7 +157,7 @@ const darkPrimitives: Partial<PrimitiveTokens> = {
   accent: "#3E9A87",
   "accent-hover": "#4FAE9A",
   "accent-ink": "#0E1A17",
-  "accent-subtle": "#1B2E29",
+  "accent-subtle": "#12201C",
   "accent-border": "#2F5B52",
   link: "#5CB8A4",
   "link-hover": "#7ACBB9",

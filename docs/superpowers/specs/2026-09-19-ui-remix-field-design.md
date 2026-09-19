@@ -96,8 +96,25 @@ controls sharing a tag name, and M2 schedules `Checkbox`, `Radio` and `Switch`
 for that reason. `multiple` is off `select` on the same grounds: a multi-select
 is a list box.
 
-`textarea`'s `value` renders as text content, where HTML keeps it. That also
-leaves `children` unambiguously the select's.
+### Two renderer behaviours the surface has to respect
+
+Both verified by probe against `remix@3.0.0-rc.2`, and both would otherwise
+have produced markup that looks right and does nothing.
+
+**A `<textarea>`'s children are dropped.** `<textarea>{value}</textarea>`
+renders `<textarea></textarea>`; the text is gone, with no warning.
+`<textarea value="hi" />` renders `<textarea>hi</textarea>`. So `value` is the
+prop for every kind, and `children` never reaches a textarea. This is the
+opposite of the plain-HTML arrangement, where the value *is* the content.
+
+**A `<select>` has no `value` content attribute.** `<select value="a">` emits
+`value="a"` onto the element, which is invalid HTML that selects nothing. The
+IDL property exists; the attribute does not. So `FieldSelect` has no `value`
+prop, and the caller marks the chosen option with `selected`, which is where
+HTML puts it. Adding the prop would give callers an obvious-looking handle that
+silently fails, which is the same class of defect as a mismatched `commandfor`.
+
+`children` therefore belongs to `select` alone, and it holds the options.
 
 ### No `size` axis
 

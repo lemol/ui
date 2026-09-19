@@ -61,4 +61,19 @@ describe("the component token aggregate", () => {
       .map(([name]) => `${name}: contains color-mix()`)
     expect(problems).toEqual([])
   })
+
+  it("holds every component's tokens, Badge included", () => {
+    // The aggregate is what emitTokensCss writes ahead of a theme's values.
+    // A component missing from it ships a contract whose every default
+    // resolves to nothing, and no component test can see that.
+    const prefixes = new Set(entries.map(([name]) => name.split("-").slice(0, 2).join("-")))
+    expect([...prefixes].sort()).toEqual([
+      "ui-badge",
+      "ui-btn",
+      "ui-eyebrow",
+      "ui-field",
+      "ui-heading",
+      "ui-text",
+    ])
+  })
 })

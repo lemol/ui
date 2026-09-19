@@ -178,6 +178,21 @@ Twenty-seven tokens in `field/tokens.ts`. Field styles no focus ring, as
 competes with it. **`mix` reaches the wrapper, not the control** — a property
 of the control goes through its token.
 
+### `Badge`
+
+A status pill: a `<span>` laid out `inline-flex`, so it sits in a sentence or
+a table cell without breaking the line. One axis, `tone` — `neutral`,
+`success`, `warning`, `danger`, `info` — defaulting to `neutral`, because the
+most common badge says `Draft` rather than anything semantic.
+
+Every tone is a `<tone>-subtle` fill with `<tone>` as ink. That pair is the
+second contrast promise in [design-system.md](../../docs/design-system.md),
+and `mini`'s theme test holds it. No hover and no transition: the schema gives
+status colours no `-hover` arm. No size axis: `schema.sizing` names two
+control heights and a badge is not a control.
+
+Twenty-three tokens in `badge/tokens.ts`.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -244,9 +259,9 @@ transitions.
 ## Status
 
 `Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container`, `Heading`, `Text`,
-`Eyebrow`, `Field` and `ThemeStyle` ship. `tokens.ts` aggregates the
+`Eyebrow`, `Field`, `Badge` and `ThemeStyle` ship. `tokens.ts` aggregates the
 component records and exports `ComponentTokenName`; the four layout components
 add nothing to it, which is what they exist to demonstrate, the three
-typographic ones add twenty-two between them, and `Field` adds twenty-seven.
-`src/demos.ts` registers nine demos. `runtime.ts` and `compat.ts` are still
-stubs — nothing here needs client JavaScript yet.
+typographic ones add twenty-two between them, `Field` adds twenty-seven and
+`Badge` twenty-three. `demos.ts` registers ten demos. `runtime.ts` and
+`compat.ts` are still stubs — nothing here needs client JavaScript yet.

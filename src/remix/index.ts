@@ -1,5 +1,6 @@
 export type { HeadingLevel } from "../design/index.ts"
 export type { Align } from "./align.ts"
+export { Badge, type BadgeProps, type BadgeTone } from "./badge/badge.tsx"
 export {
   Button,
   type ButtonProps,

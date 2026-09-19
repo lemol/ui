@@ -1,3 +1,4 @@
+import { BadgeDemo } from "./badge/badge.demo.tsx"
 import { ButtonDemo } from "./button/button.demo.tsx"
 import { ContainerDemo } from "./container/container.demo.tsx"
 import { EyebrowDemo } from "./eyebrow/eyebrow.demo.tsx"
@@ -14,6 +15,7 @@ import { TextDemo } from "./text/text.demo.tsx"
  * from anything but its own source.
  */
 export const demos = {
+  badge: { title: "Badge", Demo: BadgeDemo },
   button: { title: "Button", Demo: ButtonDemo },
   container: { title: "Container", Demo: ContainerDemo },
   eyebrow: { title: "Eyebrow", Demo: EyebrowDemo },

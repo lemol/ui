@@ -316,6 +316,14 @@ import { badgeTokens } from "./tokens.ts"
 
 const tones: BadgeTone[] = ["neutral", "success", "warning", "danger", "info"]
 
+/**
+ * Values a declaration may carry instead of a token. Structural keywords
+ * only: nothing here is a colour, a length, a duration or a weight. Badge
+ * declares exactly these five, and Button's list is the precedent for the
+ * shape — Eyebrow needs none because it declares nothing structural.
+ */
+const keywords = new Set(["inline-flex", "center", "solid", "inherit", "nowrap"])
+
 describe("Badge", () => {
   it("renders a span carrying its children", async () => {
     const html = await renderToHtml(<Badge>Draft</Badge>)
@@ -323,14 +331,17 @@ describe("Badge", () => {
     expect(html).toContain("Draft")
   })
 
-  it("reads only its own tokens", async () => {
+  it("reads only its own tokens and structural keywords", async () => {
     // The whole point of the component: if a semantic primitive did not carry
     // enough meaning, this is where a color-mix() or a literal would appear.
-    const styles = stylesOf(await renderToHtml(<Badge tone="success">Live</Badge>))
-    const offenders = valuesOf(styles).filter(
-      (value) => !/^var\(--ui-badge-[\w-]+\)$/.test(value),
-    )
-    expect(offenders).toEqual([])
+    // Every tone renders, because a literal could hide in any one of them.
+    for (const tone of tones) {
+      const styles = stylesOf(await renderToHtml(<Badge tone={tone}>Live</Badge>))
+      const offenders = valuesOf(styles).filter(
+        (value) => !keywords.has(value) && !/^var\(--ui-badge-[\w-]+\)$/.test(value),
+      )
+      expect(offenders).toEqual([])
+    }
   })
 
   it("reads every token it declares, and declares every one it reads", async () => {
@@ -395,8 +406,11 @@ describe("BadgeDemo", () => {
     // as part of a --ui-badge-<tone>-* custom property, so a raw toContain
     // would pass without a single badge having rendered.
     const markup = markupOf(await renderToHtml(<BadgeDemo />))
-    for (const tone of tones) expect(markup).toContain(tone)
-    expect(markup).toContain("mid-sentence")
+    // Anchored between the tags, not a bare substring: the demo's own prose
+    // says "five tones", and a tone name loose in a sentence would satisfy a
+    // bare toContain without a badge having rendered.
+    for (const tone of tones) expect(markup).toContain(`>${tone}<`)
+    expect(markup).toContain(">mid-sentence<")
   })
 })
 ```

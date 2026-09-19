@@ -331,6 +331,30 @@ under the order observed today. Adding `padding-inline` to a shared base block
 when a size block already sets it reintroduces the bug — and it reintroduces it
 silently, since both declarations are present and only one wins.
 
+**Disjointness is a question about one element, not one document.** Two blocks
+on two different elements never contend for a cascade slot, so a property both
+declare is not a collision: `Field`'s label and its control both set `color`,
+legitimately. A component that styles several elements asks the question per
+element — `test/styles.ts` has `blocksOn(html, tag)` for exactly that, and a
+disjointness assertion should check the list is non-empty first, since an empty
+one satisfies it without proving anything.
+
+**A shorthand in one block and its longhand in another collide where no test
+can see it.** `padding-inline` in a base block and `padding-inline-end` in a
+variant block conflict in CSS, while a check that compares property names sees
+two different names and passes. `Field` declares padding as longhands
+throughout for this reason, and keeps `background` as a shorthand only because
+no other block on the control declares a background longhand. The rule is about
+a shorthand and a longhand in two blocks on one element, not about shorthands
+generally.
+
+**Write the `&` in a nested selector explicitly.** `remix/ui` emits a `css()`
+block's nesting verbatim, so `&:disabled` and `& > svg` reach the browser
+intact. `&`-led nesting is Chrome 112, below the baseline; bare-element
+nesting, `svg { … }` with no `&`, is Chrome 120, above it. The escaping hazard
+that bans nesting in `ui-design/src/css` is a different mechanism: that sheet
+ships as the text of a style element, where the renderer escapes `&`.
+
 **An axis with a default takes its property away from `mix`.** Disjointness is
 easy to satisfy while a component's axes are independent, as `Button`'s base,
 size and tone are. It gets harder the moment an axis has a default, because the

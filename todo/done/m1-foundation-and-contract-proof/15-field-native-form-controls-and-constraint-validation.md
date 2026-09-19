@@ -2,6 +2,9 @@
 title: 'Field: native form controls and constraint validation'
 tags: [ui-remix, forms]
 depends_on: [12]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-19T16:53:37Z
+outcome: completed
 ---
 `Field` — native form controls and constraint validation. It is in the M1 slice
 deliberately: form integration is one of the two places a token contract breaks,

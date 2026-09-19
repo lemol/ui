@@ -637,7 +637,7 @@ describe("Field", () => {
 
   it("describes the control with no messages when it has none", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
-    expect(html).not.toContain("aria-describedby")
+    expect(markupOf(html)).not.toContain("aria-describedby")
   })
 
   it("names only the messages it actually rendered", async () => {
@@ -677,8 +677,11 @@ describe("Field", () => {
     // `required` is on the control, and that is what gets announced. The
     // asterisk is for eyes only, so it must not be read out as well.
     const html = markupOf(await renderToHtml(<Field label="Email" name="email" required />))
-    expect(html).toContain("required")
+    expect(html).toContain(" required")
     expect(html).toContain('aria-hidden="true"')
+    // A component that dropped the asterisk but kept the span would satisfy
+    // both assertions above, so the marker's own content is checked too.
+    expect(html).toContain(" *</span>")
     expect(
       markupOf(await renderToHtml(<Field label="Email" name="email" />)),
     ).not.toContain("aria-hidden")
@@ -706,7 +709,7 @@ describe("Field", () => {
     expect(html).toContain('min="18"')
     expect(html).toContain('max="120"')
     expect(html).toContain('step="1"')
-    expect(html).toContain("required")
+    expect(markupOf(html)).toContain(" required")
 
     const text = await renderToHtml(
       <Field
@@ -728,11 +731,12 @@ describe("Field", () => {
     expect(text).toContain('pattern="[^@]+@[^@]+"')
     expect(text).toContain('placeholder="you@example.com"')
     expect(text).toContain('value="a@b.co"')
-    expect(text).toContain("readonly")
+    expect(markupOf(text)).toContain(" readonly")
   })
 
   it("renders the disabled attribute", async () => {
-    expect(await renderToHtml(<Field disabled label="Email" name="email" />)).toContain("disabled")
+    const html = markupOf(await renderToHtml(<Field disabled label="Email" name="email" />))
+    expect(html).toContain(" disabled")
   })
 
   it("reads only its own tokens and structural keywords", async () => {
@@ -760,9 +764,12 @@ describe("Field", () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
     const styles = stylesOf(html)
     expect(styles).not.toContain("padding-inline:")
+    expect(styles).not.toContain("padding-block:")
     expect(styles).not.toContain("padding:")
     expect(styles).toContain("padding-inline-start:")
     expect(styles).toContain("padding-inline-end:")
+    expect(styles).toContain("padding-block-start:")
+    expect(styles).toContain("padding-block-end:")
   })
 
   it("wins the invalid cascade from inside the control's own block", async () => {
@@ -977,11 +984,12 @@ const errorStyle = css({
  * so Chrome 114 through 118 gets no invalid styling — the validation bubble
  * still blocks submission there, so the field is unstyled rather than dead.
  *
- * Padding is longhand throughout. `padding-inline` here plus
- * `padding-inline-end` in a kind block would conflict in CSS while
- * `sharedProperties()` saw two different names and passed. `background` stays
- * a shorthand, as Button's tones do, so a skin may set `--ui-field-bg` to a
- * gradient.
+ * Padding is longhand throughout, including `padding-block` itself:
+ * `padding-block` is shorthand over `padding-block-start`/`padding-block-end`,
+ * so declaring it here would conflict with a kind block that later declares
+ * `padding-block-end` while `sharedProperties()` saw two different names and
+ * passed. `background` stays a shorthand, deliberately, as Button's tones do,
+ * so a skin may set `--ui-field-bg` to a gradient.
  *
  * No `outline` anywhere. The reset's `:where(:focus-visible)` rule owns the
  * focus ring, and it applies because nothing here competes with it.
@@ -995,7 +1003,8 @@ const controlBase = css({
   color: "var(--ui-field-ink)",
   fontSize: "var(--ui-field-font-size)",
   inlineSize: "100%",
-  paddingBlock: "var(--ui-field-pad-y)",
+  paddingBlockStart: "var(--ui-field-pad-y)",
+  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineStart: "var(--ui-field-pad-x)",
   "&::placeholder": {
     color: "var(--ui-field-placeholder-ink)",

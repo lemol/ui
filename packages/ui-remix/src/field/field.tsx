@@ -170,11 +170,12 @@ const invalidDeclarations = {
  * so Chrome 114 through 118 gets no invalid styling — the validation bubble
  * still blocks submission there, so the field is unstyled rather than dead.
  *
- * Padding is longhand throughout. `padding-inline` here plus
- * `padding-inline-end` in a kind block would conflict in CSS while
- * `sharedProperties()` saw two different names and passed. `background` stays
- * a shorthand, as Button's tones do, so a skin may set `--ui-field-bg` to a
- * gradient.
+ * Padding is longhand throughout, including `padding-block` itself:
+ * `padding-block` is shorthand over `padding-block-start`/`padding-block-end`,
+ * so declaring it here would conflict with a kind block that later declares
+ * `padding-block-end` while `sharedProperties()` saw two different names and
+ * passed. `background` stays a shorthand, deliberately, as Button's tones do,
+ * so a skin may set `--ui-field-bg` to a gradient.
  *
  * No `outline` anywhere. The reset's `:where(:focus-visible)` rule owns the
  * focus ring, and it applies because nothing here competes with it.
@@ -188,7 +189,8 @@ const controlBase = css({
   color: "var(--ui-field-ink)",
   fontSize: "var(--ui-field-font-size)",
   inlineSize: "100%",
-  paddingBlock: "var(--ui-field-pad-y)",
+  paddingBlockStart: "var(--ui-field-pad-y)",
+  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineStart: "var(--ui-field-pad-x)",
   "&::placeholder": {
     color: "var(--ui-field-placeholder-ink)",

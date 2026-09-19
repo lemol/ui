@@ -563,6 +563,20 @@ const offendersIn = (styles: string): string[] =>
 const describedIds = (html: string): string[] =>
   (/aria-describedby="([^"]*)"/.exec(html)?.[1] ?? "").split(" ").filter((id) => id !== "")
 
+/**
+ * The rendered markup with remix's style elements dropped — the complement of
+ * `stylesOf`.
+ *
+ * `renderToHtml` returns the markup and the collected `<style>` blocks in one
+ * string, so an assertion about an attribute has to exclude the stylesheet or
+ * it is really an assertion about both. `controlBase` emits the selector
+ * `&[aria-invalid="true"]` on every render, which makes
+ * `expect(html).not.toContain("aria-invalid")` impossible to satisfy and
+ * `expect(html).toContain('aria-invalid="true"')` impossible to fail. Both
+ * directions are wrong for the same reason.
+ */
+const markupOf = (html: string): string => html.replace(/<style[\s\S]*?<\/style>/g, "")
+
 describe("Field", () => {
   it("renders a labelled text input by default", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
@@ -617,19 +631,26 @@ describe("Field", () => {
   })
 
   it("marks the control invalid only when an error is passed", async () => {
-    expect(await renderToHtml(<Field label="Email" name="email" />)).not.toContain("aria-invalid")
-    expect(
+    // markupOf, not the raw html: controlBase's `&[aria-invalid="true"]`
+    // selector is in the stylesheet on every render, so the negative
+    // assertion could never pass and the positive one could never fail.
+    const plain = markupOf(await renderToHtml(<Field label="Email" name="email" />))
+    expect(plain).not.toContain("aria-invalid")
+    const withError = markupOf(
       await renderToHtml(<Field error="Already registered" label="Email" name="email" />),
-    ).toContain('aria-invalid="true"')
+    )
+    expect(withError).toContain('aria-invalid="true"')
   })
 
   it("hides the required marker from assistive technology", async () => {
     // `required` is on the control, and that is what gets announced. The
     // asterisk is for eyes only, so it must not be read out as well.
-    const html = await renderToHtml(<Field label="Email" name="email" required />)
+    const html = markupOf(await renderToHtml(<Field label="Email" name="email" required />))
     expect(html).toContain("required")
     expect(html).toContain('aria-hidden="true"')
-    expect(await renderToHtml(<Field label="Email" name="email" />)).not.toContain("aria-hidden")
+    expect(
+      markupOf(await renderToHtml(<Field label="Email" name="email" />)),
+    ).not.toContain("aria-hidden")
   })
 
   it("passes the constraint attributes through to the control", async () => {
@@ -1570,7 +1591,10 @@ describe("FieldDemo", () => {
   })
 
   it("shows the states a caller has to be able to see", async () => {
-    const html = await renderToHtml(<FieldDemo />)
+    // markupOf, because controlBase's own selectors put `aria-invalid="true"`
+    // and `readonly` in the stylesheet on every render — asserted against the
+    // raw html, two of these four would pass with no such field on the page.
+    const html = markupOf(await renderToHtml(<FieldDemo />))
     expect(html).toContain("required")
     expect(html).toContain("disabled")
     expect(html).toContain("readonly")

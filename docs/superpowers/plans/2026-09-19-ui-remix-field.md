@@ -1228,7 +1228,18 @@ describe("Field, as a textarea", () => {
     expect(html).toContain('minlength="10"')
     expect(html).toContain('maxlength="500"')
     expect(html).toContain('placeholder="Anything else?"')
-    expect(html).toContain("required")
+    expect(markupOf(html)).toContain(" required")
+  })
+
+  it("passes readonly through, spelled camelCase because that is the only spelling remix/ui's textarea props declare", async () => {
+    // TextareaHTMLProps has only `readOnly`; PartialInputHTMLProps has both
+    // spellings. field.tsx's readOnly={props.readonly} on the textarea is that
+    // constraint, not an inconsistency with the input branch's readonly=. Both
+    // still emit lowercase `readonly` in the markup.
+    const html = markupOf(
+      await renderToHtml(<Field control="textarea" label="Notes" name="notes" readonly />),
+    )
+    expect(html).toContain(" readonly")
   })
 
   it("declares no height, so rows decides it", async () => {
@@ -1342,7 +1353,12 @@ element itself does not change — only where it sits.
               mix={[controlBase, textareaBox]}
               name={name}
               placeholder={props.placeholder}
-              readonly={props.readonly}
+              // camelCase, unlike the input branch's `readonly=`: remix/ui's
+              // TextareaHTMLProps declares only `readOnly`, where
+              // PartialInputHTMLProps declares both spellings. It still emits
+              // lowercase `readonly` in the markup, so behaviour and the
+              // `&[readonly]` selector are unaffected.
+              readOnly={props.readonly}
               required={required}
               rows={props.rows}
               value={props.value}
@@ -1380,6 +1396,14 @@ and replace the inline `<input>` in the returned tree with `{control()}`.
 `default` narrows to `FieldInputProps` here because the union has exactly two
 members. It would not if `FieldSelectProps` already existed, which is why
 Task 5 adds that member and its `case` together.
+
+**Known constraint, not a typo:** the input branch passes `readonly=`, the
+textarea branch passes `readOnly=`. `remix/ui`'s `TextareaHTMLProps` declares
+only the camelCase spelling; `PartialInputHTMLProps` declares both. Both still
+emit lowercase `readonly` in the markup, so behaviour and the `&[readonly]`
+selector in `controlBase` are unaffected by the spelling. Leave the asymmetry
+in place — a future "tidy-up" that makes both branches match the same spelling
+fails to compile on one of them.
 
 - [ ] **Step 5: Run the test to verify it passes**
 
@@ -1769,9 +1793,9 @@ describe("FieldDemo", () => {
     // and `readonly` in the stylesheet on every render — asserted against the
     // raw html, two of these four would pass with no such field on the page.
     const html = markupOf(await renderToHtml(<FieldDemo />))
-    expect(html).toContain("required")
-    expect(html).toContain("disabled")
-    expect(html).toContain("readonly")
+    expect(html).toContain(" required")
+    expect(html).toContain(" disabled")
+    expect(html).toContain(" readonly")
     expect(html).toContain('aria-invalid="true"')
   })
 })

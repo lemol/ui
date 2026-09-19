@@ -263,6 +263,11 @@ export function Field(handle: Handle<FieldProps>) {
               mix={[controlBase, textareaBox]}
               name={name}
               placeholder={props.placeholder}
+              // camelCase, unlike the input branch's `readonly=`: remix/ui's
+              // TextareaHTMLProps declares only `readOnly`, where
+              // PartialInputHTMLProps declares both spellings. It still emits
+              // lowercase `readonly` in the markup, so behaviour and the
+              // `&[readonly]` selector are unaffected.
               readOnly={props.readonly}
               required={required}
               rows={props.rows}

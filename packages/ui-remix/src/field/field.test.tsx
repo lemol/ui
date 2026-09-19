@@ -292,7 +292,18 @@ describe("Field, as a textarea", () => {
     expect(html).toContain('minlength="10"')
     expect(html).toContain('maxlength="500"')
     expect(html).toContain('placeholder="Anything else?"')
-    expect(html).toContain("required")
+    expect(markupOf(html)).toContain(" required")
+  })
+
+  it("passes readonly through, spelled camelCase because that is the only spelling remix/ui's textarea props declare", async () => {
+    // TextareaHTMLProps has only `readOnly`; PartialInputHTMLProps has both
+    // spellings. field.tsx's readOnly={props.readonly} on the textarea is that
+    // constraint, not an inconsistency with the input branch's readonly=. Both
+    // still emit lowercase `readonly` in the markup.
+    const html = markupOf(
+      await renderToHtml(<Field control="textarea" label="Notes" name="notes" readonly />),
+    )
+    expect(html).toContain(" readonly")
   })
 
   it("declares no height, so rows decides it", async () => {

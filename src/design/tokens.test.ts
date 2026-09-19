@@ -34,6 +34,14 @@ describe("schema", () => {
     expect(new Set(primitiveNames).size).toBe(primitiveNames.length)
   })
 
+  it("names a maximum width for an overlay panel", () => {
+    // Dialog is the first component to need a panel width, and page-max is a
+    // page container rather than a panel. A component token must default to a
+    // primitive, so a size the schema cannot name is the schema's gap, not a
+    // licence for a literal in the component.
+    expect(schema.sizing).toContain("overlay-max")
+  })
+
   it("gives every interactive colour a hover value, and no status colour one", () => {
     // accent, link and danger are the colours something hovers. success,
     // warning and info are read on static elements — Badge, not Button — so

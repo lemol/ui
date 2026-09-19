@@ -107,7 +107,7 @@ export const schema = {
     "ease-spring",
     "ease-in-out-smooth",
   ],
-  sizing: ["control-h", "control-h-sm", "row-h", "row-pad-y", "page-max", "gutter"],
+  sizing: ["control-h", "control-h-sm", "row-h", "row-pad-y", "page-max", "overlay-max", "gutter"],
   // `focus-ring` holds the whole `outline` shorthand. `outline-offset` is a
   // separate property that cannot be folded into it, so it gets its own name
   // rather than a literal in the reset or a borrowed space step.

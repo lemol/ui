@@ -133,3 +133,41 @@ export const nonPrimitiveValues = (
     const referenced = /^var\(--([\w-]+)\)$/.exec(value)?.[1]
     return referenced === undefined || !primitives.has(referenced)
   })
+
+/** Each style block with the hash `remix/ui` keyed it by. */
+const hashedBlocksOf = (html: string): { hash: string; block: string }[] =>
+  [...html.matchAll(/<style data-rmx-style="([^"]*)">([\s\S]*?)<\/style>/g)].map((match) => ({
+    hash: match[1] ?? "",
+    block: match[2] ?? "",
+  }))
+
+/**
+ * The style blocks that landed on one element, found through the class
+ * `remix/ui` wrote on it.
+ *
+ * `sharedProperties` over every block in a document is the right question for
+ * a component that styles one element, and the wrong one for a component that
+ * styles several: two blocks on two different elements never contend for a
+ * cascade slot, so a property both declare is not a collision. Field's label
+ * and its control both declare `color`, legitimately.
+ *
+ * `tag` matches a whole tag name, not a prefix — Field renders both a `<p>`
+ * and a `<path>`, and attributing one's blocks to the other would make a
+ * disjointness assertion meaningless. The first element with that tag wins,
+ * which is enough because every element these assertions target is unique by
+ * tag within one Field.
+ *
+ * Returns an empty list for a tag that is absent or carries no class. A test
+ * asserting disjointness should check the list is non-empty first: an empty
+ * list satisfies `sharedProperties(blocks)).toEqual([])` without proving
+ * anything.
+ */
+export const blocksOn = (html: string, tag: string): string[] => {
+  const opening = new RegExp(`<${tag}\\b[^>]*>`).exec(html)?.[0] ?? ""
+  const names = new Set(
+    (/class="([^"]*)"/.exec(opening)?.[1] ?? "").split(/\s+/).filter((name) => name !== ""),
+  )
+  return hashedBlocksOf(html)
+    .filter(({ hash }) => names.has(hash))
+    .map(({ block }) => block)
+}

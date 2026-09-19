@@ -1,4 +1,5 @@
 import { type CSSMixinDescriptor, css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import type { Invocation } from "../invocation.ts"
 
 export type ButtonTone = "primary" | "neutral" | "ghost" | "danger"
 
@@ -103,6 +104,12 @@ export interface ButtonProps {
   name?: string | undefined
   value?: string | undefined
   /**
+   * What this button invokes, minted by `overlay()`. There is deliberately no
+   * `command`/`commandfor` pair here: a mismatched id fails silently, so the
+   * only way to set the attributes is with a value the factory produced.
+   */
+  invoke?: Invocation | undefined
+  /**
    * The structural escape hatch: properties the contract has no token for,
    * such as `position` or a grid placement owned by the layout around it.
    *
@@ -126,9 +133,11 @@ export interface ButtonProps {
 export function Button(handle: Handle<ButtonProps>) {
   return () => {
     const { tone = "neutral", size = "md", type = "button" } = handle.props
-    const { disabled, name, value, mix, children } = handle.props
+    const { disabled, name, value, invoke, mix, children } = handle.props
     return (
       <button
+        command={invoke?.command}
+        commandfor={invoke?.commandfor}
         disabled={disabled}
         mix={[buttonBase, toneStyles[tone], sizeStyles[size], mix]}
         name={name}

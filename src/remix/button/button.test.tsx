@@ -1,7 +1,14 @@
 import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../test/render.ts"
-import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../test/styles.ts"
+import {
+  markupOf,
+  sharedProperties,
+  styleBlocksOf,
+  stylesOf,
+  valuesOf,
+} from "../../../test/styles.ts"
+import { invoke } from "../invocation.ts"
 import { ButtonDemo } from "./button.demo.tsx"
 import { Button, type ButtonSize, type ButtonTone, LinkButton } from "./button.tsx"
 import { buttonTokens } from "./tokens.ts"
@@ -159,6 +166,20 @@ describe("Button", () => {
     const baseBlock = blocks.find((block) => block.includes("inline-flex"))
     expect(baseBlock).toBeDefined()
     expect(baseBlock).not.toContain(":disabled")
+  })
+
+  it("renders an invocation as the attribute pair, and nothing when absent", async () => {
+    // commandfor only works on <button>, and only as an attribute pair. The
+    // invocation is destructured rather than spread because it carries a
+    // symbol key that no element's props accept.
+    const markup = markupOf(
+      await renderToHtml(<Button invoke={invoke("show-modal", "new-task")}>Open</Button>),
+    )
+    expect(markup).toContain('command="show-modal"')
+    expect(markup).toContain('commandfor="new-task"')
+
+    const bare = markupOf(await renderToHtml(<Button>Plain</Button>))
+    expect(bare).not.toContain("command")
   })
 
   it("keeps its own css() blocks property-disjoint", async () => {

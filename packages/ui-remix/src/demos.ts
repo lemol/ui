@@ -1,6 +1,7 @@
 import { ButtonDemo } from "./button/button.demo.tsx"
 import { ContainerDemo } from "./container/container.demo.tsx"
 import { EyebrowDemo } from "./eyebrow/eyebrow.demo.tsx"
+import { FieldDemo } from "./field/field.demo.tsx"
 import { GridDemo } from "./grid/grid.demo.tsx"
 import { HeadingDemo } from "./heading/heading.demo.tsx"
 import { RowDemo } from "./row/row.demo.tsx"
@@ -16,6 +17,7 @@ export const demos = {
   button: { title: "Button", Demo: ButtonDemo },
   container: { title: "Container", Demo: ContainerDemo },
   eyebrow: { title: "Eyebrow", Demo: EyebrowDemo },
+  field: { title: "Field", Demo: FieldDemo },
   grid: { title: "Grid", Demo: GridDemo },
   heading: { title: "Heading", Demo: HeadingDemo },
   row: { title: "Row", Demo: RowDemo },

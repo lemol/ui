@@ -2,7 +2,8 @@ import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../../test/render.ts"
 import { blocksOn, sharedProperties, stylesOf, valuesOf } from "../../../../test/styles.ts"
-import { Field, fieldTypes } from "./field.tsx"
+import { FieldDemo } from "./field.demo.tsx"
+import { Field, fieldControls, fieldTypes } from "./field.tsx"
 
 /**
  * Values a declaration may carry instead of a token. Structural only: nothing
@@ -435,5 +436,33 @@ describe("Field, as a select", () => {
       </Field>,
     )
     expect(offendersIn(stylesOf(html))).toEqual([])
+  })
+})
+
+describe("FieldDemo", () => {
+  it("renders every kind Field offers", async () => {
+    // Derived from fieldControls, so a kind the component gains is a kind this
+    // demo has to show.
+    const html = await renderToHtml(<FieldDemo />)
+    for (const control of fieldControls) expect(html).toContain(`<${control}`)
+  })
+
+  it("submits with no client JavaScript, which is the whole point", async () => {
+    // A GET form with no action submits to the current URL, so the catalogue
+    // route reloads with the values in the query string.
+    const html = await renderToHtml(<FieldDemo />)
+    expect(html).toContain('method="get"')
+    expect(html).toContain('type="submit"')
+  })
+
+  it("shows the states a caller has to be able to see", async () => {
+    // markupOf, because controlBase's own selectors put `aria-invalid="true"`
+    // and `readonly` in the stylesheet on every render — asserted against the
+    // raw html, two of these four would pass with no such field on the page.
+    const html = markupOf(await renderToHtml(<FieldDemo />))
+    expect(html).toContain(" required")
+    expect(html).toContain(" disabled")
+    expect(html).toContain(" readonly")
+    expect(html).toContain('aria-invalid="true"')
   })
 })

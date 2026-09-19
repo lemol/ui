@@ -486,6 +486,10 @@ const keywords = new Set([
   "auto",
   "pointer",
   "100%",
+  // The two ends of a fade. A token for "invisible" would be a token whose
+  // only sane value is the one it has.
+  "0",
+  "1",
 ])
 
 /** Every var() a value names, so a calc() of two tokens reads as two. */
@@ -598,6 +602,23 @@ describe("DialogPanel", () => {
     const styles = stylesOf(await renderToHtml(panel()))
     expect(styles).toContain("&::backdrop")
     expect(styles).toContain("background: var(--ui-dialog-backdrop-bg)")
+  })
+
+  it("gives the panel and the close button their own arms of the contract", async () => {
+    // Set equality above proves every token is read somewhere. It does not
+    // prove the right element reads it: swapping --ui-dialog-bg for
+    // --ui-dialog-close-bg keeps the set identical and paints the panel with
+    // the button's fill. That is the failure class the previous component's
+    // final review found, one component later.
+    const html = await renderToHtml(panel())
+    const panelBlock = blocksOn(html, "dialog")[0] ?? ""
+    const closeBlock = blocksOn(html, "button")[0] ?? ""
+    expect(panelBlock).toContain("background: var(--ui-dialog-bg)")
+    expect(panelBlock).toContain("color: var(--ui-dialog-ink)")
+    expect(panelBlock).not.toContain("--ui-dialog-close-")
+    expect(closeBlock).toContain("background: var(--ui-dialog-close-bg)")
+    expect(closeBlock).toContain("color: var(--ui-dialog-close-ink)")
+    expect(closeBlock).not.toContain("--ui-dialog-bg")
   })
 
   it("keeps each element's blocks disjoint by property", async () => {
@@ -881,7 +902,12 @@ describe("overlay", () => {
     )
     expect(markup).toContain('command="show-modal"')
     expect(markup).toContain('commandfor="new-task"')
-    expect(markup).toContain('<dialog aria-labelledby="new-task-title" id="new-task"')
+    // Attribute by attribute, not as one string: the renderer emits them in
+    // the order the JSX lists them, so a single substring would break the day
+    // someone reorders two props that have no ordering.
+    const dialogTag = /<dialog[^>]*>/.exec(markup)?.[0] ?? ""
+    expect(dialogTag).toContain('id="new-task"')
+    expect(dialogTag).toContain('aria-labelledby="new-task-title"')
   })
 
   it("gives Close the dismissal, so a caller's cancel button needs no id", async () => {

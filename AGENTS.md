@@ -1,15 +1,17 @@
 # AGENTS.md — @lemol/ui
 
-UI packages shared by lemol projects: a renderer-agnostic design-token core, a
-Remix 3 component library, and one concrete minimal design built on both.
+UI shared by lemol projects: a renderer-agnostic design-token core, a Remix 3
+component library, and one concrete minimal design built on both. Three layers
+under `src/`, shipped as one package at the repository root — a consumer takes
+`@lemol/ui` by git specifier and imports a subpath.
 
 ## Read first
 
 - [docs/README.md](docs/README.md) is the index.
 - [docs/principles.md](docs/principles.md) — the rules below, each with the
   reason it exists. Read this before arguing with one of them.
-- [docs/architecture.md](docs/architecture.md) — package boundaries, structure,
-  dependency rules, tooling, testing.
+- [docs/architecture.md](docs/architecture.md) — the shipping shape, layer
+  boundaries, structure, dependency rules, tooling, testing.
 - [docs/design-system.md](docs/design-system.md) — tokens, the contract,
   themes, cascade layers.
 - [docs/interactivity.md](docs/interactivity.md) — the native-first ladder, the
@@ -17,19 +19,21 @@ Remix 3 component library, and one concrete minimal design built on both.
 - [docs/motion.md](docs/motion.md) — motion tokens, native entry/exit, reduced
   motion, view transitions.
 
-Each `packages/<name>/README.md` covers that package's contents and limits.
+Each `src/<layer>/README.md` covers that layer's contents and limits.
 Dated decision records live in `docs/superpowers/specs/` — read those for why a
 choice was made, and the documents above for what is true now.
 
 ## Layout
 
 ```
-packages/
-  ui-design/       @lemol/ui-design      token schema, themes, CSS emission
-  ui-remix/        @lemol/ui-remix       components + their own token contracts
-  ui-remix-mini/   @lemol/ui-remix-mini  one concrete design: theme + app shell
+src/
+  design/      @lemol/ui/design      token schema, themes, v()
+               @lemol/ui/design/css  the stylesheet emitter and element defaults
+  remix/       @lemol/ui/remix       components + their own token contracts
+               …/compat …/runtime …/demos
+  mini/        @lemol/ui/mini        one concrete design: theme + app shell
 apps/
-  playground/      catalogue, page recipes, theme and no-JS switches
+  playground/  catalogue, page recipes, theme and no-JS switches
 ```
 
 ## Commands
@@ -51,8 +55,14 @@ bun run playground    # the catalogue
   skin is a set of token values, never a forked component.
 - **Native first, then `remix/ui`, then hand-written.** Check the ladder in
   [interactivity.md](docs/interactivity.md) before writing DOM code.
-- **SPA-safe.** The packages must not import `node:*`, `bun`, `effect`, or any
-  server-side `remix/*` entry. `test/boundaries.test.ts` enforces it.
+- **One installable package.** Everything ships as `@lemol/ui` from the
+  repository root, because a Bun git dependency always installs a repository's
+  root package. So a cross-layer import inside `src/` is relative, and goes
+  through the entry point the exports map publishes — never at an arbitrary
+  file inside another layer. `test/boundaries.test.ts` holds that line and
+  `test/git-consumer.test.ts` proves the shape installs.
+- **SPA-safe.** Nothing under `src/` may import `node:*`, `bun`, `effect`, or
+  any server-side `remix/*` entry. `test/boundaries.test.ts` enforces it.
 - **One delegated, capturing listener.** Behaviours use `--` custom commands
   read by a single `command` listener on `document`, registered with `true`.
   `CommandEvent` does not bubble, and a non-delegated listener dies on the
@@ -65,13 +75,13 @@ bun run playground    # the catalogue
   transition with `@starting-style` + `allow-discrete` when they are built, not
   as a later pass. Name duration and easing tokens, never literals. Mint
   `view-transition-name` values; never hand-write one.
-- **No build step.** Packages ship TypeScript from `src/`. Browser assets are
+- **No build step.** The package ships TypeScript from `src/`. Browser assets are
   the Remix asset server's job, configured in `remix.json`. Do not add a
   bundler.
 - **No Effect.** `remix` is the only peer dependency.
 - **Tests** use `bun:test`. Every component gets a server-render test. Browser
   tests cover only the runtime behaviours.
-- **Docs** stay short and local. Package specifics go in that package's README.
+- **Docs** stay short and local. Layer specifics go in that layer's README.
   Keep the documents in `docs/` current — if code and a document disagree, fix
   one of them deliberately.
 

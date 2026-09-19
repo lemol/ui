@@ -3,7 +3,7 @@
 The catalogue. A Remix 3 app in this repo rather than Storybook, because these
 components are Remix 3 functions taking a `Handle` — no hooks, no client render,
 nothing React-based to plug into. Demos live beside their component and are
-exposed as `@lemol/ui-remix/demos`, so the catalogue cannot drift from what
+exposed as `@lemol/ui/remix/demos`, so the catalogue cannot drift from what
 ships.
 
 ```sh

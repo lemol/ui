@@ -2,6 +2,9 @@
 title: 'Badge: the semantic token set'
 tags: [ui-remix]
 depends_on: [12]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-19T19:05:48Z
+outcome: completed
 ---
 `Badge` — the third angle on the contract: a component whose tokens are
 *semantic* (success, warning, danger, info) rather than structural, so it tests

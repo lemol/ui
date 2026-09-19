@@ -1,3 +1,4 @@
+import { badgeTokens } from "./badge/tokens.ts"
 import { buttonTokens } from "./button/tokens.ts"
 import { eyebrowTokens } from "./eyebrow/tokens.ts"
 import { fieldTokens } from "./field/tokens.ts"
@@ -12,6 +13,7 @@ import { textTokens } from "./text/tokens.ts"
  * a component means adding its record here and nowhere else.
  */
 export const componentTokens = {
+  ...badgeTokens,
   ...buttonTokens,
   ...eyebrowTokens,
   ...fieldTokens,

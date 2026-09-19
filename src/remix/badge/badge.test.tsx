@@ -29,6 +29,18 @@ describe("Badge", () => {
     expect(html).toContain("Draft")
   })
 
+  it("declares border-style: solid, the one structural keyword two tokens depend on", async () => {
+    // Unlike Badge's other structural declarations, this one is pinned on
+    // purpose: border-color and border-width are var(--ui-badge-*) tokens,
+    // but CSS border-style defaults to none, under which a border does not
+    // render at all regardless of colour or width. Losing this declaration
+    // silently disables two of Badge's tokens while every other test —
+    // which asserts border-color and border-width, never border-style —
+    // keeps passing.
+    const styles = stylesOf(await renderToHtml(<Badge>Draft</Badge>))
+    expect(styles).toContain("border-style: solid")
+  })
+
   it("reads only its own tokens and structural keywords", async () => {
     // The whole point of the component: if a semantic primitive did not carry
     // enough meaning, this is where a color-mix() or a literal would appear.

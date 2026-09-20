@@ -2,6 +2,11 @@
 title: 'Plan M4: mionso migration'
 tags: [planning]
 depends_on: [3]
+group: M4 — mionso migration
+completed_at: 2026-09-20T16:53:15Z
+outcome: cancelled
+cancelled_reason: Moving this plan into the mionso repo itself, since the migration work belongs
+  there.
 ---
 Plan mionso's migration onto the UI packages. Deferred until things are nice here; `@mionso/design` stays untouched until then, and this gets its own spec.
 

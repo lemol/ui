@@ -24,8 +24,6 @@
 
 ## M4 — mionso migration
 
-- [ ] [04 - Plan M4: mionso migration](./m4-mionso-migration/04-plan-m4-mionso-migration.md)
-
 ## M5 — Motion system
 
 - [ ] [05 - Plan M5: motion system](./m5-motion-system/05-plan-m5-motion-system.md)

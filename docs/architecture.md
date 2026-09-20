@@ -221,16 +221,40 @@ than a runner; `bunx playwright install chromium` once per machine.
 
 ## Workspace composition
 
-`repos/ui` is composed by `@lemol/workspace` like its siblings: declared in
-`workspace.yaml`, `repos/ui/apps/*` listed in the root `workspaces`, and one
-`file:` override redirecting `@lemol/ui` to the local clone. It typechecks and
-tests before `todo-md` in `tools/verify-order.ts`.
+`repos/ui` is composed by `@lemol/workspace`: declared in `workspace.yaml`, one
+`file:` override redirecting `@lemol/ui` to the local clone, and typechecked and
+tested before `todo-md` in `tools/verify-order.ts`.
+
+It is **not** a member of the root `workspaces`, unlike its siblings, and that
+is what makes `bun install` here authoritative. Bun resolves a workspace by
+walking up to the nearest ancestor whose `workspaces` patterns match the
+directory it runs in, so while the root globbed `repos/*`, an install here wrote
+`@lemol/workspace`'s lockfile and store rather than this repository's — and the
+playground then resolved `@lemol/ui` into a store its asset configuration knows
+nothing about. The root now lists its members one by one and `bootstrap` runs
+`bun install` inside this clone after its own. There is nothing to configure on
+this side: `bunfig.toml`'s `ignoreWorkspace` and `package.json`'s
+`installConfig` are Yarn and pnpm vocabulary that Bun 1.4 does not read, which
+is why neither is here.
+
+Installing itself means carrying its own version pins. `remix@3.0.0-rc.2`
+depends on `@remix-run/ui` at `^0.9.0`, but takes `@remix-run/assets`,
+`@remix-run/render-middleware` and `@remix-run/spa` at caret ranges whose later
+patches moved to `@remix-run/ui@^0.10.0` — so a fresh resolution puts two copies
+of `@remix-run/ui` in the tree: components import `remix/ui` and get `0.9.0`,
+while the render middleware gets `0.10.0`, which rejects the string `innerHTML`
+that `ThemeStyle` and `Document` depend on. A server-render test passes and the
+same markup through `render()` fails. The three `overrides` in `package.json`
+hold those packages at the last versions that agree with the rc's own pin, and
+they come out when `remix` ships an rc whose dependencies are coherent. The
+composition root carries the same three for the same reason.
 
 Inside this repository the catalogue does the same thing one level down:
 `apps/playground` takes `"@lemol/ui": "file:../.."`, so it reaches the source
 through the exports map rather than through a relative path into `src/`. It is
 `file:` and not `workspace:*` because Bun cannot name the workspace root as a
-workspace member — `workspaces: ["."]` fails to resolve. `installConfig` on the
-repository root and a committed `bun.lock` keep `bun install` at this
-repository's root authoritative; `bunfig.toml` ignores a parent
-`@lemol/workspace` when this clone is composed.
+workspace member — `workspaces: ["."]` fails to resolve. Bun hardlinks a path
+dependency into the store rather than symlinking the checkout, so
+`@lemol/ui/remix` resolves inside `node_modules/.bun`; `app/assets.ts` derives
+its mount and its allow-list entry from where the resolution actually lands, and
+both layouts work.

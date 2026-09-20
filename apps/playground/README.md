@@ -73,14 +73,20 @@ a controller cannot leak into the browser by being imported.
 target, watching and sourcemaps in development, fingerprinting and minification
 otherwise, and the Bun store mount.
 
-The store mount is derived at runtime rather than written down. `bun install` at
-the `@lemol/ui` repository root keeps the store under that tree (`installConfig`
-hoisting limits make this repo self-contained even when it sits inside
-`@lemol/workspace`), and symlinks packages into each consumer's `node_modules`.
-The files behind `remix` still sit outside this app's `rootDir`, so an
-allow-list cannot reach them without a mount — and the store can sit at a
-different depth when a parent workspace hoists instead, which is why the path is
-computed from `import.meta.resolve` instead of hard-coded.
+Both paths that leave this app's `rootDir` are derived at runtime rather than
+written down. `bun install` at the `@lemol/ui` repository root keeps the store
+under that tree — the composition root deliberately does not list this clone as
+a workspace member, so nothing above it claims the install — and symlinks
+packages into each consumer's `node_modules`. The files behind `remix` still sit
+outside `rootDir`, so an allow-list cannot reach them without a mount.
+
+`@lemol/ui` itself is the second path. Bun hardlinks a `file:` dependency into
+the store rather than symlinking the checkout, so `@lemol/ui/remix` normally
+resolves *inside* the store: mounting it again would overlap the store mount,
+which is a thrown `TypeError` at boot, and `remix.json`'s `../../src/**` would
+not match it. `app/assets.ts` therefore mounts it only when it resolves outside
+the store, and admits wherever it actually resolved in both cases — still by
+path, never by adding `@lemol/ui` to `allowPackages`.
 
 The `remix` CLI resolves `remix` from the project directory, so `remix doctor`
 needs `apps/playground/node_modules` to exist:

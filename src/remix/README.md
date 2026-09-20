@@ -214,6 +214,14 @@ properties into `::backdrop`.
 
 Twenty-two tokens in `dialog/tokens.ts`.
 
+`dialog.test.tsx` and `overlay.test.tsx` cover the markup and the contract.
+What they cannot reach — that a click actually opens the dialog, on an engine
+with native Invoker Commands and on one driven by the backfill — lives in
+`test/browser/dialog.browser.test.ts`, because it drives the playground route
+rather than the component: a real document, the real asset pipeline, and the
+client entry that installs `compat` and `runtime`. `runtime.ts`'s capture-phase
+listener is covered beside it, in `test/browser/runtime.browser.test.ts`.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this

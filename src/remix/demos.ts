@@ -1,6 +1,7 @@
 import { BadgeDemo } from "./badge/badge.demo.tsx"
 import { ButtonDemo } from "./button/button.demo.tsx"
 import { ContainerDemo } from "./container/container.demo.tsx"
+import { DialogDemo } from "./dialog/dialog.demo.tsx"
 import { EyebrowDemo } from "./eyebrow/eyebrow.demo.tsx"
 import { FieldDemo } from "./field/field.demo.tsx"
 import { GridDemo } from "./grid/grid.demo.tsx"
@@ -18,6 +19,7 @@ export const demos = {
   badge: { title: "Badge", Demo: BadgeDemo },
   button: { title: "Button", Demo: ButtonDemo },
   container: { title: "Container", Demo: ContainerDemo },
+  dialog: { title: "Dialog", Demo: DialogDemo },
   eyebrow: { title: "Eyebrow", Demo: EyebrowDemo },
   field: { title: "Field", Demo: FieldDemo },
   grid: { title: "Grid", Demo: GridDemo },

@@ -40,6 +40,7 @@ apps/
 
 ```sh
 bun install
+bunx playwright install chromium   # once: the browser test/browser/ drives
 bun run check         # lint + typecheck + test: the gate for every change
 bun test
 bun run fix

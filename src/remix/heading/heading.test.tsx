@@ -1,7 +1,13 @@
 import { describe, expect, it } from "bun:test"
 import { css } from "remix/ui"
 import { renderToHtml } from "../../../test/render.ts"
-import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../test/styles.ts"
+import {
+  markupOf,
+  sharedProperties,
+  styleBlocksOf,
+  stylesOf,
+  valuesOf,
+} from "../../../test/styles.ts"
 import { resetCss } from "../../design/css/index.ts"
 import { type HeadingLevel, headingScale } from "../../design/index.ts"
 import { demoLevels, HeadingDemo } from "./heading.demo.tsx"
@@ -68,6 +74,20 @@ describe("Heading", () => {
     expect(html).toContain("<h2")
     expect(stylesOf(html)).toContain("font-size: var(--ui-heading-5-size)")
     expect(stylesOf(html)).not.toContain("var(--ui-heading-2-size)")
+  })
+
+  it("renders an id, so something can point at it", async () => {
+    // Dialog's aria-labelledby names the title. The alternative — an
+    // aria-label repeating the title string — names the dialog twice and
+    // drifts the first time one copy is edited.
+    const markup = markupOf(
+      await renderToHtml(
+        <Heading id="new-task-title" level={2}>
+          New task
+        </Heading>,
+      ),
+    )
+    expect(markup).toContain('id="new-task-title"')
   })
 
   it("keeps its own css() blocks property-disjoint across every combination", async () => {

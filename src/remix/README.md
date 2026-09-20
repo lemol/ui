@@ -193,6 +193,27 @@ control heights and a badge is not a control.
 
 Twenty-three tokens in `badge/tokens.ts`.
 
+### `Dialog` and `overlay()`
+
+A native `<dialog>` opened by Invoker Commands, with no client code in the page
+on an engine that has them. `overlay(name)` mints the id once and returns
+`{ id, Trigger, Dialog, Close }`; the `command`/`commandfor` pair travels as a
+branded `Invocation` that only the factory can construct, so the string that
+fails silently when mistyped cannot be written by hand.
+
+The panel renders a header — the title as a level-2 `Heading`, and a × bound to
+`command="close"` — then its children. There is no footer slot: a caller's form
+already carries its own submit row.
+
+Entry and exit ship with the component: the `transition` shorthand twice, the
+second in a nested `&` block, and `@starting-style` on `[open]`. `display` is
+declared only inside `&[open]`, because a top-level one renders every closed
+dialog on the page. Exit degrades in Safari, which has no `overlay` property,
+and the backdrop is untinted below Chromium 122, which does not inherit custom
+properties into `::backdrop`.
+
+Twenty-two tokens in `dialog/tokens.ts`.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -259,9 +280,10 @@ transitions.
 ## Status
 
 `Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container`, `Heading`, `Text`,
-`Eyebrow`, `Field`, `Badge` and `ThemeStyle` ship. `tokens.ts` aggregates the
-component records and exports `ComponentTokenName`; the four layout components
-add nothing to it, which is what they exist to demonstrate, the three
-typographic ones add twenty-two between them, `Field` adds twenty-seven and
-`Badge` twenty-three. `demos.ts` registers ten demos. `runtime.ts` and
-`compat.ts` are still stubs — nothing here needs client JavaScript yet.
+`Eyebrow`, `Field`, `Badge`, `Dialog` and `ThemeStyle` ship. `tokens.ts`
+aggregates the component records and exports `ComponentTokenName`; the four
+layout components add nothing to it, which is what they exist to demonstrate,
+the three typographic ones add twenty-two between them, `Field` adds
+twenty-seven, `Badge` twenty-three and `Dialog` twenty-two. `demos.ts`
+registers eleven demos. `compat.ts` backfills Invoker Commands and `runtime.ts`
+holds the one capture-phase listener; no command is registered yet.

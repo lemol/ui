@@ -44,7 +44,7 @@ order, typing, themes and the cascade layers.
 
 ## Status
 
-`@lemol/ui/design` holds 96 primitive names across seven groups, and no values.
+`@lemol/ui/design` holds 97 primitive names across seven groups, and no values.
 `@lemol/ui/design/css` emits the stylesheet: the layer statement, a block per
 variant axis, the element defaults — including the six `:where(hN) { font-size:
 var(--fs-*) }` rules derived from `headingScale` — the one unlayered rule, and

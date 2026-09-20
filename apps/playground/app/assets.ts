@@ -22,9 +22,19 @@ const isProduction = !isDevelopment && !isTest
 const remixDir = path.dirname(fileURLToPath(import.meta.resolve("remix/package.json")))
 const bunStoreDir = path.resolve(remixDir, "../../..")
 
+// `@lemol/ui` is a file: dependency pointing at this repository's root, so its
+// source resolves outside both the app and the Bun store. Mount `src` rather
+// than the root: mounts may not overlap, and the root contains `app`.
+const uiRemixDir = path.dirname(fileURLToPath(import.meta.resolve("@lemol/ui/remix")))
+const uiDir = path.resolve(uiRemixDir, "..")
+
 export const assetServer = createAssetServer({
   ...config.assets,
-  mounts: { app: "app", npm: path.relative(config.assets.rootDir, bunStoreDir) },
+  mounts: {
+    app: "app",
+    npm: path.relative(config.assets.rootDir, bunStoreDir),
+    ui: path.relative(config.assets.rootDir, uiDir),
+  },
   // The browser baseline from AGENTS.md, so the playground compiles for the
   // same engines the packages claim to support.
   target: { es: "2022", chrome: "114", safari: "17", firefox: "125" },

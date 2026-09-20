@@ -119,6 +119,9 @@ const basePrimitives: PrimitiveTokens = {
   "row-h": "44px",
   "row-pad-y": "12px",
   "page-max": "72rem",
+  // A dialog, a drawer, a command palette. Narrower than page-max by a lot:
+  // this is a panel over a page, not the page.
+  "overlay-max": "32rem",
   gutter: "24px",
 
   "shadow-sm": "0 1px 2px rgba(23, 21, 18, 0.06)",

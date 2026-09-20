@@ -47,6 +47,11 @@ export interface HeadingProps {
    */
   size?: HeadingLevel | undefined
   /**
+   * For an `aria-labelledby` or a deep link. `Field` already carries one for
+   * the same reason: a label that points at nothing is worse than no label.
+   */
+  id?: string | undefined
+  /**
    * Adds properties Heading does not declare — `text-wrap`, a grid placement
    * owned by the layout around it. It does not reliably override one it does:
    * each `css()` block is its own cascade sub-layer, layer order beats
@@ -60,8 +65,12 @@ export interface HeadingProps {
 
 export function Heading(handle: Handle<HeadingProps>) {
   return () => {
-    const { level, size = level, mix, children } = handle.props
+    const { level, size = level, id, mix, children } = handle.props
     const Tag = tags[level]
-    return <Tag mix={[headingBase, sizeStyles[size], mix]}>{children}</Tag>
+    return (
+      <Tag id={id} mix={[headingBase, sizeStyles[size], mix]}>
+        {children}
+      </Tag>
+    )
   }
 }

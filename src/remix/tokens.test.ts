@@ -70,6 +70,7 @@ describe("the component token aggregate", () => {
     expect([...prefixes].sort()).toEqual([
       "ui-badge",
       "ui-btn",
+      "ui-dialog",
       "ui-eyebrow",
       "ui-field",
       "ui-heading",

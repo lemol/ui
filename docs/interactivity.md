@@ -69,7 +69,9 @@ means one standard vocabulary instead of a private one. For comparison,
 @lemol/ui/remix/compat     Invoker Commands backfill; installs itself on import.
                            installInvokerCommands({ force: true }) installs it
                            over native support and cancels the trusted
-                           CommandEvent, which is what keeps it from acting twice.
+                           CommandEvent's default action, so a built-in is not
+                           performed twice, and cancels it before the runtime
+                           sees it, so a `--` command is not handled twice.
 @lemol/ui/remix/runtime    the capture-phase listener and registerCommand().
                            No command is registered yet. The table below is the
                            complete set the library will ever hold:
@@ -122,16 +124,16 @@ lower floor:
 | Feature | Availability | How it is used |
 | --- | --- | --- |
 | Popover API | Chrome 114, Safari 17, Firefox 125 | Relied on directly. **This sets the floor.** |
-| Invoker Commands | Baseline Dec 2025 (Chrome 135+, Safari 26, Firefox late 2025) | Native, with `@lemol/ui/remix/compat` backfilling older engines in ~15 lines. Identical markup either way. |
+| Invoker Commands | Baseline Dec 2025 (Chrome 135+, Safari 26, Firefox late 2025) | Native, with `@lemol/ui/remix/compat` backfilling older engines in ~70 lines. Identical markup either way. |
 | CSS anchor positioning | Baseline Jan 2026 (Chrome 125+, Safari 26, Firefox 147+) | Behind `@supports (anchor-name: --a)`. |
 
 **Why the floor is the Popover API.** Below it you must reimplement top layer
 and light dismiss, which is where the cost explodes. Above it, a shim is
-fifteen lines.
+about seventy lines.
 
 **Why the compat shim exists at all**, given JavaScript is assumed available:
 because the failure mode without it is a silent dead click rather than an
-error. Fifteen lines closes that.
+error. Seventy lines closes that.
 
 **`?compat` forces the shim on.** Every engine we can drive in a test already
 has Invoker Commands natively, so without a switch the backfill would ship

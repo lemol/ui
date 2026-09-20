@@ -116,7 +116,16 @@ export function installInvokerCommands(options?: InstallInvokerCommandsOptions):
   // Only when forced over a platform that has the feature. WHATWG HTML
   // initialises CommandEvent with cancelable: true and checks it before the
   // default action, so cancelling the trusted event hands authority here.
-  if (native) document.addEventListener("command", suppressNative, true)
+  //
+  // Registered on `window`, not `document`: the capture phase descends
+  // window → document → … → target, so a `window` listener always runs
+  // before a `document` one regardless of which module happened to import
+  // first. `runtime.ts` self-installs its own `document` listener at import
+  // time, so pinning this to `document` would make the ordering — and
+  // therefore whether a `--` command is suppressed before the runtime sees
+  // it — a coin flip decided by import order rather than a property of the
+  // DOM.
+  if (native) window.addEventListener("command", suppressNative, true)
 
   document.addEventListener("click", onClick, true)
 }

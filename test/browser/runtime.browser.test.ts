@@ -62,3 +62,40 @@ test("a registered command reaches its handler through the capture phase", async
     expect(seen).toEqual([{ sourceId: "probe-trigger", targetId: "new-task" }])
   })
 })
+
+test("a `--` command fires its handler once under the forced compat shim", async () => {
+  // ?compat forces the Invoker Commands backfill on over a native platform
+  // (see docs/interactivity.md and compat.ts). A click on a `--` invoker then
+  // produces two `command` events on the target — the shim's synthetic one,
+  // then the platform's trusted one — because suppressNative cancels the
+  // trusted event's *default action*, and for a `--` command the default
+  // action is nothing: the runtime is what acts. Without runtime.ts's
+  // defaultPrevented guard, and without compat.ts's suppressor running ahead
+  // of runtime.ts's own document listener, the handler below would run
+  // twice.
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/dialog?compat=1`)
+    const runtimeUrl = await runtimeUrlOf(page)
+
+    const count = await page.evaluate(async (url) => {
+      const runtime = (await import(url)) as {
+        registerCommand: (name: string, handler: () => void) => void
+      }
+      let count = 0
+      runtime.registerCommand("--probe-once", () => {
+        count += 1
+      })
+
+      const button = document.createElement("button")
+      button.id = "probe-once-trigger"
+      button.setAttribute("command", "--probe-once")
+      button.setAttribute("commandfor", "new-task")
+      document.body.append(button)
+      button.click()
+
+      return count
+    }, runtimeUrl)
+
+    expect(count).toBe(1)
+  })
+})

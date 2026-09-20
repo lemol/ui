@@ -40,11 +40,24 @@ let listening = false
  * handlers for one name is a half-behaviour where nothing says which wins.
  */
 export function registerCommand(name: CommandName, handler: CommandHandler): void {
+  // Enforced at runtime and not only in the type: a JavaScript caller — or a
+  // TypeScript one reaching past the type with a cast — that registers
+  // "close" would otherwise fire on every native dialog dismissal, since
+  // nothing here would ever have checked the namespace.
+  if (!name.startsWith("--")) throw new Error(`Not a custom command: ${name}`)
   if (handlers.has(name)) throw new Error(`Command already registered: ${name}`)
   handlers.set(name, handler)
 }
 
 const onCommand = (event: Event): void => {
+  // An invocation something already cancelled has been handled. Under a
+  // forced compat shim that "something" is the shim itself: it cancels the
+  // platform's trusted CommandEvent from a capturing listener on `window`,
+  // which — because capture descends window before document — runs ahead of
+  // this listener, and dispatches its own synthetic event carrying the same
+  // invocation. Without this guard the trusted event's arrival here, after
+  // being cancelled, would run the handler a second time.
+  if (event.defaultPrevented) return
   const invocation = event as Event & { command?: string; source?: unknown }
   const handler = handlers.get(invocation.command ?? "")
   if (handler === undefined) return

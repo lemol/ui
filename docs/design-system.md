@@ -151,7 +151,7 @@ export const miniTheme = defineTheme({
   base: {
     "scheme-mode": "light",
     canvas: "#FBFBFA", surface: "#FFFFFF", ink: "#111111", hairline: "#EAEAEA",
-    // … and the other 90 primitives
+    // … and the other 92 primitives
   },
   dark: {
     "scheme-mode": "dark",

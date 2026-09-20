@@ -25,6 +25,11 @@ const keywords = new Set([
   // only sane value is the one it has.
   "0",
   "1",
+  // transitionProperty's value is a bare keyword list naming CSS properties,
+  // not a themeable quantity — there is no token for "which properties
+  // transition", only for how long and with what easing, which the close
+  // button already reads from --ui-dialog-transition-duration/-easing.
+  "background, color",
 ])
 
 /** Every var() a value names, so a calc() of two tokens reads as two. */

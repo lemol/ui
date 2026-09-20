@@ -34,6 +34,8 @@ export const dialogTokens = {
   "ui-dialog-close-bg-hover": "var(--surface-hover)",
   "ui-dialog-close-ink": "var(--ink-muted)",
   "ui-dialog-close-ink-hover": "var(--ink)",
+  // Sizes the svg's box, not the visible mark: the × is drawn inset within a
+  // 0 0 12 12 viewBox, so the glyph itself renders smaller than this value.
   "ui-dialog-close-glyph-size": "var(--fs-md)",
 
   "ui-dialog-backdrop-bg": "var(--scrim)",

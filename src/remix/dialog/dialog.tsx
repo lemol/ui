@@ -100,6 +100,9 @@ const closeStyle = css({
   background: "var(--ui-dialog-close-bg)",
   color: "var(--ui-dialog-close-ink)",
   cursor: "pointer",
+  transitionProperty: "background, color",
+  transitionDuration: "var(--ui-dialog-transition-duration)",
+  transitionTimingFunction: "var(--ui-dialog-transition-easing)",
   "&:hover": {
     background: "var(--ui-dialog-close-bg-hover)",
     color: "var(--ui-dialog-close-ink-hover)",

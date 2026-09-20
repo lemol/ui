@@ -71,7 +71,8 @@ means one standard vocabulary instead of a private one. For comparison,
                            over native support and cancels the trusted
                            CommandEvent, which is what keeps it from acting twice.
 @lemol/ui/remix/runtime    the capture-phase listener and registerCommand().
-                           No commands are registered yet; M2 adds:
+                           No command is registered yet. The table below is the
+                           complete set the library will ever hold:
   --live-submit     debounced auto-submit for filter forms
   --copy            clipboard write + in-place confirm
   --set-scheme      persist the light/dark choice

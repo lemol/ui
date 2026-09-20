@@ -13,19 +13,33 @@ PORT=4200 bun run playground    # 4000 by default
 
 ## What is here now
 
-One route, and the pipeline underneath it. The catalogue, the page recipes and
-the switchers arrive with the components they display.
+Two routes and the pipeline underneath them. The page recipes and the visible
+switchers arrive with the components they display.
 
 | Path | |
 | --- | --- |
 | `/` | server-rendered, with the browser entry resolved through the asset server |
-| `/?nojs` | the same page with no `<script>` at all |
+| `/c/:component` | one component's demo, by its name in `@lemol/ui/remix/demos` |
 | `/assets/*` | the asset server |
+
+Four query switches, each a full proof of one axis with no client state:
+
+| Query | |
+| --- | --- |
+| `?nojs` | the same page with no `<script>` at all |
+| `?compat` | forces the Invoker Commands backfill on over native support |
+| `?scheme=dark` / `?scheme=light` | beats the media query |
+| `?density=compact` | retunes every control |
 
 `?nojs` is the premise these packages are built on, made checkable: a page is
 finished before a script runs. It renders interactive markup *dead* rather than
-*absent*, so the unenhanced page shows exactly what the enhanced one does. Task
-19 turns it into a visible toggle.
+*absent*, so the unenhanced page shows exactly what the enhanced one does.
+
+`?compat` exists because every engine a test can drive has Invoker Commands
+natively, so the backfill would otherwise ship unexercised. Forced on, it
+cancels the platform's own trusted `CommandEvent` and drives the invocation
+itself — which is what `test/browser/dialog.browser.test.ts` uses to tell the
+two paths apart.
 
 ## Structure
 

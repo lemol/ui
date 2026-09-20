@@ -11,9 +11,10 @@
  * one caller that has to install it deliberately: see `force` below.
  *
  * The architecture note estimated fifteen lines. With six built-in commands,
- * the idempotence guard and the event construction it is nearer forty. The
- * estimate was the size of the idea, not a budget, and a half-backfill that
- * covers dialogs while leaving popovers dead is not worth the saving.
+ * the idempotence guard, the trusted-event suppressor and the event
+ * construction it is about seventy. The estimate was the size of the idea, not
+ * a budget, and a half-backfill that covers dialogs while leaving popovers
+ * dead is not worth the saving.
  */
 
 const installedFlag = Symbol.for("@lemol/ui/invoker-commands")

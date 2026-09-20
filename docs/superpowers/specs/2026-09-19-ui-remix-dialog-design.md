@@ -316,7 +316,8 @@ identical for dialogs and silently dead for menus, and M2 opens with exactly
 that markup.
 
 The architecture note calls this "about fifteen lines". With six commands, the
-guard and the event construction it is nearer forty. The number was an estimate
+guard, the trusted-event suppressor and the event construction it is about
+seventy. The number was an estimate
 of the idea's size, not a budget, and it is not worth hitting by shipping half
 of it.
 

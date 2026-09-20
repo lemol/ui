@@ -136,6 +136,20 @@ describe("DialogPanel", () => {
     for (const declaration of declarations) {
       expect(declaration).not.toMatch(/\d+m?s|cubic-bezier/)
     }
+
+    // Counting the declarations is not enough: "&, &::backdrop" narrowed to
+    // "&::backdrop" would still produce two transition: lines, but the panel
+    // itself would carry only the allow-discrete declaration — no transition
+    // at all on an engine without transition-behavior, which is the exact
+    // failure the doubled declaration exists to prevent. Each selector list
+    // is captured from the rule enclosing its transition: line, so this
+    // fails if either declaration's rule stops including the bare `&`.
+    const rules = [...styles.matchAll(/([^{}\n]+)\{\s*transition:\s*[^;]+;\s*\}/g)]
+    expect(rules).toHaveLength(2)
+    for (const [, selectorList] of rules) {
+      const selectors = (selectorList ?? "").split(",").map((selector) => selector.trim())
+      expect(selectors).toContain("&")
+    }
   })
 
   it("animates from the state being entered, not the resting one", async () => {

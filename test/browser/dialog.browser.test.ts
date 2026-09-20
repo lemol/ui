@@ -118,9 +118,44 @@ test("the open dialog's accessibility tree is what a screen reader gets", async 
     await page.getByRole("button", { name: "New task" }).click()
     await page.waitForFunction(isOpen)
 
+    // The dialog's own accessible name — what aria-labelledby and Heading's
+    // id prop exist to produce. The three assertions below it all pass even
+    // with aria-labelledby deleted, because the heading, the close button and
+    // the field remain in the tree regardless; only this line depends on the
+    // dialog itself being named.
+    expect(await page.locator("dialog").ariaSnapshot()).toContain('dialog "New task"')
     expect(await page.locator("dialog").ariaSnapshot()).toContain('heading "New task"')
     expect(await page.locator("dialog").ariaSnapshot()).toContain('button "Close"')
     expect(await page.locator("dialog").ariaSnapshot()).toContain('textbox "Title')
+  })
+})
+
+test("a disabled invoker does not open the dialog under the shim", async () => {
+  // compat.ts skips a disabled button in onClick. The one property the shim
+  // exists to guarantee is identical behaviour with or without it, so a
+  // disabled trigger that opened a dialog through the shim would be exactly
+  // the divergence that defeats the point of the backfill.
+  //
+  // A genuine user click on a disabled <button> never reaches a "click"
+  // listener at all — the platform suppresses it before it fires, disabled
+  // check or not — so calling .click() here would pass whether or not
+  // compat.ts's own guard exists. Dispatching the MouseEvent directly is
+  // what actually reaches document's capturing listener with a disabled
+  // target, exercising the guard this test is for.
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/dialog?compat=1`)
+
+    const opened = await page.evaluate(() => {
+      const button = document.createElement("button")
+      button.setAttribute("command", "show-modal")
+      button.setAttribute("commandfor", "new-task")
+      button.disabled = true
+      document.body.append(button)
+      button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
+      return document.querySelector("dialog")?.open
+    })
+
+    expect(opened).toBe(false)
   })
 })
 

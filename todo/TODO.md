@@ -4,7 +4,21 @@
 
 ## M2 — Catalogue
 
-- [ ] [02 - Plan M2: catalogue](./m2-catalogue/02-plan-m2-catalogue.md)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## M3 — todo-md adoption
 

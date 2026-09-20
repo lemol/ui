@@ -2,6 +2,9 @@
 title: 'Plan M2: catalogue'
 tags: [planning]
 depends_on: [1]
+group: M2 — Catalogue
+completed_at: 2026-09-20T16:48:37Z
+outcome: completed
 ---
 Plan M2: complete the catalogue on the contract M1 proved. Full spec: `docs/superpowers/specs/2026-09-17-lemol-ui-architecture-design.md`.
 

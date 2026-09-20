@@ -9,14 +9,16 @@ import { componentTokens } from "./tokens.ts"
  *
  * - `transparent` keeps a ghost control the same size as a filled one, so a
  *   toolbar does not reflow when a tone changes.
- * - `1px` is a border width, and the schema has no border-width primitive.
- *   Named here rather than written into button.tsx, so a skin can change it.
+ * - `1px` and `2px` are border widths, and the schema has no border-width
+ *   primitive. Named here rather than written into the component, so a skin
+ *   can change one. `Spinner`'s ring reads `2px` for a visible arc at its
+ *   default size; `1px` is every bordered surface's default elsewhere.
  * - `uppercase` is Eyebrow's whole look. `display: inline-flex` in Button is
  *   structural — change it and the component stops working — but caps are
  *   taste, and a brand that sets things in sentence case has to be able to say
  *   `--ui-eyebrow-transform: none` rather than fork the component.
  */
-const allowedLiterals = new Set(["transparent", "1px", "uppercase"])
+const allowedLiterals = new Set(["transparent", "1px", "2px", "uppercase"])
 
 const primitives = new Set<string>(primitiveNames)
 const entries = Object.entries(componentTokens)
@@ -69,12 +71,28 @@ describe("the component token aggregate", () => {
     const prefixes = new Set(entries.map(([name]) => name.split("-").slice(0, 2).join("-")))
     expect([...prefixes].sort()).toEqual([
       "ui-badge",
+      "ui-breadcrumbs",
       "ui-btn",
+      "ui-callout",
+      "ui-checkbox",
       "ui-dialog",
+      "ui-disclosure",
       "ui-eyebrow",
       "ui-field",
       "ui-heading",
+      "ui-menu",
+      "ui-meter",
+      "ui-pagination",
+      "ui-palette",
+      "ui-popover",
+      "ui-radio",
+      "ui-segmented",
+      "ui-skeleton",
+      "ui-spinner",
+      "ui-switch",
+      "ui-table",
       "ui-text",
+      "ui-toast",
     ])
   })
 })

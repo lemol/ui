@@ -68,6 +68,47 @@ test("a registered command reaches its handler through the capture phase", async
   })
 })
 
+test("an input carrying command/commandfor invokes through the input bridge", async () => {
+  // No trust requirement here, unlike a button click: command/commandfor on
+  // an <input> is not a native browser feature, so there is nothing for a
+  // synthetic event to impersonate and nothing for compat.ts to backfill.
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/dialog`)
+    const runtimeUrl = await runtimeUrlOf(page)
+
+    const seen = await page.evaluate(async (url) => {
+      const runtime = (await import(url)) as {
+        registerCommand: (
+          name: string,
+          handler: (context: { source: unknown; target: Element }) => void,
+        ) => void
+      }
+      const received: { sourceId: string; targetId: string; value: string }[] = []
+      runtime.registerCommand("--probe-input", ({ source, target }) => {
+        received.push({
+          sourceId: (source as HTMLInputElement | null)?.id ?? "",
+          targetId: target.id,
+          value: (source as HTMLInputElement | null)?.value ?? "",
+        })
+      })
+
+      const input = document.createElement("input")
+      input.id = "probe-input-trigger"
+      input.setAttribute("command", "--probe-input")
+      input.setAttribute("commandfor", "new-task")
+      document.body.append(input)
+      input.value = "hello"
+      input.dispatchEvent(new Event("input", { bubbles: true }))
+
+      return received
+    }, runtimeUrl)
+
+    expect(seen).toEqual([
+      { sourceId: "probe-input-trigger", targetId: "new-task", value: "hello" },
+    ])
+  })
+})
+
 test("a `--` command fires its handler once under the forced compat shim", async () => {
   // ?compat forces the Invoker Commands backfill on over a native platform
   // (see docs/interactivity.md and compat.ts). A click on a `--` invoker then

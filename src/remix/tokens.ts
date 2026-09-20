@@ -1,10 +1,26 @@
 import { badgeTokens } from "./badge/tokens.ts"
+import { breadcrumbsTokens } from "./breadcrumbs/tokens.ts"
 import { buttonTokens } from "./button/tokens.ts"
+import { calloutTokens } from "./callout/tokens.ts"
+import { checkboxTokens } from "./checkbox/tokens.ts"
+import { commandPaletteTokens } from "./command-palette/tokens.ts"
 import { dialogTokens } from "./dialog/tokens.ts"
+import { disclosureTokens } from "./disclosure/tokens.ts"
 import { eyebrowTokens } from "./eyebrow/tokens.ts"
 import { fieldTokens } from "./field/tokens.ts"
 import { headingTokens } from "./heading/tokens.ts"
+import { menuTokens } from "./menu/tokens.ts"
+import { meterTokens } from "./meter/tokens.ts"
+import { paginationTokens } from "./pagination/tokens.ts"
+import { popoverTokens } from "./popover/tokens.ts"
+import { radioTokens } from "./radio/tokens.ts"
+import { segmentedControlTokens } from "./segmented-control/tokens.ts"
+import { skeletonTokens } from "./skeleton/tokens.ts"
+import { spinnerTokens } from "./spinner/tokens.ts"
+import { switchTokens } from "./switch/tokens.ts"
+import { tableTokens } from "./table/tokens.ts"
 import { textTokens } from "./text/tokens.ts"
+import { toastTokens } from "./toaster/tokens.ts"
 
 /**
  * Every component's token record in one object, for `emitTokensCss()` to write
@@ -15,12 +31,28 @@ import { textTokens } from "./text/tokens.ts"
  */
 export const componentTokens = {
   ...badgeTokens,
+  ...breadcrumbsTokens,
   ...buttonTokens,
+  ...calloutTokens,
+  ...checkboxTokens,
+  ...commandPaletteTokens,
   ...dialogTokens,
+  ...disclosureTokens,
   ...eyebrowTokens,
   ...fieldTokens,
   ...headingTokens,
+  ...menuTokens,
+  ...meterTokens,
+  ...paginationTokens,
+  ...popoverTokens,
+  ...radioTokens,
+  ...segmentedControlTokens,
+  ...skeletonTokens,
+  ...spinnerTokens,
+  ...switchTokens,
+  ...tableTokens,
   ...textTokens,
+  ...toastTokens,
 } satisfies Record<string, string>
 
 /**

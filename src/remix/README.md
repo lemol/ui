@@ -27,6 +27,10 @@ button inside a form submits it. `LinkButton` renders an `<a>` and requires
 `href`: `aria-disabled` on an anchor does not prevent navigation, so a disabled
 link is a broken link.
 
+`Button` also takes an optional `id` — added for `CopyButton` (M2), which
+needs a button to `commandfor` itself, but useful anywhere else a caller
+needs to target the element (an `aria-describedby`, a `<label for>`).
+
 Two axes, thirty-one tokens in `button/tokens.ts`:
 
 | Axis | Values | Comes from |
@@ -214,6 +218,298 @@ properties into `::backdrop`.
 
 Twenty-two tokens in `dialog/tokens.ts`.
 
+### `Popover` and `popover()`
+
+A native `[popover]` opened by `command="toggle-popover"`, with no client code
+in the page. `popover(name)` mints the id and an `anchor-name` together and
+returns `{ id, Trigger, Surface }`, the same reasoning as `overlay()`: neither
+string can be written by hand.
+
+Placement sits behind `@supports (anchor-name: --a)` — `position-anchor` on
+the surface, `anchor-name` on the trigger. Unsupported, the surface keeps the
+platform's own popover default (`position: fixed; inset: 0; margin: auto`),
+which is already a centered popover, so there is no fallback CSS to write.
+
+Entry and exit follow Dialog's pattern exactly: the `transition` shorthand
+twice, `@starting-style` targeting `&:popover-open`, `display` declared only
+inside that same state.
+
+Thirteen tokens in `popover/tokens.ts`; the trigger is a `Button` and reads
+`--ui-btn-*`, not a parallel set.
+
+### `Menu` and `menu()`
+
+A `Popover` with `role="menu"` and rows of `role="menuitem"` — checked against
+`remix/ui/menu` first and built without it: that package's `Menu` owns a
+JS-`Context`-driven popover of its own, not `[popover]` plus
+`command="toggle-popover"`, so building on it would trade the native-first
+open/close this layer exists to guarantee for a keyboard model outside the six
+hand-written behaviours the M2 plan budgets for. `Tab` reaches every row with
+the runtime absent; there is no roving-tabindex or typeahead enhancement.
+
+`MenuItem` renders an `<a>` when given `href`, a `<button>` otherwise.
+`MenuSeparator` is an `<hr>` — its role is implicit, so none is written.
+
+Eleven tokens in `menu/tokens.ts`; the surface itself reads `--ui-popover-*`.
+
+### `Disclosure` and `Accordion`
+
+A native `<details>`/`<summary>`, zero client JS even for the accordion case.
+`Accordion` renders `Disclosure` items sharing one `name`, the platform's own
+single-open exclusion (Baseline 2023) — it takes `items` as data rather than
+raw `Disclosure` children, because nothing in this layer can inject a shared
+prop into arbitrary JSX children the way a wrapper component would need to.
+
+The marker is drawn, not the UA triangle: `display: flex` on `<summary>`
+drops it on the engines that draw it through `::marker`, and
+`::-webkit-details-marker { display: none }` covers Safari, which draws it
+through a separate pseudo `display` does not reach. It rotates from
+`:where(details[open]) &`, a plain descendant selector, so nothing here
+toggles a class on open/close. The content itself does not animate: `<details>`
+reveals it by toggling internal visibility rather than `display`, and no
+Baseline feature transitions that yet.
+
+Thirteen tokens in `disclosure/tokens.ts`.
+
+### `Table`
+
+`Table`, `TableHead`, `TableBody`, `TableRow`, `TableHeaderCell` and
+`TableCell` — server-rendered rows, nothing else. `SortableColumnHeader` is a
+plain `<a>` toggling `?sort=field&dir=asc|desc`, computed by `sortHrefFor()`
+and `sortDirectionOf()` from the page's own `location` string; every other
+query param survives a sort, and `aria-sort` marks the active column. No
+client state, because the request that follows a click is an ordinary
+navigation. Virtualized tables are out of scope — see the M2 plan.
+
+Density reads `--row-pad-y` through `ui-table-cell-pad-y` rather than an
+explicit row height, which table layout does not reliably respect across
+engines.
+
+Twelve tokens in `table/tokens.ts`.
+
+### `Toaster` and `toast()`
+
+The one M2 component that needs real hand-written JS: a *timed* auto-dismiss
+is not something `[popover]` can express on its own, so `Toaster` sits on the
+ladder's third rung by necessity, unlike `Popover` and `Menu`. `toast(name)`
+mints an id and binds a trigger to it; the trigger's command is
+`--dismiss-toast`, which shows the toast (`popover="manual"`) and schedules
+its own hide with `scheduleDismiss()` (`toaster/dismiss-timer.ts`) — a pure,
+DOM-free function tested directly, the palette's-match-rule model the M2 plan
+names for this. Manual dismissal is still native: the close button carries
+`command="hide-popover"`.
+
+The handler is registered in `runtime.ts`, not in `toaster.tsx`: a document's
+browser entry imports only `runtime.ts` and `compat.ts`, never a component
+module for its own sake, so a `registerCommand()` call living in the
+component file would sit in code the bundle has no other reason to load and
+would never fire. `runtime.ts` imports `scheduleDismiss` and a shared
+attribute-name constant from `toaster/`, both plain and JSX-free, so the
+runtime file itself stays free of the component library it dispatches for.
+
+Entry and exit follow `Dialog`'s and `Popover`'s pattern exactly. Thirty
+tokens in `toaster/tokens.ts`: a shell, a close button, and five tones each
+carrying the `<tone>` on `<tone>-subtle` pair.
+
+### `Checkbox`, `Radio` and `Switch`
+
+The rest of the native control family `Field` deliberately excluded in M1
+(see the doc comment in `field/field.tsx`, which names exactly these three).
+`Select` needed no new component: `Field`'s `control="select"` arm already
+covers it from M1, and the playground's own knobs already use it.
+
+`Checkbox` and `Radio` retint the platform's own glyph with `accent-color` —
+one property, every engine in the baseline, no `appearance: none` and no
+hand-drawn box. `Switch` cannot do that: no native input type gives it a
+track/thumb to retint, so it draws its own — `appearance: none` on a real
+`<input type="checkbox" role="switch">`, the thumb a `::before` translated on
+`:checked`. It stays a real checkbox throughout; `role="switch"` and a mirrored
+`aria-checked` are the only additions.
+
+All three share `form-control.ts`'s `fieldMessages()` for the id/
+`aria-describedby`/`aria-invalid` wiring `Field` also has — factored out
+because three copies of that scaffold is the line the M2 plan draws before
+asking for a shared helper. `Field` itself is not migrated onto it.
+
+Each disabled/enabled label is one parameterized `css()` block, not a base
+block plus a `:disabled` override in a second one: two blocks both setting
+`color` on one element would hand sub-layer order the decision, the same
+trap `button.tsx`'s own tone/disabled co-location note describes.
+
+Nine tokens each in `checkbox/tokens.ts` and `radio/tokens.ts`; eighteen in
+`switch/tokens.ts`.
+
+### `SegmentedControl`
+
+A native `<fieldset>` of `<input type="radio">`, visually hidden behind the
+`<label>` each sits inside, with a single sliding fill drawn as its own `<div>`
+and one `:has()` rule per option — `:where(fieldset:has(label:nth-of-type(n)
+input:checked)) &`, positional rather than id-keyed, so `trackStyle` and the
+indicator's own block cache by option count alone, the same reasoning
+`Grid`'s `columnStyles` gives for `repeat(n, 1fr)`.
+
+The fill moves by `translate`, not `grid-column`: `grid-column` does not
+interpolate, so a transition on it would snap between segments instead of
+sliding. A percentage in `translate` resolves against the element's own box,
+so `translate: n00%` reaches segment `n` with no per-instance measurement.
+
+The radio's own `:focus-visible` ring is invisible where the input is
+clipped, so the reset's rule is relocated to `label:has(input:focus-visible)`,
+reading the same two primitives rather than a token of its own — the same
+rule, not a second one. Disabling the whole group is the native
+`<fieldset disabled>`, not a per-input attribute.
+
+Fifteen tokens in `segmented-control/tokens.ts`.
+
+### `Callout`
+
+Static — no interactivity, no runtime. `Badge`'s tone pair scaled from a pill
+to a block: the same five tones, `neutral` reading the surface vocabulary and
+the semantic four each the `<tone>` on `<tone>-subtle` pair. An optional
+icon, description and action slot; no footer, no dismissal — a caller wanting
+either composes its own around it.
+
+Twenty-four tokens in `callout/tokens.ts`.
+
+### `Meter` and `Progress`
+
+Native `<meter>` and `<progress>`, deliberately under-styled: `appearance:
+none` is not used on either, because on `<progress>` it would discard the
+UA's own indeterminate-state animation — the striped pulse a valueless
+`<progress>` already renders with no markup and no script, which the M2 plan
+is explicit must not be reimplemented. `Progress` retints its fill with
+`accent-color`; `Meter` gets no fill-colour token at all, since its colour is
+the UA's own low/high/optimum semantics and `accent-color` support for
+`<meter>` specifically is inconsistent across the baseline.
+
+Two tokens in `meter/tokens.ts`, shared by both.
+
+### `CommandPalette`
+
+The other component needing hand-written JS, and the one the M2 plan names as
+the model for testing it: `matchItems()` (`command-palette/match.ts`) is a
+pure, DOM-free subsequence match, tested directly with a table of
+query/items/expected cases rather than through a render. Built on `overlay()`
+rather than its own shell — a palette wants a modal focus trap, which
+`Dialog`'s `<dialog>` already gives it, so `--ui-dialog-*` covers the panel,
+the motion and the close button, and `command-palette/tokens.ts` adds only
+the input and the row.
+
+`CommandPaletteInput` fires `--palette` on every keystroke, not a click —
+`command`/`commandfor` on an `<input>` is not itself a native browser
+feature, so this is the first consumer of `runtime.ts`'s `input` bridge (see
+below). `CommandPaletteItem` writes its own `label`/`keywords` as
+`data-palette-*` attributes; `--palette`'s handler reads those straight off
+the rendered `<li>` rows rather than keeping a second items array in sync
+with them, then toggles `hidden`. With the runtime absent every row stays
+visible: there is no native way to filter, so the whole list is what a
+no-JS reader gets.
+
+Twelve tokens in `command-palette/tokens.ts`.
+
+### `LiveForm` and `liveSubmit()`
+
+`LiveForm` is a plain `<form>`; `liveSubmit(formId)` is an `attrs()` mixin a
+caller applies through `mix` to whichever field should trigger a resubmit —
+`Field`'s own wrapper, since `runtime.ts`'s `input` bridge reaches it with
+`closest()` from wherever the actual event targets. `--live-submit`
+debounces per **form**, not per field: every field in one `LiveForm` shares
+one target (`commandfor` names the form), so one `debounce()` instance is
+keyed by that target and every field's own input events reuse it, then calls
+`form.requestSubmit()`. `debounce()` (`live-form/debounce.ts`) is pure and
+DOM-free, tested directly like `toaster/dismiss-timer.ts`'s `scheduleDismiss`.
+
+With the runtime absent `LiveForm` is exactly a `<form>` with no
+`liveSubmit()` field ever wired to anything — it still submits normally on
+its own submit button. No component tokens: this is behaviour, not a
+styled shell.
+
+### `CopyButton`
+
+`command="--copy"`, `commandfor` pointing at itself (copying its own `value`)
+or at another element (copying its `textContent` with `for`) — the same
+one-variable-used-twice reasoning as `overlay()`'s minted id, since `id` is
+both the element's own id and, absent `for`, its `commandfor` target. Renders
+a plain `Button`, so it reads `--ui-btn-*` and declares no tokens of its own.
+
+`Button` gained an `id` prop for this — optional, and every other M1 use is
+unaffected. `--copy`'s handler (`runtime.ts`) writes the clipboard, then
+swaps the button's own text for `confirmLabel` and back with
+`scheduleDismiss()`, the same one-shot timer `Toaster` uses. Retriggering
+before the revert cancels the pending one, so two rapid clicks cannot race
+each other. With the runtime absent the button is inert — there is no
+clipboard API without JavaScript, and that is accepted rather than papered
+over with a fallback nobody asked for.
+
+### `DensityToggle` and `SchemeToggle`
+
+Both `command`/`commandfor` a `documentRootId` (`document-root.ts`) —
+`<html>` carries no id by default, so `mini`'s `Document` now renders one and
+both toggles target the same constant rather than a hand-written string. Any
+other document shell (a static SPA `index.html`) needs the same id for these
+two to work there.
+
+`--toggle-density` and `--set-scheme` (`runtime.ts`) read and write the exact
+`data-density`/`data-scheme` attributes and `localStorage` keys
+`bootScript` (`design/css/boot.ts`) restores from on the next load — the two
+have to agree exactly, or the no-flash guarantee breaks. `--set-scheme` is
+named "set" rather than "toggle": it resolves the *current* scheme (the
+root's own attribute, or `prefers-color-scheme` when the document left that
+to the media query) and sets the explicit opposite, so the first click is
+correct regardless of which one was never written down. `--toggle-density`
+toggles between absent and `"compact"`, the schema's only two states.
+
+Both render a plain `Button` and declare no tokens; both are inert with the
+runtime absent, which is the accepted degradation — no JS, no live
+switching, and the page still renders in whatever `bootScript` restored.
+
+### `Breadcrumbs`
+
+Route links with `aria-current` — no client state, since this is a
+server-rendered app and the current page is known at render time. Checked
+against `remix/ui/breadcrumbs` first: its markup shape (`nav` > `ol` > `li`*,
+`aria-current="page"` on the current item, a separator marked `aria-hidden`)
+is followed here too, but its styling reads a hardcoded internal
+style-values module rather than this package's `--ui-*` contract, so the
+component itself was not reused. The last item with no `href` is the current
+page; any other item with no `href` is plain text, a segment with nothing to
+link to.
+
+Eight tokens in `breadcrumbs/tokens.ts`.
+
+### `Pagination`
+
+Server-rendered `?page=n` links, pairing with `Table`. `pageRange()`
+(`pagination/page-range.ts`) is the page-list-with-ellipsis algorithm, pure
+and tested directly; `pageHref()`/`currentPageOf()` follow `Table`'s own
+`sortHrefFor()`/`sortDirectionOf()` pattern for reading and writing the query
+string. The boundary controls (`Previous` on page 1, `Next` on the last
+page) render as plain text, not an `aria-disabled` anchor: `aria-disabled`
+does not prevent navigation, so a "disabled" link is a broken link, the same
+reasoning `LinkButton` gives for requiring a real `href`.
+
+Ten tokens in `pagination/tokens.ts`.
+
+### `Spinner` and `Skeleton`
+
+Pure CSS animation, no JS, and neither carries a component-local
+`prefers-reduced-motion` query: each reads `--dur-slow` through its own
+`-duration` token, and the global reset (`design/css/reset.ts`) zeroes every
+`--dur-*` token under `prefers-reduced-motion: reduce`, so a zero-duration
+animation completes instantly — the quiet state the media query asks for,
+reached by reading the token rather than by a second rule.
+
+`Spinner` is a ring drawn from `border`, one arc retinted, rotated by the
+native `rotate` property. `Skeleton` is a gradient sweeping across itself via
+`background-position` rather than an opacity pulse — a shimmer reads as
+"content is coming," where a flashing block can read as "something is
+wrong." Neither `@keyframes` name is minted: unlike a `view-transition-name`,
+two elements sharing one is the normal case, not a collision. `Skeleton` is
+sized entirely through `mix`, the same way `Container`/`Grid` leave arbitrary
+structural lengths to the caller.
+
+Six tokens in `spinner/tokens.ts`, five in `skeleton/tokens.ts`.
+
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -243,6 +539,10 @@ the `rmx` layer exists — and `@layer rmx-reset, base, rmx;` then registers
 - **One delegated, capturing listener.** `CommandEvent` does not bubble, and a
   non-delegated listener dies on the first frame navigation, so behaviours go
   through `--` custom commands read by the single listener in `runtime.ts`.
+  A second delegated listener there bridges `input` events into the same
+  `command` event for the two behaviours a click cannot source
+  (`--live-submit`, `--palette`) — one dispatch mechanism, one place handlers
+  are registered, two ways to trigger it.
 - **Never hand-write a `commandfor` id.** A mismatch is a dead click with no
   error and no warning. Use the `overlay()` factory, which binds both halves.
 - **Native first.** Check the ladder in
@@ -289,10 +589,24 @@ transitions.
 ## Status
 
 `Button`, `LinkButton`, `Stack`, `Row`, `Grid`, `Container`, `Heading`, `Text`,
-`Eyebrow`, `Field`, `Badge`, `Dialog` and `ThemeStyle` ship. `tokens.ts`
-aggregates the component records and exports `ComponentTokenName`; the four
-layout components add nothing to it, which is what they exist to demonstrate,
-the three typographic ones add twenty-two between them, `Field` adds
-twenty-seven, `Badge` twenty-three and `Dialog` twenty-two. `demos.ts`
-registers eleven demos. `compat.ts` backfills Invoker Commands and `runtime.ts`
-holds the one capture-phase listener; no command is registered yet.
+`Eyebrow`, `Field`, `Badge`, `Dialog` and `ThemeStyle` ship from M1. M2's full
+catalogue ships too: `Popover`, `Menu`, `Disclosure`/`Accordion`, `Table`,
+`Toaster`, `Checkbox`, `Radio`, `Switch`, `SegmentedControl`, `Callout`,
+`Meter`/`Progress`, `CommandPalette`, `LiveForm`, `CopyButton`,
+`DensityToggle`, `SchemeToggle`, `Breadcrumbs`, `Pagination`, `Spinner` and
+`Skeleton`. `tokens.ts` aggregates the component records and exports
+`ComponentTokenName`; the four layout components add nothing to it, which is
+what they exist to demonstrate, the three typographic ones add twenty-two
+between them, `Field` adds twenty-seven, `Badge` twenty-three, `Dialog`
+twenty-two, `Popover` thirteen, `Menu` eleven, `Disclosure` thirteen, `Table`
+twelve, `Toaster` thirty, `Checkbox` and `Radio` nine each, `Switch`
+eighteen, `SegmentedControl` fifteen, `Callout` twenty-four, `Meter` two
+(shared by `Progress`), `CommandPalette` twelve, `Breadcrumbs` eight,
+`Pagination` ten, `Spinner` six, `Skeleton` five, and `LiveForm`,
+`CopyButton`, `DensityToggle` and `SchemeToggle` none — each is behaviour
+over an existing shell, not a styled one of their own. `demos.ts` registers
+thirty-one demos. `compat.ts` backfills Invoker Commands and `runtime.ts`
+holds the command listener and
+the `input` bridge, registering
+`--dismiss-toast`, `--palette`, `--live-submit`, `--copy`,
+`--toggle-density` and `--set-scheme`.

@@ -49,6 +49,10 @@ describe("Button", () => {
     expect(await renderToHtml(<Button disabled>Save</Button>)).toContain("disabled")
   })
 
+  it("renders an explicit id, for a caller that needs to target the button itself", async () => {
+    expect(await renderToHtml(<Button id="copy-token">Copy</Button>)).toContain('id="copy-token"')
+  })
+
   it("reads only its own tokens and structural keywords", async () => {
     // The machine-checkable form of "no component hard-codes a colour,
     // radius, duration or space step".

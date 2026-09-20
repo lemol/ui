@@ -101,6 +101,12 @@ export interface ButtonProps {
   /** Defaulted to "button": a bare <button> inside a <form> submits it. */
   type?: "button" | "submit" | "reset" | undefined
   disabled?: boolean | undefined
+  /**
+   * For an `aria-describedby`, a `<label for>`, or — `CopyButton`'s case —
+   * a `commandfor` pointing the button at itself. Optional because most
+   * buttons need no id at all.
+   */
+  id?: string | undefined
   name?: string | undefined
   value?: string | undefined
   /**
@@ -133,12 +139,13 @@ export interface ButtonProps {
 export function Button(handle: Handle<ButtonProps>) {
   return () => {
     const { tone = "neutral", size = "md", type = "button" } = handle.props
-    const { disabled, name, value, invoke, mix, children } = handle.props
+    const { disabled, id, name, value, invoke, mix, children } = handle.props
     return (
       <button
         command={invoke?.command}
         commandfor={invoke?.commandfor}
         disabled={disabled}
+        id={id}
         mix={[buttonBase, toneStyles[tone], sizeStyles[size], mix]}
         name={name}
         type={type}

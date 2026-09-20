@@ -2,7 +2,7 @@ import type { Handle, RemixNode } from "remix/ui"
 import { ImportMap, type ImportMapData } from "remix/ui/server"
 import { schemeBootScript } from "../design/css/index.ts"
 import type { Theme } from "../design/index.ts"
-import { type ComponentTokenName, ThemeStyle } from "../remix/index.ts"
+import { type ComponentTokenName, documentRootId, ThemeStyle } from "../remix/index.ts"
 import { miniTheme } from "./theme.ts"
 
 /**
@@ -121,7 +121,7 @@ export function Document(handle: Handle<DocumentProps>) {
     } = handle.props
 
     return (
-      <html data-density={density} data-scheme={scheme} lang={lang}>
+      <html data-density={density} data-scheme={scheme} id={documentRootId} lang={lang}>
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />

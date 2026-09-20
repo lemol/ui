@@ -1,13 +1,16 @@
 import * as path from "node:path"
+import { Document } from "@lemol/ui/mini/document"
 import { demos, isDemoName } from "@lemol/ui/remix/demos"
 import { createController } from "remix/router"
 import { assetServer } from "../assets.ts"
 import { routes } from "../routes.ts"
 import { CataloguePage } from "../ui/catalogue.tsx"
-import { Document } from "../ui/document.tsx"
 import { HomePage } from "../ui/home.tsx"
 
 const browserEntry = path.resolve(import.meta.dirname, "public/entry.ts")
+
+/** Appended after every page title by `mini`'s Document. */
+const site = "lemol ui"
 
 export default createController(routes, {
   actions: {
@@ -16,16 +19,20 @@ export default createController(routes, {
      * import map and preloads always carry the asset server's current URLs —
      * fingerprinted in production, freshly compiled while watching.
      *
-     * `?nojs` drops the entry entirely. The premise of these packages is that a
-     * page is finished before a script runs, so that has to be one request away
-     * rather than something to remember to check.
+     * `?nojs` drops the entry entirely, and the no-flash boot script with it.
+     * The premise of these packages is that a page is finished before a script
+     * runs, so that has to be one request away rather than something to
+     * remember to check — and "no client JavaScript" has to mean no script
+     * element at all, or the assertion is weaker than it reads.
      */
     async home(context) {
       const scripts = !context.url.searchParams.has("nojs")
       return context.render(
         <Document
-          title="Playground"
+          boot={scripts}
           entry={scripts ? await assetServer.getScriptEntry(browserEntry) : null}
+          site={site}
+          title="Playground"
         >
           <HomePage scripts={scripts} />
         </Document>,
@@ -52,9 +59,11 @@ export default createController(routes, {
 
       return context.render(
         <Document
+          boot={scripts}
           density={density === "compact" ? density : undefined}
           entry={scripts ? await assetServer.getScriptEntry(browserEntry) : null}
           scheme={scheme === "dark" || scheme === "light" ? scheme : undefined}
+          site={site}
           title={demos[name].title}
         >
           <CataloguePage entry={demos[name]} />

@@ -9,12 +9,19 @@ import { densityStorageKey, schemeBootScript, schemeStorageKey } from "./boot.ts
  * it refuses to write, and that it survives storage throwing — none of which
  * needs a browser.
  */
-function boot(store: Record<string, string>, failing = false): Record<string, string> {
-  const attributes: Record<string, string> = {}
+function boot(
+  store: Record<string, string>,
+  failing = false,
+  rendered: Record<string, string> = {},
+): Record<string, string> {
+  const attributes: Record<string, string> = { ...rendered }
   const document = {
     documentElement: {
       setAttribute(name: string, value: string) {
         attributes[name] = value
+      },
+      hasAttribute(name: string): boolean {
+        return name in attributes
       },
     },
   }
@@ -51,6 +58,26 @@ describe("schemeBootScript", () => {
   it("refuses a value outside the allow-list", () => {
     // Otherwise a stale or hand-edited entry lands in a root attribute verbatim.
     expect(boot({ [schemeStorageKey]: "solarized" })).toEqual({})
+  })
+
+  it("leaves an attribute the document already rendered alone", () => {
+    // The server rendering data-scheme is a decision — a query param, a
+    // session preference — and it has to beat the remembered value, or that
+    // decision is unreachable for anyone who has ever chosen a scheme.
+    expect(
+      boot({ [schemeStorageKey]: "dark", [densityStorageKey]: "compact" }, false, {
+        "data-scheme": "light",
+        "data-density": "compact",
+      }),
+    ).toEqual({ "data-scheme": "light", "data-density": "compact" })
+  })
+
+  it("still fills in the axis the document left blank", () => {
+    expect(
+      boot({ [schemeStorageKey]: "dark", [densityStorageKey]: "compact" }, false, {
+        "data-scheme": "light",
+      }),
+    ).toEqual({ "data-scheme": "light", "data-density": "compact" })
   })
 
   it("survives storage that refuses to be read", () => {

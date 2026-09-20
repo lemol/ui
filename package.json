@@ -14,7 +14,8 @@
     "./remix/compat": "./src/remix/compat.ts",
     "./remix/runtime": "./src/remix/runtime.ts",
     "./remix/demos": "./src/remix/demos.ts",
-    "./mini": "./src/mini/index.ts"
+    "./mini": "./src/mini/index.ts",
+    "./mini/document": "./src/mini/document.tsx"
   },
   "scripts": {
     "check": "bun run lint && bun run typecheck && bun run test",

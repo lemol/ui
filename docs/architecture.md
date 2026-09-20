@@ -25,7 +25,8 @@ checkout has no `node_modules` to resolve that through.
 | `@lemol/ui/remix/compat` | The Invoker Commands backfill. |
 | `@lemol/ui/remix/runtime` | The single capture-phase `command` listener. |
 | `@lemol/ui/remix/demos` | The demo for each component, for the playground. |
-| `@lemol/ui/mini` | One concrete design: a theme plus the app shell. |
+| `@lemol/ui/mini` | One concrete design: a theme, `AppShell`, `Nav` and the state components. |
+| `@lemol/ui/mini/document` | `Document` — the `<html>` wiring, which only a server renders. |
 
 There is no `.` export. A root barrel would merge the three layers into one
 name and hide which one a component came from — the same reason `mini` does not
@@ -85,6 +86,10 @@ src/
   mini/
     index.ts              the layer's entry point
     theme.ts              base + dark + compact
+    shell.tsx             AppShell and Nav
+    states.tsx            EmptyState and ErrorState
+    document.tsx          Document — its own subpath, and the only file here
+                          that reaches for remix/ui/server
 apps/
   playground/             catalogue, page recipes, theme and no-JS switches
 ```
@@ -139,6 +144,13 @@ same router contract as the server — `render()` middleware plus
 `context.render()` — and `remix/ui`'s `css()` emits into the `rmx` cascade
 layer identically in both modes. So components are portable by construction,
 and the only thing that can break it is a server-only import.
+
+`Document` sits on its own subpath for a related reason. `<html>` exists only
+on the server — an SPA has an `index.html` carrying the same boot script — and
+it is the one file in `mini` that imports `remix/ui/server`. Through the barrel
+it would follow `miniTheme` into every browser bundle, since the packages ship
+unbundled source and the asset server compiles a module graph rather than
+tree-shaking it.
 
 `mini` deliberately does **not** re-export `remix`. A barrel would need syncing
 with every new export, and it would hide which layer a component came from —

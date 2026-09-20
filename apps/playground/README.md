@@ -52,10 +52,14 @@ app/
   router.ts                      middleware + controllers
   actions/controller.tsx         the actions
   actions/public/entry.ts        the browser entry: run(), and nothing else
-  ui/document.tsx                the document shell — replaced by mini's in task 18
   ui/home.tsx                    the page
+  ui/catalogue.tsx               the frame around a demo
   ui/public/runtime-probe.tsx    a client entry, to prove hydration works
 ```
+
+There is no document of its own: the controllers render `Document` from
+`@lemol/ui/mini/document`, which is the app that proves `mini`'s wiring works
+in a real response rather than only in a render test.
 
 `public/` marks browser-reachable source, beside its narrowest owner. Everything
 else under `app/` is server-only, and `app/assets.test.ts` holds that line —

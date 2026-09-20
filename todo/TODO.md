@@ -2,7 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [18 - mini: Document, AppShell, Nav and the state components](./m1-foundation-and-contract-proof/18-mini-document-appshell-nav-and-the-state-components.md)
 - [ ] [19 - Playground: catalogue, page recipe, switchers, no-JS toggle and SPA route](./m1-foundation-and-contract-proof/19-playground-catalogue-page-recipe-switchers-no-js-toggle-and-spa-route.md)
 
 
@@ -11,8 +10,6 @@
 - [ ] [02 - Plan M2: catalogue](./m2-catalogue/02-plan-m2-catalogue.md)
 
 ## M3 — todo-md adoption
-
-- [ ] [03 - Plan M3: todo-md adoption](./m3-todo-md-adoption/03-plan-m3-todo-md-adoption.md)
 
 ## M4 — mionso migration
 

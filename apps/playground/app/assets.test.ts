@@ -34,7 +34,7 @@ describe("browser assets", () => {
       "app/actions/controller.tsx",
       "app/assets.ts",
       "app/router.ts",
-      "app/ui/document.tsx",
+      "app/ui/catalogue.tsx",
       "app/ui/home.tsx",
       "app/router.test.tsx",
       "server.ts",

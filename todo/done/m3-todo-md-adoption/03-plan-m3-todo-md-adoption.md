@@ -2,6 +2,9 @@
 title: 'Plan M3: todo-md adoption'
 tags: [planning]
 depends_on: [2]
+group: M3 — todo-md adoption
+completed_at: 2026-09-20T02:56:07Z
+outcome: completed
 ---
 Plan todo-md's adoption of the UI packages. Full spec: `docs/superpowers/specs/2026-09-17-lemol-ui-architecture-design.md`.
 

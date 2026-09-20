@@ -2,6 +2,9 @@
 title: 'mini: Document, AppShell, Nav and the state components'
 tags: [ui-remix-mini]
 depends_on: [13, 14]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-20T02:43:37Z
+outcome: completed
 ---
 `ui-remix-mini`'s composed pieces: `src/shell.tsx` with `Document`, `AppShell`
 and `Nav`, and `src/states.tsx` with `EmptyState` and `ErrorState`.

@@ -214,14 +214,6 @@ properties into `::backdrop`.
 
 Twenty-two tokens in `dialog/tokens.ts`.
 
-`dialog.test.tsx` and `overlay.test.tsx` cover the markup and the contract.
-What they cannot reach — that a click actually opens the dialog, on an engine
-with native Invoker Commands and on one driven by the backfill — lives in
-`test/browser/dialog.browser.test.ts`, because it drives the playground route
-rather than the component: a real document, the real asset pipeline, and the
-client entry that installs `compat` and `runtime`. `runtime.ts`'s capture-phase
-listener is covered beside it, in `test/browser/runtime.browser.test.ts`.
-
 ### `ThemeStyle`
 
 Renders `emitTokensCss()`'s string into the document, defaulting to this
@@ -264,8 +256,8 @@ One directory per component, holding the component, its demo, its test, and its
 token record if it has one:
 
 ```
-src/button/button.tsx  tokens.ts  button.demo.tsx  button.test.tsx
-src/stack/stack.tsx               stack.demo.tsx   stack.test.tsx
+button/button.tsx  tokens.ts  button.demo.tsx  button.test.tsx
+stack/stack.tsx               stack.demo.tsx   stack.test.tsx
 ```
 
 Dropped rather than aligned: `heading/` is another instance of the "with
@@ -277,6 +269,15 @@ primitives and structural keywords alone, and its test fails on a `--ui-`
 anywhere in its output. `tokens.ts` aggregates every component's record and
 exports the union of their names as a type. A Record of blocks more than one
 component uses sits at the layer root instead: `space.ts`, `align.ts`.
+
+The one test a component does not keep beside it is the one that needs a real
+browser. Those live in `test/browser/`, because their subject is not the
+component: they drive a playground route through a real document, the asset
+pipeline and the client entry, so what they prove is the whole chain rather
+than the render. Keeping them out of `src/` is also what lets
+`test/boundaries.test.ts` go on refusing a browser driver anywhere under it.
+They are named `<subject>.browser.test.ts`, so `bun test test/browser` runs
+the set and a component's browser coverage is findable by its own name.
 
 ## Reading
 

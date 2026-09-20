@@ -9,7 +9,7 @@ tokens; the tokens are the part that must not drift.
 `--ink-muted`, `--sp-4`, `--r-md`, `--dur-fast`. A theme supplies their values.
 
 **Component tokens** are the retheming surface — `--ui-btn-primary-bg`,
-`--ui-field-border`, `--ui-dialog-surface`. A component whose every value is a
+`--ui-field-border`, `--ui-dialog-bg`. A component whose every value is a
 structural keyword or a primitive — one a theme sets, or one a caller picks off
 a scale — declares none; the layout components are all four of them. A
 component with something to retheme declares its own, defaulting relationally
@@ -64,6 +64,15 @@ button the same size as a filled one; and `uppercase` for
 brand that sets things in sentence case must be able to say `none` instead of
 forking the component. Adding a fourth means editing that list and arguing for
 it.
+
+**`::backdrop` does not see the contract below Chromium 122.** It inherits from
+its originating element only since Chromium 122, Safari 17.4 and Firefox 120;
+before that it inherits from nothing, `:root` included. So
+`--ui-dialog-backdrop-bg` resolves to nothing on Chrome 114–121 and Safari
+17.0–17.3 and the modal opens over an undimmed page. That is accepted: the loss
+is cosmetic, `showModal()` still takes the top layer and makes the page behind
+inert, and the alternatives are a pseudo-element selector in the emitter — which
+the dark axis cannot follow — or a hard-coded colour in a component.
 
 **Naming.** Ramps you do arithmetic on are numeric, and the number is a
 multiplier: `sp-4` is four 4px units. Sets you choose from are t-shirt sized:

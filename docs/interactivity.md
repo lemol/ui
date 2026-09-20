@@ -66,8 +66,12 @@ means one standard vocabulary instead of a private one. For comparison,
 ## The complete list of hand-written client JS
 
 ```
-@lemol/ui/remix/compat     Invoker Commands backfill
-@lemol/ui/remix/runtime    the capture-phase listener, dispatching:
+@lemol/ui/remix/compat     Invoker Commands backfill; installs itself on import.
+                           installInvokerCommands({ force: true }) installs it
+                           over native support and cancels the trusted
+                           CommandEvent, which is what keeps it from acting twice.
+@lemol/ui/remix/runtime    the capture-phase listener and registerCommand().
+                           No commands are registered yet; M2 adds:
   --live-submit     debounced auto-submit for filter forms
   --copy            clipboard write + in-place confirm
   --set-scheme      persist the light/dark choice
@@ -101,6 +105,11 @@ const NewTask = overlay("new-task")
 Note also that `commandfor` works only on `<button>`. Links and inputs cannot
 be invokers, so a trigger is always a button.
 
+`overlay()` mints an `Invocation`, and `Button`'s `invoke` prop is the only way
+to put `command`/`commandfor` on an element from this package. The type carries
+a module-private brand, so there is no expression outside `overlay()` that
+satisfies it — the rule is held by the type checker rather than by review.
+
 ## Browser baseline
 
 **Chrome 114+ / Safari 17+ / Firefox 125+** — the Popover API floor.
@@ -122,6 +131,12 @@ fifteen lines.
 **Why the compat shim exists at all**, given JavaScript is assumed available:
 because the failure mode without it is a silent dead click rather than an
 error. Fifteen lines closes that.
+
+**`?compat` forces the shim on.** Every engine we can drive in a test already
+has Invoker Commands natively, so without a switch the backfill would ship
+unexercised. The playground's browser entry checks for it beside the `?nojs`
+check that drops the client entry entirely, and calls
+`installInvokerCommands({ force: true })`.
 
 **Why anchor positioning is the one exception.** Interop is still rough even at
 Baseline — behaviour differs across engines and MDN still carries a

@@ -163,9 +163,20 @@ not a required layer — an app can skip it and supply its own theme and shell.
 in `remix.json`. **No bundler for the package at all** — see
 [principles.md](principles.md) rule 7 for why Vite was considered and rejected.
 
+**`allowPackages` admits a package root, not a package.** The playground's
+`@lemol/ui` is a `file:` dependency pointing at this repository's own root, so
+naming it in `allowPackages` would make the app's own controllers, router,
+document and pages browser-reachable too — and `allowFiles` cannot claw that
+back, because the package check is a fallback that runs only after a file has
+failed every `allowFiles` pattern. `apps/playground/remix.json` instead admits
+the path, `../../src/**`, and leaves `allowPackages` at `remix` alone.
+
 Otherwise the repo follows its siblings: Biome, one root `tsconfig.json` over
 `src`, `apps` and `test` with the playground extending it, and `bun run check` =
 lint + typecheck + test as the single gate for every change.
+
+**Playwright** supplies the browser for `test/browser/`, as a library rather
+than a runner; `bunx playwright install chromium` once per machine.
 
 ## Testing
 
@@ -173,8 +184,17 @@ lint + typecheck + test as the single gate for every change.
   is the harness, and `apps/playground/app/ui/home.test.tsx` the worked example.
   It reaches for no router, no asset server and no DOM, because `remix/ui/server`
   is inside the import allow-list and the other three are not.
-- **Browser tests for the runtime behaviours only.** A DOM shim would be
-  testing the shim, which is the same conclusion `@mionso/design` reached.
+- **Browser tests for the runtime behaviours only**, in `test/browser/`, driven
+  by Playwright as a library from inside `bun test` — not the `@playwright/test`
+  runner, so `bun test` stays the only runner and `bun run check` the only gate.
+  They drive the playground's own router through `Bun.serve`, so what is tested
+  is the real document and the real asset pipeline. A DOM shim would be testing
+  the shim, which is the same conclusion `@mionso/design` reached.
+  Two limits: Playwright's WebKit is built from WebKit `main` and is not Safari,
+  and every engine it bundles has Invoker Commands natively — so Safari 17 and
+  a genuinely unsupporting engine are both out of reach. The backfill is
+  exercised by forcing it on instead. See
+  `docs/superpowers/research/2026-09-19-browser-testing-harness.md`.
 - **Pure logic extracted and tested directly** — the palette's match rule is
   the model: exported as a pure function so it needs no DOM.
 - **A no-JS render test** asserting that dialogs, disclosures and popovers are

@@ -45,11 +45,29 @@ Three things about that snippet are deliberate:
 - **The shorthand is declared twice.** The first, without `allow-discrete`,
   keeps `translate` and `opacity` transitioning on engines that do not support
   `transition-behavior`. The second upgrades it where they do.
+
+  In a `css()` object the second declaration goes in a nested `&` block, because
+  a JavaScript object cannot hold the same key twice:
+
+  ```ts
+  transition: `opacity ${timing}, translate ${timing}`,
+  "&": { transition: `opacity ${timing}, translate ${timing}, display ${duration} allow-discrete` },
+  ```
+
+  CSS nesting gives `&` the same specificity, later in source order, so the
+  second wins where `allow-discrete` parses and is dropped whole where it does
+  not.
 - **`@starting-style` targets the state being entered** — `dialog[open]`, not
   `dialog`; `[popover]:popover-open`, not `[popover]`. Targeting the resting
   state is the most common way to get nothing.
 - **`@starting-style` carries no specificity boost**, unlike `@keyframes`. An id
   selector, an inline style, or an `!important` elsewhere will silently beat it.
+
+**Declare `display` only in the open state.** A closed `<dialog>` and a closed
+popover are `display: none` from the user-agent sheet, and any author
+declaration beats that — cascade layers do not change it, because layered
+author CSS still outranks the UA origin. A `display` at the top level of a
+component's block renders every one of them, open or not.
 
 `allow-discrete` is not a substitute for `@starting-style`. The first prevents
 snapping; the second supplies the initial state. Entry animations need both.

@@ -1,5 +1,5 @@
-import { Button } from "@lemol/ui/remix"
 import { css, type Handle } from "remix/ui"
+import { Button } from "../../../../src/remix/index.ts"
 import { HiddenFields, splitLocation } from "./forms.tsx"
 
 /**

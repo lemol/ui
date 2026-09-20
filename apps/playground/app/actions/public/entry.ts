@@ -1,6 +1,6 @@
-import { installInvokerCommands } from "@lemol/ui/remix/compat"
-import { installCommandRuntime } from "@lemol/ui/remix/runtime"
 import { run } from "remix/ui"
+import { installInvokerCommands } from "../../../../../src/remix/compat.ts"
+import { installCommandRuntime } from "../../../../../src/remix/runtime.ts"
 
 /**
  * Importing `compat` is what installs the backfill: the module installs

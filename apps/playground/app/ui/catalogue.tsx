@@ -1,7 +1,7 @@
-import { ErrorState } from "@lemol/ui/mini"
-import { Eyebrow, Heading, LinkButton, Row, Stack } from "@lemol/ui/remix"
-import { type DemoEntry, type DemoName, demos } from "@lemol/ui/remix/demos"
 import type { Handle } from "remix/ui"
+import { ErrorState } from "../../../../src/mini/index.ts"
+import { type DemoEntry, type DemoName, demos } from "../../../../src/remix/demos.ts"
+import { Eyebrow, Heading, LinkButton, Row, Stack } from "../../../../src/remix/index.ts"
 import { BadgeKnobs, ButtonKnobs, HeadingKnobs, TextKnobs } from "./knobs.tsx"
 import { PlaygroundShell } from "./layout.tsx"
 

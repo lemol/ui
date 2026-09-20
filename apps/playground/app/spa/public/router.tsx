@@ -1,16 +1,16 @@
-import { AppShell, ErrorState, Nav } from "@lemol/ui/mini"
-import { Eyebrow, Grid, Heading, LinkButton, Stack, Text } from "@lemol/ui/remix"
-import { type DemoName, demos, isDemoName } from "@lemol/ui/remix/demos"
 import { createRouter } from "remix/router"
 import { get, route } from "remix/routes"
 import { render } from "remix/spa"
 import type { Handle } from "remix/ui"
+import { AppShell, ErrorState, Nav } from "../../../../../src/mini/index.ts"
+import { type DemoName, demos, isDemoName } from "../../../../../src/remix/demos.ts"
+import { Eyebrow, Grid, Heading, LinkButton, Stack, Text } from "../../../../../src/remix/index.ts"
 
 /**
  * The playground's client-rendered twin. It resolves the same demo registry
- * the server catalogue reads — `@lemol/ui/remix/demos` — through a router
- * that runs entirely in the browser, which is what proves the components
- * are portable by construction rather than by audit.
+ * the server catalogue reads — the `demos.ts` beside the components —
+ * through a router that runs entirely in the browser, which is what proves
+ * the components are portable by construction rather than by audit.
  *
  * Everything here is browser source: this directory is `public/`, and it
  * reaches the server's world only through the demo registry and the

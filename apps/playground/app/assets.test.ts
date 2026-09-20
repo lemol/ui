@@ -17,8 +17,9 @@ const browserEntries = [
 describe("browser assets", () => {
   it("serves every module in each entry's graph", async () => {
     const hrefs = await assetServer.getPreloads(browserEntries)
-    // The graph reaches into `remix` through the Bun store, so it is much wider
-    // than the two entries — which is the part a store mount gets wrong.
+    // The graph reaches into `remix` through the Bun store and into `src`
+    // through the source mount, so it is much wider than the three entries —
+    // which is the part a mount gets wrong.
     expect(hrefs.length).toBeGreaterThan(browserEntries.length)
 
     for (const href of hrefs) {

@@ -1,5 +1,5 @@
-import { AppShell, Nav } from "@lemol/ui/mini"
 import type { Handle, RemixNode } from "remix/ui"
+import { AppShell, Nav } from "../../../../src/mini/index.ts"
 import { PlaygroundSwitchers } from "./switchers.tsx"
 
 export type PlaygroundNav = "catalogue" | "dashboard" | "spa"

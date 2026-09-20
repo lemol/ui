@@ -1,4 +1,5 @@
 import { describe, expect, test } from "bun:test"
+import { Glob } from "bun"
 
 const root = new URL("..", import.meta.url).pathname
 
@@ -96,12 +97,27 @@ test("keeps the mini barrel clear of the document subpath", async () => {
 describe("apps/playground", () => {
   const playground = () => read("apps/playground/package.json")
 
-  // The catalogue is the in-repo consumer. Going through the package name
-  // rather than a relative path into src is what keeps the exports map honest.
-  test("takes the package by name, not by a path into src", async () => {
+  // The catalogue imports the source relatively. A `file:` dependency on the
+  // repository root would go through the package name — but Bun hardlinks a
+  // path dependency into the store, so the playground would resolve a stale
+  // snapshot instead of the working tree, and every source file would carry
+  // a second hard link. The exports map stays honest through
+  // `git-consumer.test.ts`, which installs the tagged repository by git
+  // specifier and imports it by name for real.
+  test("takes no @lemol/* dependency, and imports no @lemol/ui specifier", async () => {
     const deps = (await playground()).dependencies ?? {}
-    expect(deps["@lemol/ui"]).toBe("file:../..")
-    expect(Object.keys(deps).filter((name) => name.startsWith("@lemol/"))).toEqual(["@lemol/ui"])
+    expect(Object.keys(deps).filter((name) => name.startsWith("@lemol/"))).toEqual([])
+
+    const files = await Array.fromAsync(
+      new Glob("apps/playground/app/**/*.{ts,tsx}").scan({ cwd: root, onlyFiles: true }),
+    )
+    expect(files.length).toBeGreaterThan(0)
+    const offenders: string[] = []
+    for (const file of files) {
+      const source = await Bun.file(`${root}${file}`).text()
+      if (/(?:from|import\()\s*["']@lemol\/ui/.test(source)) offenders.push(file)
+    }
+    expect(offenders).toEqual([])
   })
 
   test("pins remix to the version the package declares as its peer", async () => {

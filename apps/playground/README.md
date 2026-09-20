@@ -3,8 +3,8 @@
 The catalogue. A Remix 3 app in this repo rather than Storybook, because these
 components are Remix 3 functions taking a `Handle` — no hooks, no client render,
 nothing React-based to plug into. Demos live beside their component and are
-exposed as `@lemol/ui/remix/demos`, so the catalogue cannot drift from what
-ships.
+registered in `src/remix/demos.ts` — published as `@lemol/ui/remix/demos` —
+so the catalogue cannot drift from what ships.
 
 ```sh
 bun run playground              # from the repo root
@@ -13,14 +13,17 @@ PORT=4200 bun run playground    # 4000 by default
 
 ## What is here now
 
-Four routes and the pipeline underneath them. Every page is built from
-`@lemol/ui/mini` (`AppShell`, `Nav`, the state components) and `@lemol/ui/remix`
-— the playground is the first consumer, not a parallel design.
+Four routes and the pipeline underneath them. Every page is built from `mini`
+(`AppShell`, `Nav`, the state components) and `remix`, imported relatively from
+`src/` — the playground is the first consumer, not a parallel design. It takes
+no `@lemol/*` dependency: a `file:` dependency on the repository root would
+resolve a stale store snapshot instead of the working tree (see
+`docs/architecture.md`, "Workspace composition").
 
 | Path | |
 | --- | --- |
 | `/` | the catalogue index: every demo by name, the recipes, the hydration probe |
-| `/c/:component` | one component's demo, by its name in `@lemol/ui/remix/demos` |
+| `/c/:component` | one component's demo, by its name in the demo registry |
 | `/pages/dashboard` | one composed page recipe: stats, tasks, settings, a dialog |
 | `/spa/*` | the client-rendered twin: the same demos through the SPA router |
 | `/assets/*` | the asset server |
@@ -79,7 +82,7 @@ app/
 ```
 
 There is no document of its own: the controllers render `Document` from
-`@lemol/ui/mini/document`, which is the app that proves `mini`'s wiring works
+`src/mini/document.tsx`, which is the app that proves `mini`'s wiring works
 in a real response rather than only in a render test.
 
 `public/` marks browser-reachable source, beside its narrowest owner. Everything
@@ -92,22 +95,20 @@ a controller cannot leak into the browser by being imported.
 `remix assets`, `remix doctor` and the running server cannot disagree.
 `app/assets.ts` loads it and adds only what JSON cannot express: the browser
 target, watching and sourcemaps in development, fingerprinting and minification
-otherwise, and the Bun store mount.
+otherwise, and the two mounts that leave this app's `rootDir`.
 
-Both paths that leave this app's `rootDir` are derived at runtime rather than
-written down. `bun install` at the `@lemol/ui` repository root keeps the store
-under that tree — the composition root deliberately does not list this clone as
-a workspace member, so nothing above it claims the install — and symlinks
-packages into each consumer's `node_modules`. The files behind `remix` still sit
-outside `rootDir`, so an allow-list cannot reach them without a mount.
+The Bun store mount is derived at runtime rather than written down. `bun
+install` at the repository root keeps the store under that tree — the
+composition root deliberately does not list this clone as a workspace member,
+so nothing above it claims the install — and symlinks packages into each
+consumer's `node_modules`. The files behind `remix` still sit outside `rootDir`,
+so an allow-list cannot reach them without a mount, and the store sits at a
+different depth when this app is installed alone than when a parent workspace
+hoists it.
 
-`@lemol/ui` itself is the second path. Bun hardlinks a `file:` dependency into
-the store rather than symlinking the checkout, so `@lemol/ui/remix` normally
-resolves *inside* the store: mounting it again would overlap the store mount,
-which is a thrown `TypeError` at boot, and `remix.json`'s `../../src/**` would
-not match it. `app/assets.ts` therefore mounts it only when it resolves outside
-the store, and admits wherever it actually resolved in both cases — still by
-path, never by adding `@lemol/ui` to `allowPackages`.
+The source mount is written down. `../../src` is this repository's own layout,
+which does not move, and `remix.json` admits it by path — so the compat shim,
+the runtime and the demos compile from the working tree, never from a snapshot.
 
 The `remix` CLI resolves `remix` from the project directory, so `remix doctor`
 needs `apps/playground/node_modules` to exist:

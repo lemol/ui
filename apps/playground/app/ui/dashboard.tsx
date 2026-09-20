@@ -1,4 +1,5 @@
-import { EmptyState } from "@lemol/ui/mini"
+import { css, type Handle } from "remix/ui"
+import { EmptyState } from "../../../../src/mini/index.ts"
 import {
   Badge,
   Button,
@@ -11,8 +12,7 @@ import {
   Row,
   Stack,
   Text,
-} from "@lemol/ui/remix"
-import { css, type Handle } from "remix/ui"
+} from "../../../../src/remix/index.ts"
 import { HiddenFields, splitLocation } from "./forms.tsx"
 import { PlaygroundShell } from "./layout.tsx"
 

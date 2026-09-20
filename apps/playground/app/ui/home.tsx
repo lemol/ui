@@ -1,6 +1,14 @@
-import { Eyebrow, Grid, Heading, LinkButton, Row, Stack, Text } from "@lemol/ui/remix"
-import { type DemoName, demos } from "@lemol/ui/remix/demos"
 import type { Handle } from "remix/ui"
+import { type DemoName, demos } from "../../../../src/remix/demos.ts"
+import {
+  Eyebrow,
+  Grid,
+  Heading,
+  LinkButton,
+  Row,
+  Stack,
+  Text,
+} from "../../../../src/remix/index.ts"
 import { PlaygroundShell } from "./layout.tsx"
 import { RuntimeProbe, RuntimeProbeView } from "./public/runtime-probe.tsx"
 

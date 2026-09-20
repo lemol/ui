@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { demos } from "@lemol/ui/remix/demos"
+import { demos } from "../../../src/remix/demos.ts"
 import { createPlaygroundRouter } from "./router.ts"
 
 /**

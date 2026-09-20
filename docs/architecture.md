@@ -175,13 +175,12 @@ not a required layer — an app can skip it and supply its own theme and shell.
 in `remix.json`. **No bundler for the package at all** — see
 [principles.md](principles.md) rule 7 for why Vite was considered and rejected.
 
-**`allowPackages` admits a package root, not a package.** The playground's
-`@lemol/ui` is a `file:` dependency pointing at this repository's own root, so
-naming it in `allowPackages` would make the app's own controllers, router,
-document and pages browser-reachable too — and `allowFiles` cannot claw that
-back, because the package check is a fallback that runs only after a file has
-failed every `allowFiles` pattern. `apps/playground/remix.json` instead admits
-the path, `../../src/**`, and leaves `allowPackages` at `remix` alone.
+**Browser reachability is admitted by path, not by package.** The playground
+reaches the package source at `../../src/**` for the compat shim, the runtime
+and the demos, and `apps/playground/remix.json` admits exactly that path,
+leaving `allowPackages` at `remix` alone — so the app's own controllers,
+router, document and pages stay unreachable, and the allow-list never becomes
+a deny-list chasing them.
 
 Otherwise the repo follows its siblings: Biome, one root `tsconfig.json` over
 `src`, `apps` and `test` with the playground extending it, and `bun run check` =
@@ -249,12 +248,13 @@ hold those packages at the last versions that agree with the rc's own pin, and
 they come out when `remix` ships an rc whose dependencies are coherent. The
 composition root carries the same three for the same reason.
 
-Inside this repository the catalogue does the same thing one level down:
-`apps/playground` takes `"@lemol/ui": "file:../.."`, so it reaches the source
-through the exports map rather than through a relative path into `src/`. It is
-`file:` and not `workspace:*` because Bun cannot name the workspace root as a
-workspace member — `workspaces: ["."]` fails to resolve. Bun hardlinks a path
-dependency into the store rather than symlinking the checkout, so
-`@lemol/ui/remix` resolves inside `node_modules/.bun`; `app/assets.ts` derives
-its mount and its allow-list entry from where the resolution actually lands, and
-both layouts work.
+Inside this repository the catalogue imports the source relatively and takes
+no `@lemol/*` dependency at all. A `file:` dependency on the repository root
+would resolve through the package name — but Bun hardlinks a path dependency
+into the store rather than symlinking the checkout, so the playground would
+resolve a stale snapshot instead of the working tree, and every source file
+would carry a second hard link. (`workspace:*` is no alternative: Bun cannot
+name the workspace root as a member — `workspaces: ["."]` fails to resolve.)
+The exports map stays honest through `test/package.test.ts`, which pins its
+shape, and `test/git-consumer.test.ts`, which installs the tagged repository
+by git specifier and imports it by name for real.

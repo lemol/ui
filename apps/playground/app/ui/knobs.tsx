@@ -1,3 +1,4 @@
+import type { Handle } from "remix/ui"
 import {
   Badge,
   type BadgeTone,
@@ -13,8 +14,7 @@ import {
   Text,
   type TextSize,
   type TextTone,
-} from "@lemol/ui/remix"
-import type { Handle } from "remix/ui"
+} from "../../../../src/remix/index.ts"
 import { HiddenFields, splitLocation } from "./forms.tsx"
 
 /**

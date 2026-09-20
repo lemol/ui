@@ -13,15 +13,11 @@
     // narrowest owner. Everything else under `app/` stays server-only, so a
     // controller cannot leak into the browser by being imported.
     //
-    // `../../src/**` is `@lemol/ui`'s own source, which the browser reaches
-    // for the compat shim and the runtime. It is admitted by path and NOT by
-    // adding `@lemol/ui` to `allowPackages`: the package is a `file:`
-    // dependency pointing at this repository's root, so admitting it by name
-    // admits every file under that root — this app's own controllers,
-    // document and router included — and `allowFiles` cannot claw that back,
-    // because the package check is a fallback that runs only once a file has
-    // failed every `allowFiles` pattern. Naming the path keeps the allow-list
-    // an allow-list instead of a deny-list chasing it.
+    // `../../src/**` is the package source beside this app, which the browser
+    // reaches for the compat shim, the runtime and the demo registry. It is
+    // admitted by path: naming the source tree keeps the allow-list an
+    // allow-list instead of a deny-list chasing it, and this app's own
+    // controllers, document and router stay unreachable behind it.
     "allowFiles": ["app/routes.ts", "app/**/public/**", "../../src/**"],
     "allowPackages": ["remix"],
 

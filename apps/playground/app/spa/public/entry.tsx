@@ -1,6 +1,6 @@
-import { installInvokerCommands } from "@lemol/ui/remix/compat"
-import { installCommandRuntime } from "@lemol/ui/remix/runtime"
 import { run } from "remix/spa"
+import { installInvokerCommands } from "../../../../../src/remix/compat.ts"
+import { installCommandRuntime } from "../../../../../src/remix/runtime.ts"
 import { createSpaRouter, SpaFallback } from "./router.tsx"
 
 /**

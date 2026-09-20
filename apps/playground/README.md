@@ -13,33 +13,46 @@ PORT=4200 bun run playground    # 4000 by default
 
 ## What is here now
 
-Two routes and the pipeline underneath them. The page recipes and the visible
-switchers arrive with the components they display.
+Four routes and the pipeline underneath them. Every page is built from
+`@lemol/ui/mini` (`AppShell`, `Nav`, the state components) and `@lemol/ui/remix`
+— the playground is the first consumer, not a parallel design.
 
 | Path | |
 | --- | --- |
-| `/` | server-rendered, with the browser entry resolved through the asset server |
+| `/` | the catalogue index: every demo by name, the recipes, the hydration probe |
 | `/c/:component` | one component's demo, by its name in `@lemol/ui/remix/demos` |
+| `/pages/dashboard` | one composed page recipe: stats, tasks, settings, a dialog |
+| `/spa/*` | the client-rendered twin: the same demos through the SPA router |
 | `/assets/*` | the asset server |
 
-Four query switches, each a full proof of one axis with no client state:
+Knobs are query params and a form: `?tone=primary&size=sm` re-renders on the
+server, beside a preview of the one combination under test. Button, badge, text
+and heading have knobs; the rest enumerate their states in the demo already.
+
+Four query switches, each a full proof of one axis with no client state — and
+each a visible GET form in the header, so switching one preserves the rest:
 
 | Query | |
 | --- | --- |
 | `?nojs` | the same page with no `<script>` at all |
 | `?compat` | forces the Invoker Commands backfill on over native support |
-| `?scheme=dark` / `?scheme=light` | beats the media query |
-| `?density=compact` | retunes every control |
+| `?scheme=dark` / `?scheme=light` (`=system` is unset) | beats the media query |
+| `?density=compact` (`=default` is unset) | retunes every control |
 
 `?nojs` is the premise these packages are built on, made checkable: a page is
 finished before a script runs. It renders interactive markup *dead* rather than
-*absent*, so the unenhanced page shows exactly what the enhanced one does.
+*absent*, so the unenhanced page shows exactly what the enhanced one does. On
+`/spa/*` it renders the same components on the server that the SPA router would
+have resolved in the browser.
 
 `?compat` exists because every engine a test can drive has Invoker Commands
 natively, so the backfill would otherwise ship unexercised. Forced on, it
 cancels the platform's own trusted `CommandEvent` and drives the invocation
 itself — which is what `test/browser/dialog.browser.test.ts` uses to tell the
 two paths apart.
+
+There is no theme switcher: M1 ships one theme, and a switcher with one option
+is decoration. It arrives with the second theme.
 
 ## Structure
 
@@ -52,9 +65,17 @@ app/
   router.ts                      middleware + controllers
   actions/controller.tsx         the actions
   actions/public/entry.ts        the browser entry: run(), and nothing else
-  ui/home.tsx                    the page
+  ui/layout.tsx                  every page in mini's AppShell, with the switchers
+  ui/switchers.tsx               scheme / density / scripts / compat as GET forms
+  ui/forms.tsx                   hidden inputs preserving the query across forms
+  ui/knobs.tsx                   per-component knobs: query parsing, form, preview
+  ui/home.tsx                    the catalogue index
   ui/catalogue.tsx               the frame around a demo
+  ui/dashboard.tsx               the composed page recipe
+  ui/spa.tsx                     the SPA shell and its no-JS twin
   ui/public/runtime-probe.tsx    a client entry, to prove hydration works
+  spa/public/router.tsx          the browser SPA router, over the same demos
+  spa/public/entry.tsx           the SPA shell's browser entry: run(router)
 ```
 
 There is no document of its own: the controllers render `Document` from
@@ -101,8 +122,14 @@ cd apps/playground && bunx --bun remix doctor
 `bun test` from the repo root.
 
 - `app/router.test.tsx` drives the composition through real requests: the
-  document, the resolved browser entry, the client-entry metadata, and `?nojs`.
+  document, the resolved browser entries, the client-entry metadata, the knobs,
+  the dashboard, the SPA shell, and `?nojs` on every route.
 - `app/assets.test.ts` fetches every module in each browser entry's graph and
   confirms server-only source 404s.
 - `app/ui/home.test.tsx` is the server-render pattern every component test
   copies — one node through `test/render.ts`, assertions on the string.
+  `app/ui/catalogue.test.tsx` and `app/ui/dashboard.test.tsx` cover the knobs
+  and the recipe the same way.
+- `test/browser/spa.browser.test.ts` proves the SPA twin in Chromium: the same
+  components client-rendered, soft navigation without a document load, and the
+  client 404.

@@ -2,9 +2,6 @@
 
 ## M1 — Foundation and contract proof
 
-- [ ] [19 - Playground: catalogue, page recipe, switchers, no-JS toggle and SPA route](./m1-foundation-and-contract-proof/19-playground-catalogue-page-recipe-switchers-no-js-toggle-and-spa-route.md)
-
-
 ## M2 — Catalogue
 
 - [ ] [02 - Plan M2: catalogue](./m2-catalogue/02-plan-m2-catalogue.md)

@@ -2,6 +2,9 @@
 title: 'Playground: catalogue, page recipe, switchers, no-JS toggle and SPA route'
 tags: [playground]
 depends_on: [15, 16, 17, 18]
+group: M1 — Foundation and contract proof
+completed_at: 2026-09-20T07:48:15Z
+outcome: completed
 ---
 Finish the playground: the catalogue, one composed page recipe, the switchers,
 the no-JS toggle and the SPA route.
@@ -44,3 +47,22 @@ the no-JS toggle and the SPA route.
   comment here or fixed.
 - The page recipe works with the no-JS toggle on.
 - The `/spa/*` route renders the same components.
+
+## Contract gaps the dashboard exposed
+
+Recorded here per the done-when; the same note sits atop
+`apps/playground/app/ui/dashboard.tsx`.
+
+- No neutral panel: the stat and task panels are hand-styled from primitives.
+  M2's Callout is tinted, not neutral — if a second recipe needs panels, `mini`
+  wants a Panel rather than a third copy of four declarations.
+- No Table (M2): the task rows are hand-styled Rows, and Table's first consumer
+  is waiting.
+- Grid has no responsive mode — already documented on `GridProps.cols` — so the
+  two-column sections squeeze on a phone rather than stacking.
+- Nothing needed a new token: every panel, row and stat reads primitives the
+  theme already carries.
+
+No theme switcher either: M1 ships one theme, so the visible switchers are
+scheme, density, scripts and compat. The theme switcher arrives with the second
+theme.

@@ -1,4 +1,5 @@
 import { describe, expect, it } from "bun:test"
+import { demos } from "@lemol/ui/remix/demos"
 import { createPlaygroundRouter } from "./router.ts"
 
 /**
@@ -16,7 +17,12 @@ describe("the home route", () => {
     const response = await get("/")
     expect(response.status).toBe(200)
     expect(response.headers.get("Content-Type")).toContain("text/html")
-    expect(await response.text()).toContain("<h1>lemol ui playground</h1>")
+    const page = await response.text()
+    expect(page).toContain("lemol ui playground")
+    expect(page).toContain("Skip to content")
+    expect(page).toContain('href="/c/button"')
+    expect(page).toContain('href="/pages/dashboard"')
+    expect(page).toContain('href="/spa"')
   })
 
   it("resolves its browser entry through the asset server", async () => {
@@ -28,6 +34,14 @@ describe("the home route", () => {
 
   it("collects component css into the document, in the rmx layer", async () => {
     expect(await html("/")).toContain("@layer rmx.")
+  })
+
+  it("carries the switchers as GET forms", async () => {
+    const page = await html("/")
+    expect(page).toContain('name="scheme"')
+    expect(page).toContain('name="density"')
+    expect(page).toContain('name="nojs"')
+    expect(page).toContain('name="compat"')
   })
 })
 
@@ -93,8 +107,33 @@ describe("the catalogue route", () => {
     expect(page).toContain(">primary</button>")
   })
 
-  it("is a 404 for one it does not", async () => {
-    expect((await get("/c/nope")).status).toBe(404)
+  it("renders every M1 component through its own demo file", async () => {
+    const names = Object.keys(demos) as (keyof typeof demos)[]
+    expect(names.length).toBeGreaterThan(0)
+    for (const name of names) {
+      const response = await get(`/c/${name}`)
+      expect({ name, status: response.status }).toEqual({ name, status: 200 })
+      // The heading, not the title element: the demo body must be present.
+      expect(await response.text()).toContain(`>${demos[name].title}</h1>`)
+    }
+  })
+
+  it("is a 404 page, not a bare status, for one it does not", async () => {
+    const response = await get("/c/nope")
+    expect(response.status).toBe(404)
+    const page = await response.text()
+    expect(page).toContain("No such component")
+    expect(page).toContain("404")
+    expect(page).toContain("Back to the catalogue")
+  })
+
+  it("reads the knobs from the query string", async () => {
+    expect(await html("/c/button?tone=danger&size=sm")).toContain('tone="danger" size="sm"')
+    expect(await html("/c/badge?tone=success")).toContain('tone="success"')
+  })
+
+  it("falls back to the defaults for knobs it does not recognise", async () => {
+    expect(await html("/c/button?tone=primay&size=xl")).toContain('tone="neutral" size="md"')
   })
 
   it("delivers the token sheet ahead of remix's component styles", async () => {
@@ -163,6 +202,12 @@ describe("the catalogue route", () => {
     expect(compact).not.toContain("<script")
   })
 
+  it("treats the switchers' explicit defaults as unset", async () => {
+    const tag = htmlTag(await html("/c/button?scheme=system&density=default"))
+    expect(tag).not.toContain("data-scheme")
+    expect(tag).not.toContain("data-density")
+  })
+
   it("ignores a scheme or density it does not recognise", async () => {
     const tag = htmlTag(await html("/c/button?scheme=sepia&density=roomy"))
     expect(tag).not.toContain("data-scheme")
@@ -174,5 +219,90 @@ describe("the catalogue route", () => {
     for (const tone of ["primary", "neutral", "ghost", "danger"]) {
       expect(page).toContain(`>${tone}</button>`)
     }
+  })
+})
+
+describe("the dashboard route", () => {
+  it("renders the composed recipe", async () => {
+    const response = await get("/pages/dashboard")
+    expect(response.status).toBe(200)
+    const page = await response.text()
+    expect(page).toContain("Dashboard")
+    expect(page).toContain("Open tasks")
+    expect(page).toContain("Renew the TLS certificate")
+    expect(page).toContain("Project settings")
+    expect(page).toContain("No activity yet")
+  })
+
+  it("works with the no-JS toggle on", async () => {
+    const page = await html("/pages/dashboard?nojs")
+    expect(page).not.toContain("<script")
+    expect(page).toContain("Open tasks")
+    expect(page).toContain("Project settings")
+    // The dialog trigger is a native invoker, so the dialog opens with no
+    // runtime at all.
+    expect(page).toContain("commandfor=")
+    expect(page).toContain("<dialog")
+  })
+
+  it("confirms a form round trip from the query string", async () => {
+    const page = await html("/pages/dashboard?nojs&project=Beta&plan=free")
+    expect(page).toContain("Saved")
+    expect(page).toContain("Beta")
+  })
+
+  it("carries the variant axes like every other page", async () => {
+    const dark = await html("/pages/dashboard?scheme=dark")
+    expect(htmlTag(dark)).toContain('data-scheme="dark"')
+    expect(dark).toContain('name="density"')
+  })
+})
+
+describe("the SPA route", () => {
+  it("serves a shell resolving the SPA entry through the asset server", async () => {
+    const response = await get("/spa")
+    expect(response.status).toBe(200)
+    const page = await response.text()
+    expect(page).toContain('<script type="module" src="/assets/app/spa/public/entry.tsx">')
+    expect(page).toContain('type="importmap"')
+    expect(page).toContain("Loading the client")
+  })
+
+  it("renders the same components with the no-JS toggle on", async () => {
+    const server = await html("/c/button?nojs")
+    const spa = await html("/spa/button?nojs")
+    expect(spa).not.toContain("<script")
+    // The same demo markers the catalogue route asserts.
+    for (const marker of ["size md", ">primary</button>"]) {
+      expect(server).toContain(marker)
+      expect(spa).toContain(marker)
+    }
+  })
+
+  it("serves an index with no scripts either", async () => {
+    const page = await html("/spa?nojs")
+    expect(page).not.toContain("<script")
+    expect(page).toContain("SPA demo")
+    expect(page).toContain('href="/spa/button"')
+  })
+
+  it("lets the browser router own the 404 with scripts", async () => {
+    // An index.html fallback serves the shell for unknown paths too; the
+    // client router renders the 404 after boot.
+    const response = await get("/spa/nope")
+    expect(response.status).toBe(200)
+    expect(await response.text()).toContain("Loading the client")
+  })
+
+  it("is a 404 page with no scripts", async () => {
+    const response = await get("/spa/nope?nojs")
+    expect(response.status).toBe(404)
+    const page = await response.text()
+    expect(page).toContain("No such component")
+    expect(page).toContain("Back to the SPA index")
+  })
+
+  it("rejects paths deeper than one demo", async () => {
+    expect((await get("/spa/button/extra?nojs")).status).toBe(404)
   })
 })

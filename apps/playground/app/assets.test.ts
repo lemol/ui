@@ -8,7 +8,11 @@ const get = (href: string) => router.fetch(new Request(new URL(href, "http://loc
 /** Every module the browser is expected to reach, by the path the asset server
  * knows it as. A graph that compiles but cannot be fetched is the failure this
  * catches. */
-const browserEntries = ["app/actions/public/entry.ts", "app/ui/public/runtime-probe.tsx"]
+const browserEntries = [
+  "app/actions/public/entry.ts",
+  "app/spa/public/entry.tsx",
+  "app/ui/public/runtime-probe.tsx",
+]
 
 describe("browser assets", () => {
   it("serves every module in each entry's graph", async () => {
@@ -24,9 +28,13 @@ describe("browser assets", () => {
   })
 
   it("compiles browser source to javascript", async () => {
-    const response = await get(await assetServer.getHref("app/ui/public/runtime-probe.tsx"))
-    expect(response.headers.get("Content-Type")).toContain("application/javascript")
-    expect(await response.text()).toContain("RuntimeProbe")
+    const probe = await get(await assetServer.getHref("app/ui/public/runtime-probe.tsx"))
+    expect(probe.headers.get("Content-Type")).toContain("application/javascript")
+    expect(await probe.text()).toContain("RuntimeProbe")
+
+    const spa = await get(await assetServer.getHref("app/spa/public/entry.tsx"))
+    expect(spa.headers.get("Content-Type")).toContain("application/javascript")
+    expect(await spa.text()).toContain("createSpaRouter")
   })
 
   it("keeps server-only source, and the tests beside browser source, out of reach", async () => {
@@ -35,7 +43,13 @@ describe("browser assets", () => {
       "app/assets.ts",
       "app/router.ts",
       "app/ui/catalogue.tsx",
+      "app/ui/dashboard.tsx",
+      "app/ui/forms.tsx",
       "app/ui/home.tsx",
+      "app/ui/knobs.tsx",
+      "app/ui/layout.tsx",
+      "app/ui/spa.tsx",
+      "app/ui/switchers.tsx",
       "app/router.test.tsx",
       "server.ts",
       "app/ui/public/does-not-exist.tsx",

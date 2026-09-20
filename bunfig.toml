@@ -1,0 +1,5 @@
+# This repository is composed inside `@lemol/workspace`, but day-to-day work and
+# CI install here — not at the composition root. Ignore the parent workspace so
+# `bun install` keeps `bun.lock` and `node_modules` under `repos/ui`.
+[install]
+ignoreWorkspace = true

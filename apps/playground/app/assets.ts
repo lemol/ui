@@ -14,11 +14,12 @@ const isDevelopment = process.env.NODE_ENV === "development"
 const isTest = process.env.NODE_ENV === "test"
 const isProduction = !isDevelopment && !isTest
 
-// Bun installs into one store at the composed workspace root and symlinks each
+// Bun keeps a store under this repository's own `node_modules` and symlinks each
 // package into its consumer's `node_modules`, so the files behind `remix`
 // resolve outside this app's rootDir. Mount the store: an allow-list cannot
 // reach files that no mount covers. Derived rather than written down, because
-// the store sits at a different depth standalone than composed.
+// the store sits at a different depth when this app is installed alone than
+// when a parent workspace hoists it.
 const remixDir = path.dirname(fileURLToPath(import.meta.resolve("remix/package.json")))
 const bunStoreDir = path.resolve(remixDir, "../../..")
 

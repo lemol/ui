@@ -4,6 +4,9 @@
   "private": true,
   "description": "UI for lemol projects: renderer-agnostic design tokens, Remix 3 components, and one minimal reference design",
   "type": "module",
+  "installConfig": {
+    "hoistingLimits": "workspaces"
+  },
   "workspaces": [
     "apps/*"
   ],

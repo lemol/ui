@@ -230,4 +230,7 @@ Inside this repository the catalogue does the same thing one level down:
 `apps/playground` takes `"@lemol/ui": "file:../.."`, so it reaches the source
 through the exports map rather than through a relative path into `src/`. It is
 `file:` and not `workspace:*` because Bun cannot name the workspace root as a
-workspace member — `workspaces: ["."]` fails to resolve.
+workspace member — `workspaces: ["."]` fails to resolve. `installConfig` on the
+repository root and a committed `bun.lock` keep `bun install` at this
+repository's root authoritative; `bunfig.toml` ignores a parent
+`@lemol/workspace` when this clone is composed.

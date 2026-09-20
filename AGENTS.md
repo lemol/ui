@@ -39,7 +39,7 @@ apps/
 ## Commands
 
 ```sh
-bun install
+bun install                        # from this repository's root, not @lemol/workspace
 bunx playwright install chromium   # once: the browser test/browser/ drives
 bun run check         # lint + typecheck + test: the gate for every change
 bun test

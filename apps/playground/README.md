@@ -73,19 +73,20 @@ a controller cannot leak into the browser by being imported.
 target, watching and sourcemaps in development, fingerprinting and minification
 otherwise, and the Bun store mount.
 
-The store mount is derived at runtime rather than written down. Bun installs into
-one store at the composed workspace root and symlinks packages into each
-consumer's `node_modules`, so the files behind `remix` sit outside this app's
-`rootDir` — and an allow-list cannot reach files that no mount covers. The store
-also sits at a different depth standalone than composed, which is why it is
+The store mount is derived at runtime rather than written down. `bun install` at
+the `@lemol/ui` repository root keeps the store under that tree (`installConfig`
+hoisting limits make this repo self-contained even when it sits inside
+`@lemol/workspace`), and symlinks packages into each consumer's `node_modules`.
+The files behind `remix` still sit outside this app's `rootDir`, so an
+allow-list cannot reach them without a mount — and the store can sit at a
+different depth when a parent workspace hoists instead, which is why the path is
 computed from `import.meta.resolve` instead of hard-coded.
 
-One consequence: the `remix` CLI resolves `remix` from the project directory, so
-`remix doctor` needs `apps/playground/node_modules` to exist, which only a
-composed install creates. Until then:
+The `remix` CLI resolves `remix` from the project directory, so `remix doctor`
+needs `apps/playground/node_modules` to exist:
 
 ```sh
-bun install                                    # from the composed workspace root
+bun install              # from the @lemol/ui repository root
 cd apps/playground && bunx --bun remix doctor
 ```
 

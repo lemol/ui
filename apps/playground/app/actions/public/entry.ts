@@ -1,4 +1,21 @@
+import { installInvokerCommands } from "@lemol/ui/remix/compat"
+import { installCommandRuntime } from "@lemol/ui/remix/runtime"
 import { run } from "remix/ui"
+
+/**
+ * Importing `compat` is what installs the backfill: the module installs
+ * itself, and the named import is here for the line below.
+ *
+ * `?compat` forces it on over the platform's own Invoker Commands, the same
+ * way `?nojs` drops this entry entirely. Every engine a test can drive has the
+ * feature natively, so without this switch the backfill is the one piece of
+ * client code that would ship unexercised.
+ */
+if (new URLSearchParams(location.search).has("compat")) {
+  installInvokerCommands({ force: true })
+}
+
+installCommandRuntime()
 
 /**
  * The document's browser entry. It hydrates the client entries the server

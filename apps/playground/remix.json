@@ -13,8 +13,23 @@
     // narrowest owner. Everything else under `app/` stays server-only, so a
     // controller cannot leak into the browser by being imported.
     "allowFiles": ["app/routes.ts", "app/**/public/**"],
-    "allowPackages": ["remix"],
-    "denyFiles": ["app/**/*.test.*"]
+    "allowPackages": ["remix", "@lemol/ui"],
+
+    // `@lemol/ui` is a `file:` dependency pointing at this repository's root,
+    // so admitting it by name also makes every file under that root resolve
+    // to an allowed package root — including this app's own server-only
+    // source, which sits inside the same repository. `allowFiles` alone
+    // cannot claw that back, because the package check is a fallback that
+    // only runs once a file fails every `allowFiles` pattern. These four
+    // patterns are what stayed open once `@lemol/ui` was admitted; verified
+    // by `app/assets.test.ts`.
+    "denyFiles": [
+      "app/**/*.test.*",
+      "app/assets.ts",
+      "app/router.ts",
+      "app/actions/*.tsx",
+      "app/ui/*.tsx"
+    ]
   },
 
   // `remix db` is absent: the playground has no persistence.

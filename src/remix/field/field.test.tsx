@@ -552,6 +552,22 @@ describe("Field, as a select", () => {
     expect(html).toContain("<path")
   })
 
+  it("gives the select no block padding, so its text centres in the fixed height", async () => {
+    // Chromium lays a select's text out from the top of its content box: two
+    // pad-y steps and a line taller than the height left clip it at the
+    // bottom. An input centres its text, so it keeps the padding.
+    const select = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+    expect(blocksOn(select, "select").some((block) => block.includes("padding-block"))).toBe(false)
+    const input = await renderToHtml(<Field label="Email" name="email" />)
+    expect(blocksOn(input, "input").some((block) => block.includes("padding-block-start"))).toBe(
+      true,
+    )
+  })
+
   it("draws the chevron with the exact glyph geometry, not just some path", async () => {
     // toContain("<path") passes for a path drawing nothing, or the wrong
     // shape. viewBox, d, fill and stroke-width can each drift independently,

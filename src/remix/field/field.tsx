@@ -236,8 +236,6 @@ const controlBase = css({
   color: "var(--ui-field-ink)",
   fontSize: "var(--ui-field-font-size)",
   inlineSize: "100%",
-  paddingBlockStart: "var(--ui-field-pad-y)",
-  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineStart: "var(--ui-field-pad-x)",
   "&::placeholder": {
     color: "var(--ui-field-placeholder-ink)",
@@ -257,10 +255,12 @@ const controlBase = css({
 
 /**
  * The box metrics an input takes. Disjoint from `controlBase`, which declares
- * neither `height` nor `padding-inline-end`.
+ * neither `height` nor the end or block padding.
  */
 const inputBox = css({
   height: "var(--ui-field-height)",
+  paddingBlockStart: "var(--ui-field-pad-y)",
+  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineEnd: "var(--ui-field-pad-x)",
 })
 
@@ -270,6 +270,8 @@ const inputBox = css({
  * horizontal resize breaks the surrounding layout.
  */
 const textareaBox = css({
+  paddingBlockStart: "var(--ui-field-pad-y)",
+  paddingBlockEnd: "var(--ui-field-pad-y)",
   paddingInlineEnd: "var(--ui-field-pad-x)",
   resize: "vertical",
 })
@@ -289,6 +291,12 @@ const selectFrame = css({
 /**
  * `appearance: none` is what lets a select match an input, and it takes the
  * disclosure arrow with it — hence the chevron below.
+ *
+ * No block padding, unlike an input and a textarea. Chromium lays a select's
+ * text out from the top of its content box, so `--ui-field-pad-y` twice plus
+ * a line of text taller than `--ui-field-height` clips the text at the bottom
+ * — which a skin with a larger type step or a compact height reaches. With
+ * none, the text centres in the fixed height the way an input's does.
  *
  * The end padding is the one calc() in the component, and both of its terms
  * are tokens. field.test.tsx decomposes a calc() rather than allowing it

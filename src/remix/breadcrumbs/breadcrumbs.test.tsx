@@ -4,7 +4,7 @@ import { blocksOn, markupOf, sharedProperties, stylesOf, valuesOf } from "../../
 import { Breadcrumbs } from "./breadcrumbs.tsx"
 import { breadcrumbsTokens } from "./tokens.ts"
 
-const keywords = new Set(["flex", "wrap", "center", "0", "none", "nowrap", "inline-flex"])
+const keywords = new Set(["flex", "wrap", "center", "0", "none", "anywhere", "inline-flex"])
 
 const items = [
   { href: "/", label: "Home" },
@@ -62,6 +62,13 @@ describe("Breadcrumbs", () => {
   it("hides the separator from assistive tech and omits it after the last item", async () => {
     const markup = markupOf(await renderToHtml(<Breadcrumbs items={items} />))
     expect([...markup.matchAll(/aria-hidden="true"/g)]).toHaveLength(2)
+  })
+
+  it("breaks a crumb wider than the line instead of overflowing it", async () => {
+    const long = [{ href: "/", label: "Home" }, { label: "x".repeat(200) }]
+    const html = await renderToHtml(<Breadcrumbs items={long} />)
+    expect(stylesOf(html)).toContain("overflow-wrap: anywhere")
+    expect(stylesOf(html)).not.toContain("white-space: nowrap")
   })
 
   it("reads only its own tokens and structural keywords", async () => {

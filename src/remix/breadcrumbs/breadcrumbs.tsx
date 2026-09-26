@@ -21,10 +21,15 @@ const itemStyle = css({
   gap: "var(--ui-breadcrumbs-gap)",
 })
 
+/**
+ * A crumb wraps to the next line whole first — the list is `flex-wrap` — and
+ * breaks inside itself only when it is wider than the line on its own: a task
+ * title or a run id on a phone, which `nowrap` pushed past the viewport edge.
+ */
 const linkStyle = css({
   color: "var(--ui-breadcrumbs-link-ink)",
   textDecoration: "none",
-  whiteSpace: "nowrap",
+  overflowWrap: "anywhere",
   "&:hover": {
     color: "var(--ui-breadcrumbs-link-ink-hover)",
   },
@@ -33,7 +38,7 @@ const linkStyle = css({
 const currentStyle = css({
   color: "var(--ui-breadcrumbs-current-ink)",
   fontWeight: "var(--ui-breadcrumbs-current-font-weight)",
-  whiteSpace: "nowrap",
+  overflowWrap: "anywhere",
 })
 
 const separatorStyle = css({

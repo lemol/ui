@@ -1,4 +1,4 @@
-import type { Handle } from "remix/ui"
+import { type Handle, unsafeHTML } from "remix/component"
 import { emitTokensCss } from "../design/css/index.ts"
 import type { Theme } from "../design/index.ts"
 import { type ComponentTokenName, componentTokens as ownTokens } from "./tokens.ts"
@@ -29,11 +29,12 @@ export interface ThemeStyleProps {
  * `innerHTML` rather than text children because remix escapes &, < and > in
  * element text content, which would quietly break any declaration carrying
  * one. `emitTokensCss()` rejects those characters as well; this is the half of
- * the defence that does not depend on the emitter keeping that rule.
+ * the defence that does not depend on the emitter keeping that rule. The sheet
+ * is first-party output, which is what makes `unsafeHTML()` sound here.
  */
 export function ThemeStyle(handle: Handle<ThemeStyleProps>) {
   return () => {
     const { theme, componentTokens = ownTokens } = handle.props
-    return <style innerHTML={emitTokensCss(theme, { componentTokens })} />
+    return <style innerHTML={unsafeHTML(emitTokensCss(theme, { componentTokens }))} />
   }
 }

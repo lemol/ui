@@ -1,5 +1,5 @@
-import type { Handle, RemixNode } from "remix/ui"
-import { ImportMap, type ImportMapData } from "remix/ui/server"
+import { type Handle, type RemixNode, unsafeHTML } from "remix/component"
+import { ImportMap, type ImportMapData } from "remix/component/server"
 import { schemeBootScript } from "../design/css/index.ts"
 import type { Theme } from "../design/index.ts"
 import { type ComponentTokenName, documentRootId, ThemeStyle } from "../remix/index.ts"
@@ -102,7 +102,7 @@ export interface DocumentProps {
  *
  * `<html>` exists only on the server — an SPA has an `index.html` carrying the
  * same boot script — which is why this sits on its own subpath rather than in
- * the barrel. It is the one module here that reaches for `remix/ui/server`,
+ * the barrel. It is the one module here that reaches for `remix/component/server`,
  * and a browser bundle should not take that along with the theme.
  */
 export function Document(handle: Handle<DocumentProps>) {
@@ -130,7 +130,7 @@ export function Document(handle: Handle<DocumentProps>) {
           {/* innerHTML rather than a text child, for ThemeStyle's reason: remix
               escapes &, < and > in element text, and a script arriving escaped
               is a syntax error rather than a visible fault. */}
-          {boot ? <script innerHTML={schemeBootScript} /> : null}
+          {boot ? <script innerHTML={unsafeHTML(schemeBootScript)} /> : null}
           <ThemeStyle theme={theme} />
           {entry === null ? null : (
             <>

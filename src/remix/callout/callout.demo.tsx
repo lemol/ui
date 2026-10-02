@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { LinkButton } from "../button/button.tsx"
 import { Stack } from "../stack/stack.tsx"
 import { Callout, type CalloutTone } from "./callout.tsx"

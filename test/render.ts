@@ -1,10 +1,10 @@
-import type { RemixNode } from "remix/ui"
-import { renderToString } from "remix/ui/server"
+import type { RemixNode } from "remix/component"
+import { renderToString } from "remix/component/server"
 
 /**
  * The server-render harness every component test copies.
  *
- * `remix/ui/server` is inside the SPA import allow-list, so a component test
+ * `remix/component/server` is inside the SPA import allow-list, so a component test
  * reaches for neither the router, nor the asset server, nor a DOM shim — which
  * is the point: a test that needed any of those would be testing the app, and a
  * test that needed a shim would be testing the shim.

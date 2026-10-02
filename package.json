@@ -26,14 +26,8 @@
     "test:git-consumer": "bun test test/git-consumer.test.ts",
     "playground": "bun --filter @lemol/ui-playground dev"
   },
-  "//overrides": "The three @remix-run/* pins remix@3.0.0-rc.2 needs to stay coherent; see docs/architecture.md, 'Workspace composition'. They come out when remix ships an rc whose own dependencies agree.",
-  "overrides": {
-    "@remix-run/assets": "0.7.0",
-    "@remix-run/render-middleware": "0.3.0",
-    "@remix-run/spa": "0.1.1"
-  },
   "peerDependencies": {
-    "remix": "3.0.0-rc.2"
+    "remix": "3.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "^2.5.13",

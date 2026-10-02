@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { type HeadingLevel, headingScale } from "../../design/index.ts"
 import { Heading } from "./heading.tsx"
 

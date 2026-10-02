@@ -1,4 +1,4 @@
-import type { Handle } from "remix/ui"
+import type { Handle } from "remix/component"
 import { ErrorState } from "../../../../src/mini/index.ts"
 import { type DemoEntry, type DemoName, demos } from "../../../../src/remix/demos.ts"
 import { Eyebrow, Heading, LinkButton, Row, Stack } from "../../../../src/remix/index.ts"

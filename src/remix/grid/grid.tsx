@@ -1,4 +1,10 @@
-import { type CSSMixinDescriptor, css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import {
+  type CSSMixinDescriptor,
+  css,
+  type Handle,
+  type MixInput,
+  type RemixNode,
+} from "remix/component"
 import { gaps, type SpaceStep } from "../space.ts"
 
 /**

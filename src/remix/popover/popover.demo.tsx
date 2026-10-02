@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Stack } from "../stack/stack.tsx"
 import { Text } from "../text/text.tsx"
 import { popover } from "./popover.tsx"

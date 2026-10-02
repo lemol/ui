@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Stack } from "../stack/stack.tsx"
 import { Meter, Progress } from "./meter.tsx"
 

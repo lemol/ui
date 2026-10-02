@@ -3,7 +3,7 @@
  * every component test that cares which cascade sub-layer a declaration
  * landed in.
  *
- * `remix/ui` gives every distinct `css({...})` style object its own cascade
+ * `remix/component` gives every distinct `css({...})` style object its own cascade
  * sub-layer, and within layers, layer order beats specificity — see "Cascade
  * layers" in docs/design-system.md. That is what makes *which block* a
  * declaration sits in a correctness question, not a formatting one, and why
@@ -77,7 +77,7 @@ const topLevelPropertiesOf = (block: string): string[] => {
  * component correct under any order instead of correct under the order
  * observed today.
  *
- * `blocks` is deduplicated by exact text before comparing, because remix/ui
+ * `blocks` is deduplicated by exact text before comparing, because remix/component
  * caches a `css()` block by content and reuses one sub-layer across every
  * element that renders it: the same `buttonBase` block appearing once per
  * button in a multi-render test is one block, not evidence that "display"
@@ -134,7 +134,7 @@ export const nonPrimitiveValues = (
     return referenced === undefined || !primitives.has(referenced)
   })
 
-/** Each style block with the hash `remix/ui` keyed it by. */
+/** Each style block with the hash `remix/component` keyed it by. */
 const hashedBlocksOf = (html: string): { hash: string; block: string }[] =>
   [...html.matchAll(/<style data-rmx-style="([^"]*)">([\s\S]*?)<\/style>/g)].map((match) => ({
     hash: match[1] ?? "",
@@ -143,7 +143,7 @@ const hashedBlocksOf = (html: string): { hash: string; block: string }[] =>
 
 /**
  * The style blocks that landed on one element, found through the class
- * `remix/ui` wrote on it.
+ * `remix/component` wrote on it.
  *
  * `sharedProperties` over every block in a document is the right question for
  * a component that styles one element, and the wrong one for a component that

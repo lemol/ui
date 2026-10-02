@@ -1,4 +1,4 @@
-import type { Handle, RemixNode } from "remix/ui"
+import type { Handle, RemixNode } from "remix/component"
 import { AppShell, Nav } from "../../../../src/mini/index.ts"
 import { PlaygroundSwitchers } from "./switchers.tsx"
 

@@ -20,7 +20,7 @@ unstyled content or a dead bundle, and it is the same every time.
 Two, and the split is the same argument the runtime's subpath makes in
 `remix`. `<html>` exists only on the server — an SPA has an `index.html`
 carrying the same boot script — and `Document` is the one file here that
-imports `remix/ui/server`. In the barrel it would follow `miniTheme` into every
+imports `remix/component/server`. In the barrel it would follow `miniTheme` into every
 browser bundle, because these packages ship unbundled source and the asset
 server compiles a module graph rather than tree-shaking it.
 

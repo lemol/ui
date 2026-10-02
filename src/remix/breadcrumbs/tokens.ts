@@ -1,12 +1,10 @@
 /**
  * Breadcrumbs' contract. Eight names.
  *
- * `remix/ui` ships its own `Breadcrumbs` at `remix/ui/breadcrumbs`, checked
- * before writing this — its markup shape (`nav` > `ol` > `li`*, the current
- * item as `aria-current="page"`, a separator `li` marked `aria-hidden`) is
- * followed here too, but its styling reads a hardcoded internal style-values
- * module, not this package's `--ui-*` contract, so reusing the component
- * itself would import colours no theme here can retune.
+ * The markup shape is `nav` > `ol` > `li`*, the current item as
+ * `aria-current="page"` and a separator `li` marked `aria-hidden` — the shape
+ * Remix's own styled breadcrumbs used before Remix 3 dropped its styled
+ * components, kept here so the semantics carry over unchanged.
  */
 export const breadcrumbsTokens = {
   "ui-breadcrumbs-gap": "var(--sp-2)",

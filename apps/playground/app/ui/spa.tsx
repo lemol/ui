@@ -1,4 +1,4 @@
-import type { Handle } from "remix/ui"
+import type { Handle } from "remix/component"
 import { type DemoName, demos } from "../../../../src/remix/demos.ts"
 import { Eyebrow, Grid, Heading, LinkButton, Stack, Text } from "../../../../src/remix/index.ts"
 import { PlaygroundShell } from "./layout.tsx"

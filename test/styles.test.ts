@@ -2,7 +2,7 @@ import { describe, expect, it } from "bun:test"
 import { blocksOn, markupOf } from "./styles.ts"
 
 /**
- * A document shaped exactly as `remix/ui` writes one: the hash is both the
+ * A document shaped exactly as `remix/component` writes one: the hash is both the
  * style element's `data-rmx-style` and the class on the element it styles.
  * Built from helpers rather than pasted, so an expectation cannot drift from
  * the fixture it is asserting against.

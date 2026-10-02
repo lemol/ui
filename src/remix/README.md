@@ -4,7 +4,7 @@ Remix 3 components, and the `--ui-*` token contract a component declares beside
 itself. Also `ThemeStyle`, which puts an emitted stylesheet into the document,
 and the two files that are the whole of this repo's hand-written client code.
 
-Sits on the `design` layer and `remix/ui`, and on nothing else.
+Sits on the `design` layer and `remix/component`, and on nothing else.
 
 ## Entry points
 
@@ -85,7 +85,7 @@ the components.
 `gap` is a step on the primitive space scale — `gap={4}` is `var(--sp-4)` — and
 its type derives from `schema.space`, so a step the schema does not hold is a
 typecheck failure. The Record of blocks is shared in `space.ts`, and `align`
-in `align.ts`, because `remix/ui` caches a `css()` block by content: a copy
+in `align.ts`, because `remix/component` caches a `css()` block by content: a copy
 per component would collapse to one sub-layer anyway and save nothing while
 still drifting.
 
@@ -166,7 +166,7 @@ required field on first paint, so every form would load pre-reddened.
 `:user-invalid` is Chrome 119, so Chrome 114 through 118 shows no invalid
 styling and the validation bubble still blocks submission there.
 
-**A `<textarea>` takes its value from `value`, not from children.** `remix/ui`
+**A `<textarea>` takes its value from `value`, not from children.** `remix/component`
 drops a textarea's children. **A `<select>` takes no `value` at all** — HTML
 gives it no such content attribute, so the chosen `<option>` carries
 `selected`. It takes no `readonly` either, for the same reason.
@@ -240,7 +240,7 @@ Thirteen tokens in `popover/tokens.ts`; the trigger is a `Button` and reads
 ### `Menu` and `menu()`
 
 A `Popover` with `role="menu"` and rows of `role="menuitem"` — checked against
-`remix/ui/menu` first and built without it: that package's `Menu` owns a
+`remix/component/menu` first and built without it: that package's `Menu` owns a
 JS-`Context`-driven popover of its own, not `[popover]` plus
 `command="toggle-popover"`, so building on it would trade the native-first
 open/close this layer exists to guarantee for a keyboard model outside the six
@@ -467,7 +467,7 @@ switching, and the page still renders in whatever `bootScript` restored.
 
 Route links with `aria-current` — no client state, since this is a
 server-rendered app and the current page is known at render time. Checked
-against `remix/ui/breadcrumbs` first: its markup shape (`nav` > `ol` > `li`*,
+against `remix/component/breadcrumbs` first: its markup shape (`nav` > `ol` > `li`*,
 `aria-current="page"` on the current item, a separator marked `aria-hidden`)
 is followed here too, but its styling reads a hardcoded internal
 style-values module rather than this package's `--ui-*` contract, so the
@@ -519,7 +519,7 @@ layer's aggregate:
 <ThemeStyle theme={miniTheme} />
 ```
 
-**It belongs in `<head>`.** `remix/ui` splices its own component styles in
+**It belongs in `<head>`.** `remix/component` splices its own component styles in
 immediately before `</head>`, so a `ThemeStyle` in the body is evaluated after
 the `rmx` layer exists — and `@layer rmx-reset, base, rmx;` then registers
 `base` after it, inverting the order with no error. See

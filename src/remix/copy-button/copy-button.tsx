@@ -1,4 +1,4 @@
-import { attrs, type Handle, type RemixNode } from "remix/ui"
+import { attrs, type Handle, type RemixNode } from "remix/component"
 import { Button, type ButtonProps } from "../button/button.tsx"
 import { invoke } from "../invocation.ts"
 

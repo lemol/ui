@@ -1,4 +1,4 @@
-import { css, type Handle } from "remix/ui"
+import { css, type Handle } from "remix/component"
 import { Button } from "../../../../src/remix/index.ts"
 import { HiddenFields, splitLocation } from "./forms.tsx"
 

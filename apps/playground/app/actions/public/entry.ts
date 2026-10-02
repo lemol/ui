@@ -1,4 +1,4 @@
-import { run } from "remix/ui"
+import { run } from "remix/component"
 import { installInvokerCommands } from "../../../../../src/remix/compat.ts"
 import { installCommandRuntime } from "../../../../../src/remix/runtime.ts"
 

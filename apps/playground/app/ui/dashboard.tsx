@@ -1,4 +1,4 @@
-import { css, type Handle } from "remix/ui"
+import { css, type Handle } from "remix/component"
 import { EmptyState } from "../../../../src/mini/index.ts"
 import {
   Badge,

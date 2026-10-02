@@ -10,14 +10,14 @@ const harnesses = [resolve(import.meta.dir, "render.ts"), resolve(import.meta.di
 // The dependency graph from docs/architecture.md, now as layers inside one
 // package. Each layer may import its own files under src/<layer>/, plus the
 // specifiers listed here. An entry matches exactly or as a prefix, so
-// "remix/ui" also allows "remix/ui/server".
+// "remix/component" also allows "remix/component/server".
 //
 // design allows nothing: it is strings and data, and the day it knows about a
 // renderer is the day a future opentui layer cannot reuse it.
 const allowed: Record<string, string[]> = {
   design: [],
-  remix: ["remix/ui"],
-  mini: ["remix/ui"],
+  remix: ["remix/component"],
+  mini: ["remix/component"],
 }
 
 // Which layers each one may reach, and in which direction. Collapsing three
@@ -179,11 +179,11 @@ describe("the SPA import boundary", () => {
       }
     })
 
-    test("allows remix/ui, its subpaths and relative files", () => {
+    test("allows remix/component, its subpaths and relative files", () => {
       const source = [
-        'import type { RemixNode } from "remix/ui"',
-        'import { css } from "remix/ui"',
-        'import { renderToString } from "remix/ui/server"',
+        'import type { RemixNode } from "remix/component"',
+        'import { css } from "remix/component"',
+        'import { renderToString } from "remix/component/server"',
         'export * from "./tokens.ts"',
         'import { buttonTokens } from "../button/tokens.ts"',
       ].join("\n")
@@ -192,8 +192,8 @@ describe("the SPA import boundary", () => {
 
     test("keeps design renderer-agnostic", () => {
       const file = at("design", "css", "emit.ts")
-      expect(violations(file, 'import { css } from "remix/ui"')).toEqual([
-        `${file}: design must not import remix/ui`,
+      expect(violations(file, 'import { css } from "remix/component"')).toEqual([
+        `${file}: design must not import remix/component`,
       ])
       expect(violations(file, 'import { theme } from "../theme.ts"')).toEqual([])
     })

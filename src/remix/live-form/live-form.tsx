@@ -1,4 +1,4 @@
-import { attrs, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { attrs, type Handle, type MixInput, type RemixNode } from "remix/component"
 
 export interface LiveFormProps {
   /** Required: the id every `liveSubmit()`-tagged field points at through `commandfor`. */

@@ -1,4 +1,4 @@
-import { attrs, css, type Handle, type RemixNode } from "remix/ui"
+import { attrs, css, type Handle, type RemixNode } from "remix/component"
 
 const inputStyle = css({
   width: "100%",
@@ -56,7 +56,7 @@ export function CommandPaletteInput(handle: Handle<CommandPaletteInputProps>) {
       <input
         aria-controls={listId}
         autocomplete="off"
-        // command/commandfor via attrs(), not as typed props: remix/ui types
+        // command/commandfor via attrs(), not as typed props: remix/component types
         // <input> against the Invoker Commands spec, which is button-only,
         // so a text input's command/commandfor — this package's own
         // convention, read by runtime.ts's input bridge — has no typed home.

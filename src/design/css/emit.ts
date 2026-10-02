@@ -110,7 +110,7 @@ function validate(componentTokens: Entries, base: Entries, dark: Entries, compac
  * shareable by a renderer that has no DOM. The component that puts the text in
  * a document lives in the package that has JSX.
  *
- * The layer statement must be evaluated before remix/ui's own styles or the
+ * The layer statement must be evaluated before remix/component's own styles or the
  * layer order inverts; see layers.ts.
  */
 export function emitTokensCss<C extends string = never>(

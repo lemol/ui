@@ -1,4 +1,4 @@
-import { css, type Handle } from "remix/ui"
+import { css, type Handle } from "remix/component"
 
 /**
  * A ring drawn from `border`, one arc retinted, rotated by the native

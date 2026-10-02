@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import { blocksOn, markupOf, sharedProperties, stylesOf, valuesOf } from "../../../test/styles.ts"
 import { FieldDemo } from "./field.demo.tsx"
@@ -186,7 +186,7 @@ describe("Field", () => {
 
   it("renders every type it offers, which the compiler no longer checks", async () => {
     // `inputTypeAttribute` asserts the union down to one literal, because
-    // remix/ui types <input> as a union discriminated on `type`. That buys
+    // remix/component types <input> as a union discriminated on `type`. That buys
     // the element a typecheck at the cost of checking the value, so the
     // value is checked here instead — derived from fieldTypes, so a type
     // added to the list is a type this covers.
@@ -426,7 +426,7 @@ describe("Field, as a textarea", () => {
     expect(markupOf(html)).toContain(" required")
   })
 
-  it("passes readonly through, spelled camelCase because that is the only spelling remix/ui's textarea props declare", async () => {
+  it("passes readonly through, spelled camelCase because that is the only spelling remix/component's textarea props declare", async () => {
     // TextareaHTMLProps has only `readOnly`; PartialInputHTMLProps has both
     // spellings. field.tsx's readOnly={props.readonly} on the textarea is that
     // constraint, not an inconsistency with the input branch's readonly=. Both

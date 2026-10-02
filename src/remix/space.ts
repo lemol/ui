@@ -1,4 +1,4 @@
-import { type CSSMixinDescriptor, css } from "remix/ui"
+import { type CSSMixinDescriptor, css } from "remix/component"
 import { schema } from "../design/index.ts"
 
 /**
@@ -15,7 +15,7 @@ export type SpaceStep = StepName extends `sp-${infer N extends number}` ? N : ne
 /**
  * One `css()` block per step, shared by Stack, Row and Grid.
  *
- * Shared rather than copied into each: `remix/ui` caches a block by content,
+ * Shared rather than copied into each: `remix/component` caches a block by content,
  * so three identical copies would collapse to one sub-layer and save nothing
  * — the duplication would cost only source, and drift.
  *

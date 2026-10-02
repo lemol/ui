@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import type { SpaceStep } from "../space.ts"
 import { type ColumnCount, columnStyles, Grid } from "./grid.tsx"
 

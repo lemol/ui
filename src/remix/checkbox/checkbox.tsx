@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput } from "remix/ui"
+import { css, type Handle, type MixInput } from "remix/component"
 import { fieldMessages } from "../form-control.ts"
 
 const rowStyle = css({

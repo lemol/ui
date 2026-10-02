@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Field } from "../field/field.tsx"
 import { LiveForm, liveSubmit } from "./live-form.tsx"
 

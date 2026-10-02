@@ -1,4 +1,4 @@
-import type { Handle } from "remix/ui"
+import type { Handle } from "remix/component"
 
 /**
  * The playground's pages never see the request — only where it was going.

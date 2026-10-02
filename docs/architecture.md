@@ -40,7 +40,7 @@ when the shipping shape breaks.
 | Layer | Owns | Knows about |
 | --- | --- | --- |
 | `design` | Token schema, theme composition, `v()`, and — on the opt-in `/css` subpath — the stylesheet emitter, cascade-layer setup, element defaults, boot script. | Nothing about components, and nothing about a renderer. |
-| `remix` | Remix 3 components, the `--ui-*` contract each declares, `ThemeStyle`, the compat shim, the runtime. | `design`, `remix/ui`. |
+| `remix` | Remix 3 components, the `--ui-*` contract each declares, `ThemeStyle`, the compat shim, the runtime. | `design`, `remix/component`. |
 | `mini` | One concrete design: a theme plus the app shell. | Both of the above. |
 
 ```
@@ -89,7 +89,7 @@ src/
     shell.tsx             AppShell and Nav
     states.tsx            EmptyState and ErrorState
     document.tsx          Document — its own subpath, and the only file here
-                          that reaches for remix/ui/server
+                          that reaches for remix/component/server
 apps/
   playground/             catalogue, page recipes, theme and no-JS switches
 ```
@@ -99,7 +99,7 @@ apps/
 `design` is strings and data. `emitTokensCss()` returns CSS text; it never
 returns a component. The component that puts that text into the document —
 `ThemeStyle` — lives in `remix`, because a `.tsx` component built on
-`remix/ui` JSX is renderer-specific by definition.
+`remix/component` JSX is renderer-specific by definition.
 
 That line is what makes the layer reusable. A future `@lemol/ui/opentui`
 imports `@lemol/ui/design` and never `/css`, mapping the same themes to
@@ -125,8 +125,8 @@ must NOT import:  node:*, bun, bun:*, effect,
                   remix/router, remix/routes, remix/assets, remix/spa
 
 may import:       design   nothing
-                  remix    remix/ui, remix/ui/*, ../design
-                  mini     remix/ui, remix/ui/*, ../design, ../remix
+                  remix    remix/component, remix/component/*, ../design
+                  mini     remix/component, remix/component/*, ../design, ../remix
 ```
 
 The deny list is the SPA floor and applies to all three. The allow list is the
@@ -141,13 +141,13 @@ import neither.
 This is what makes SPA portability a checked property. `remix/spa` keeps the
 same router contract as the server — `render()` middleware plus
 `run(router, { fallback })`, the same controllers, middleware and
-`context.render()` — and `remix/ui`'s `css()` emits into the `rmx` cascade
+`context.render()` — and `remix/component`'s `css()` emits into the `rmx` cascade
 layer identically in both modes. So components are portable by construction,
 and the only thing that can break it is a server-only import.
 
 `Document` sits on its own subpath for a related reason. `<html>` exists only
 on the server — an SPA has an `index.html` carrying the same boot script — and
-it is the one file in `mini` that imports `remix/ui/server`. Through the barrel
+it is the one file in `mini` that imports `remix/component/server`. Through the barrel
 it would follow `miniTheme` into every browser bundle, since the packages ship
 unbundled source and the asset server compiles a module graph rather than
 tree-shaking it.
@@ -191,9 +191,9 @@ than a runner; `bunx playwright install chromium` once per machine.
 
 ## Testing
 
-- A **server-render test per component**, via `remix/ui/server` — `test/render.ts`
+- A **server-render test per component**, via `remix/component/server` — `test/render.ts`
   is the harness, and `apps/playground/app/ui/home.test.tsx` the worked example.
-  It reaches for no router, no asset server and no DOM, because `remix/ui/server`
+  It reaches for no router, no asset server and no DOM, because `remix/component/server`
   is inside the import allow-list and the other three are not.
 - **Browser tests for the runtime behaviours only**, in `test/browser/`, driven
   by Playwright as a library from inside `bun test` — not the `@playwright/test`
@@ -235,18 +235,6 @@ nothing about. The root now lists its members one by one and `bootstrap` runs
 this side: `bunfig.toml`'s `ignoreWorkspace` and `package.json`'s
 `installConfig` are Yarn and pnpm vocabulary that Bun 1.4 does not read, which
 is why neither is here.
-
-Installing itself means carrying its own version pins. `remix@3.0.0-rc.2`
-depends on `@remix-run/ui` at `^0.9.0`, but takes `@remix-run/assets`,
-`@remix-run/render-middleware` and `@remix-run/spa` at caret ranges whose later
-patches moved to `@remix-run/ui@^0.10.0` — so a fresh resolution puts two copies
-of `@remix-run/ui` in the tree: components import `remix/ui` and get `0.9.0`,
-while the render middleware gets `0.10.0`, which rejects the string `innerHTML`
-that `ThemeStyle` and `Document` depend on. A server-render test passes and the
-same markup through `render()` fails. The three `overrides` in `package.json`
-hold those packages at the last versions that agree with the rc's own pin, and
-they come out when `remix` ships an rc whose dependencies are coherent. The
-composition root carries the same three for the same reason.
 
 Inside this repository the catalogue imports the source relatively and takes
 no `@lemol/*` dependency at all. A `file:` dependency on the repository root

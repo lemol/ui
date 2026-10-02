@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput } from "remix/ui"
+import { css, type Handle, type MixInput } from "remix/component"
 import { pageRange } from "./page-range.ts"
 
 const listStyle = css({

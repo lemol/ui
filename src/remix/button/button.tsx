@@ -1,4 +1,10 @@
-import { type CSSMixinDescriptor, css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import {
+  type CSSMixinDescriptor,
+  css,
+  type Handle,
+  type MixInput,
+  type RemixNode,
+} from "remix/component"
 import type { Invocation } from "../invocation.ts"
 
 export type ButtonTone = "primary" | "neutral" | "ghost" | "danger"
@@ -59,7 +65,7 @@ const sizeStyles: Record<ButtonSize, CSSMixinDescriptor> = {
  * is four more tokens for an effect that lasts a hundred milliseconds.
  *
  * The `:disabled` override lives here, inside the tone's own css() block,
- * rather than in buttonBase. remix/ui gives every css() call its own cascade
+ * rather than in buttonBase. remix/component gives every css() call its own cascade
  * sub-layer, and within layers, layer order beats specificity — so a
  * `.base:disabled` rule in a layer registered before the tone's layer loses
  * to `.tone { color: … }` even though it is more specific. Putting the
@@ -121,7 +127,7 @@ export interface ButtonProps {
    *
    * It reliably **adds** properties Button does not itself declare. It does
    * **not** reliably override one Button does declare, and composing it last
-   * here does not make it win. remix/ui gives every `css()` block its own
+   * here does not make it win. remix/component gives every `css()` block its own
    * cascade sub-layer; within a layer, layer order beats specificity, and
    * sub-layer order follows the order blocks are first encountered during the
    * render rather than the order of this array. A descriptor that already

@@ -1,7 +1,7 @@
+import type { Handle } from "remix/component"
 import { createRouter } from "remix/router"
 import { get, route } from "remix/routes"
 import { render } from "remix/spa"
-import type { Handle } from "remix/ui"
 import { AppShell, ErrorState, Nav } from "../../../../../src/mini/index.ts"
 import { type DemoName, demos, isDemoName } from "../../../../../src/remix/demos.ts"
 import { Eyebrow, Grid, Heading, LinkButton, Stack, Text } from "../../../../../src/remix/index.ts"

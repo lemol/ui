@@ -27,7 +27,7 @@ violation the two-tier split exists to prevent.
 
 - **No components, and no JSX.** The component that puts an emitted sheet into
   the document — `ThemeStyle` — lives in `@lemol/ui/remix`, because a component
-  built on `remix/ui` JSX is renderer-specific by definition.
+  built on `remix/component` JSX is renderer-specific by definition.
 - **No dependencies at all**, not even `remix`. The package declares `remix` as
   a peer for the sake of the layers above; nothing here imports it. Adding one
   would make this layer renderer-aware and cost it the reuse above.

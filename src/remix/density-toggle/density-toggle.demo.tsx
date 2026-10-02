@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { DensityToggle } from "./density-toggle.tsx"
 
 /** Primitives, not tokens: a demo is a page, not a component. */

@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { sizeStyles, Text, toneStyles } from "./text.tsx"
 
 /** Primitives, not tokens: a demo is a page, not a component. */

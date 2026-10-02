@@ -1,4 +1,10 @@
-import { type CSSMixinDescriptor, css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import {
+  type CSSMixinDescriptor,
+  css,
+  type Handle,
+  type MixInput,
+  type RemixNode,
+} from "remix/component"
 
 /**
  * Four semantic tones and a neutral. The semantic four are the reason this
@@ -67,7 +73,7 @@ export interface BadgeProps {
   /**
    * Adds properties Badge does not declare — a margin, a grid placement owned
    * by the layout around it. It does not reliably override one Badge declares:
-   * remix/ui gives every css() block its own cascade sub-layer, and sub-layer
+   * remix/component gives every css() block its own cascade sub-layer, and sub-layer
    * order follows first render rather than the order of this array. To change
    * something Badge sets, set its `--ui-badge-*` token.
    */

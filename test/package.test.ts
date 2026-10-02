@@ -81,7 +81,7 @@ test("keeps the design barrel clear of the css subpath", async () => {
 })
 
 // Same shape of rule, one layer up. `Document` is the only file in mini that
-// imports `remix/ui/server`, and an SPA takes the theme from this barrel — so
+// imports `remix/component/server`, and an SPA takes the theme from this barrel — so
 // a re-export here would drag a server renderer into every browser bundle,
 // since these packages ship unbundled source and the asset server compiles a
 // module graph rather than tree-shaking it.
@@ -91,7 +91,7 @@ test("keeps the mini barrel clear of the document subpath", async () => {
   const barrel = await Bun.file(`${root}src/mini/index.ts`).text()
   expect(barrel).not.toContain("./document")
   const server = await Bun.file(`${root}src/mini/document.tsx`).text()
-  expect(server).toContain("remix/ui/server")
+  expect(server).toContain("remix/component/server")
 })
 
 describe("apps/playground", () => {

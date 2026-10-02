@@ -1,4 +1,4 @@
-import { clientEntry, css, type Handle, type MixInput, on } from "remix/ui"
+import { clientEntry, css, type Handle, type MixInput, on } from "remix/component"
 
 const style = css({
   font: "inherit",

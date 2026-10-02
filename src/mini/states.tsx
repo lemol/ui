@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { Badge, Eyebrow, Heading, type HeadingLevel, Stack, Text } from "../remix/index.ts"
 
 /**

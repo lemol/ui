@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { Heading } from "../heading/heading.tsx"
 import type { Invocation } from "../invocation.ts"
 

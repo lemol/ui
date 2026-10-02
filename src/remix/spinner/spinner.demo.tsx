@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Row } from "../row/row.tsx"
 import { Spinner } from "./spinner.tsx"
 

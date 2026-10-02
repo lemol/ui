@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Heading } from "../heading/heading.tsx"
 import { Text } from "../text/text.tsx"
 import { Eyebrow } from "./eyebrow.tsx"

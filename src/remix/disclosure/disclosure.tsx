@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 
 /**
  * Hides the platform marker on every engine, including the two that ignore
@@ -45,7 +45,7 @@ const markerStyle = css({
   transitionDuration: "var(--ui-disclosure-marker-transition-duration)",
   transitionTimingFunction: "var(--ui-disclosure-marker-transition-easing)",
   // A key naming a nested rule has to start with "&", "@", ":", "[" or "." for
-  // remix/ui's css() to treat it as a selector rather than a declaration —
+  // remix/component's css() to treat it as a selector rather than a declaration —
   // "details[open] &" fails that and silently renders as [object Object]. The
   // `:where(...)` wrapper is the shortest fix: zero specificity, valid CSS
   // nesting, and it starts with ":".

@@ -21,10 +21,10 @@ no typecheck catches.
 
 See [design-system.md](design-system.md) for the mechanism.
 
-## 2. Native first, then `remix/ui`, then hand-written
+## 2. Native first, then `@remix-run/ui`, then hand-written
 
 Use `<dialog>`, `<details>`, `popover`, `command`/`commandfor` and native form
-controls where they cover the need. Reach for `remix/ui/*` primitives when the
+controls where they cover the need. Reach for `@remix-run/ui/*` primitives when the
 need exceeds the platform, layered over the native element. Write DOM code only
 when neither does.
 

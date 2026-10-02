@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import {
   markupOf,
@@ -136,7 +136,7 @@ describe("Button", () => {
   })
 
   it("wins the disabled cascade from within the tone's own sub-layer", async () => {
-    // remix/ui gives every css() call its own cascade sub-layer, and within
+    // remix/component gives every css() call its own cascade sub-layer, and within
     // layers, layer order beats specificity — not just "more specific wins".
     // buttonBase's sub-layer is registered before the tone's, so a
     // `.base:disabled` rule sitting in buttonBase would lose to

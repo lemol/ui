@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import type { Handle } from "remix/ui"
+import { type Handle, unsafeHTML } from "remix/component"
 import { renderToHtml } from "../../test/render.ts"
 import { emitTokensCss } from "../design/css/index.ts"
 import { defineTheme, type PrimitiveTokens, primitiveNames } from "../design/index.ts"
@@ -59,7 +59,7 @@ describe("ThemeStyle", () => {
     expect(html).toContain("--ui-app-x: 1px;")
   })
 
-  it("sets innerHTML on the style element and renders no children", () => {
+  it("sets innerHTML on the style element and renders no children", async () => {
     // Every test above reads rendered HTML, and emitTokensCss() currently bans
     // &, < and > — so a rewrite to text children (`<style>{css}</style>`)
     // would produce byte-identical HTML and pass all of them. This reads the
@@ -72,8 +72,9 @@ describe("ThemeStyle", () => {
     const handle = { props: { theme } } as unknown as Handle<ThemeStyleProps>
     const element = ThemeStyle(handle)()
     expect(element.type).toBe("style")
-    expect(element.props.innerHTML).toContain("@layer rmx-reset, base, rmx;")
+    expect(element.props.innerHTML).toBeDefined()
     expect(element.props.children).toBeUndefined()
+    expect(await renderToHtml(element)).toContain("@layer rmx-reset, base, rmx;")
   })
 
   it("remix escapes text children but not innerHTML", async () => {
@@ -85,7 +86,7 @@ describe("ThemeStyle", () => {
     // innerHTML), and the innerHTML decision in theme-style.tsx needs
     // revisiting, not just this test.
     const raw = "a & b < c > d"
-    const viaInnerHtml = await renderToHtml(<style innerHTML={raw} />)
+    const viaInnerHtml = await renderToHtml(<style innerHTML={unsafeHTML(raw)} />)
     const viaChildren = await renderToHtml(<style>{raw}</style>)
     expect(viaInnerHtml).toContain(raw)
     expect(viaChildren).not.toContain(raw)

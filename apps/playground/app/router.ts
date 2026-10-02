@@ -21,7 +21,7 @@ export function createMiddleware() {
 /** The request context every controller sees. */
 export type PlaygroundContext = MiddlewareContext<ReturnType<typeof createMiddleware>>
 
-declare module "remix/router" {
+declare module "remix" {
   interface RouterTypes {
     context: PlaygroundContext
   }

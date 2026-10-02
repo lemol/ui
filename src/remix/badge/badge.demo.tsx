@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Row } from "../row/row.tsx"
 import { Text } from "../text/text.tsx"
 import { Badge, type BadgeTone } from "./badge.tsx"

@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { overlay } from "../dialog/overlay.tsx"
 import { Text } from "../text/text.tsx"
 import { CommandPaletteInput, CommandPaletteItem, CommandPaletteList } from "./command-palette.tsx"

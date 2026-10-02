@@ -42,7 +42,7 @@ test("installs from Git, then renders a component and emits a theme", () => {
         type: "module",
         dependencies: {
           "@lemol/ui": `git+file://${remote}#ui@0.1.0`,
-          remix: "3.0.0-rc.2",
+          remix: "3.0.0",
         },
         scripts: { contract: "bun contract.tsx" },
       },
@@ -57,7 +57,13 @@ test("installs from Git, then renders a component and emits a theme", () => {
   writeFileSync(
     join(consumer, "tsconfig.json"),
     JSON.stringify(
-      { compilerOptions: { jsx: "react-jsx", jsxImportSource: "remix/ui", module: "Preserve" } },
+      {
+        compilerOptions: {
+          jsx: "react-jsx",
+          jsxImportSource: "remix/component",
+          module: "Preserve",
+        },
+      },
       null,
       2,
     ),
@@ -72,7 +78,7 @@ test("installs from Git, then renders a component and emits a theme", () => {
       'import { emitTokensCss } from "@lemol/ui/design/css"',
       'import { miniTheme } from "@lemol/ui/mini"',
       'import { Button } from "@lemol/ui/remix"',
-      'import { renderToString } from "remix/ui/server"',
+      'import { renderToString } from "remix/component/server"',
       "",
       "const html = await renderToString(<Button>Save</Button>)",
       "const css = emitTokensCss(miniTheme)",

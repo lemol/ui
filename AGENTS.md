@@ -54,7 +54,7 @@ bun run playground    # the catalogue
   declares its own `--ui-*` tokens beside itself, defaulting to a primitive;
   one styled from structural keywords and primitives alone declares none. A
   skin is a set of token values, never a forked component.
-- **Native first, then `remix/ui`, then hand-written.** Check the ladder in
+- **Native first, then `@remix-run/ui`, then hand-written.** Check the ladder in
   [interactivity.md](docs/interactivity.md) before writing DOM code.
 - **One installable package.** Everything ships as `@lemol/ui` from the
   repository root, because a Bun git dependency always installs a repository's

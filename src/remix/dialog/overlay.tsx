@@ -1,4 +1,4 @@
-import type { Handle, MixInput, RemixNode } from "remix/ui"
+import type { Handle, MixInput, RemixNode } from "remix/component"
 import { Button, type ButtonProps } from "../button/button.tsx"
 import { invoke } from "../invocation.ts"
 import { DialogPanel } from "./dialog.tsx"

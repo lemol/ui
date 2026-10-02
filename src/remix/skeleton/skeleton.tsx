@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput } from "remix/ui"
+import { css, type Handle, type MixInput } from "remix/component"
 
 /**
  * A gradient sweeping across itself, not an opacity pulse: a shimmer reads

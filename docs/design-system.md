@@ -199,7 +199,7 @@ selector-precedence story for combinations that do not yet exist.
 <ThemeStyle theme={miniTheme} />
 ```
 
-**The placement is load-bearing.** `remix/ui` collects every `css({...})` rule
+**The placement is load-bearing.** `remix/component` collects every `css({...})` rule
 and splices the resulting `<style>` elements in immediately before `</head>` —
 after all authored head content, before anything in the body. A `ThemeStyle` in
 the body is therefore evaluated after `@layer rmx.*` already exists, and
@@ -261,7 +261,7 @@ string, so a document still inlines one.
 
 ## Cascade layers
 
-This is the part that is easy to get wrong. `remix/ui` emits every `css({...})`
+This is the part that is easy to get wrong. `remix/component` emits every `css({...})`
 rule into the `rmx` cascade layer, and **unlayered CSS beats layered CSS
 regardless of specificity**. So an unlayered
 
@@ -365,7 +365,7 @@ no other block on the control declares a background longhand. The rule is about
 a shorthand and a longhand in two blocks on one element, not about shorthands
 generally.
 
-**Write the `&` in a nested selector explicitly.** `remix/ui` emits a `css()`
+**Write the `&` in a nested selector explicitly.** `remix/component` emits a `css()`
 block's nesting verbatim, so `&:disabled` and `& > svg` reach the browser
 intact. `&`-led nesting is Chrome 112, below the baseline; bare-element
 nesting, `svg { … }` with no `&`, is Chrome 120, above it. The escaping hazard
@@ -389,7 +389,7 @@ The resolution is to decide per axis whether it has a default at all:
   is passed, or for a boolean axis when it is `true`. The component then
   declares that property nowhere, and the browser's own default applies.
 
-A block is left out by putting `undefined` in the `mix` array — `remix/ui`
+A block is left out by putting `undefined` in the `mix` array — `remix/component`
 skips undefined entries, so `align === undefined ? undefined : alignStyles[align]`
 composes nothing when the prop is absent. That is behaviour of `mix` rather
 than of any one component, so it holds anywhere a descriptor is conditional.
@@ -413,7 +413,7 @@ on an earlier element, it registered first and the component's own declarations
 beat it. Document `mix` as what it is: a way to set properties the component
 leaves alone. Overriding a property the component declares goes through its
 `--ui-*` token, which is the entire purpose of the component tier.
-`!important` is the other reliable exit, since `remix/ui` emits no `!important`
+`!important` is the other reliable exit, since `remix/component` emits no `!important`
 of its own and passes one through untouched — but an `!important` in a caller's
 one-off is a token that should have existed.
 

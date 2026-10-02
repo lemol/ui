@@ -1,4 +1,4 @@
-import type { Handle } from "remix/ui"
+import type { Handle } from "remix/component"
 import { Button, type ButtonProps } from "../button/button.tsx"
 import { documentRootId } from "../document-root.ts"
 import { invoke } from "../invocation.ts"

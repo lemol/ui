@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { Button, type ButtonSize, type ButtonTone, LinkButton } from "./button.tsx"
 
 const tones: ButtonTone[] = ["primary", "neutral", "ghost", "danger"]

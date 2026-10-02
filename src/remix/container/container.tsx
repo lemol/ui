@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 
 /**
  * The page's inline measure, and the component that proves the primitives

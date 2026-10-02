@@ -1,4 +1,4 @@
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { type Align, alignStyles } from "../align.ts"
 import type { SpaceStep } from "../space.ts"
 import { type Justify, justifyStyles, Row } from "./row.tsx"

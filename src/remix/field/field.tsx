@@ -1,4 +1,4 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 
 /**
  * Derived from the list, not the other way around: a kind added only to the
@@ -148,7 +148,7 @@ export type FieldProps = FieldInputProps | FieldTextareaProps | FieldSelectProps
 /**
  * The `type` attribute, narrowed to one literal for the compiler's benefit.
  *
- * `remix/ui` types `<input>` as a union discriminated on `type`, so that each
+ * `remix/component` types `<input>` as a union discriminated on `type`, so that each
  * type can restrict what sits beside it: `role` is limited per type, and the
  * `text`/`search`/`tel`/`url`/`email` arms forbid `list` unless the combobox
  * arm is selected. A union-typed `type` selects no arm at all, and `Field`'s
@@ -159,7 +159,7 @@ export type FieldProps = FieldInputProps | FieldTextareaProps | FieldSelectProps
  * `role` and `list`, `Field` passes neither, and the runtime value is
  * whatever the caller gave. It narrows the compiler's view, not the data.
  *
- * The cost is real and worth naming: if a future `remix/ui` adds an arm that
+ * The cost is real and worth naming: if a future `remix/component` adds an arm that
  * restricts an attribute `Field` does pass, this hides it. `field.test.tsx`
  * asserts the rendered `type` for every member of `fieldTypes`, so the value
  * reaching the DOM stays checked even though the attribute's type does not.
@@ -361,7 +361,7 @@ export function Field(handle: Handle<FieldProps>) {
               mix={[controlBase, textareaBox]}
               name={name}
               placeholder={props.placeholder}
-              // camelCase, unlike the input branch's `readonly=`: remix/ui's
+              // camelCase, unlike the input branch's `readonly=`: remix/component's
               // TextareaHTMLProps declares only `readOnly`, where
               // PartialInputHTMLProps declares both spellings. It still emits
               // lowercase `readonly` in the markup, so behaviour and the

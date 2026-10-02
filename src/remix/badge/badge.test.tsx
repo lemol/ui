@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { css } from "remix/ui"
+import { css } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import {
   markupOf,

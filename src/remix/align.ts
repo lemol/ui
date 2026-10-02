@@ -1,8 +1,8 @@
-import { type CSSMixinDescriptor, css } from "remix/ui"
+import { type CSSMixinDescriptor, css } from "remix/component"
 
 /**
  * Cross-axis alignment, shared by Stack and Row for the same reason the gap
- * scale is shared: two copies of one Record drift, and `remix/ui` caches a
+ * scale is shared: two copies of one Record drift, and `remix/component` caches a
  * block by content so they would collapse to one sub-layer anyway.
  *
  * `start` and `end` are the logical keywords rather than `flex-start` and

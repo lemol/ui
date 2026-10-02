@@ -1,8 +1,8 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/ui"
+import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { type PopoverTriggerProps, popover } from "../popover/popover.tsx"
 
 /**
- * `remix/ui/menu` ships a composed `Menu` for the same idea, and it was
+ * `remix/component/menu` ships a composed `Menu` for the same idea, and it was
  * checked before writing this. It was not reused: its popover is a JS
  * `Context`-driven surface (`menu.popover()`), opened and closed entirely by
  * script, not `[popover]` plus `command="toggle-popover"`. Building on it

@@ -2,22 +2,24 @@
 
 The platform carries the behaviour. Six behaviours in the whole library need
 hand-written client JavaScript, and everything else is native HTML plus, where
-the need exceeds the platform, a `remix/ui` primitive layered over it.
+the need exceeds the platform, an `@remix-run/ui` primitive layered over it.
 
 ## The ladder
 
 Work down it in order. Stop at the first step that covers the need.
 
 1. **Native platform.** Zero client code.
-2. **`remix/ui/*` primitives**, layered *over* the native element — the native
+2. **`@remix-run/ui/*` primitives**, layered *over* the native element — the native
    popover opens with no JS, the primitive enhances keyboard behaviour after
    hydration.
 3. **Hand-written.** Only where neither covers it.
 
-`remix/ui` ships `accordion`, `anchor`, `animation`, `breadcrumbs`, `button`,
-`checkbox`, `combobox`, `input`, `listbox`, `menu`, `popover`, `radio`,
-`select`, `tabs` and `toggle`, several with `/primitives` variants. Check what
-is there before writing anything.
+`@remix-run/ui` ships headless `accordion`, `anchor`, `animation`, `combobox`,
+`listbox`, `menu`, `popover`, `select`, `tabs` and `toggle` subpaths. Check what
+is there before writing anything. It is a separate package from `remix`,
+versioned in the unstable v0.x range, so the first primitive used here also
+adds it as a peer dependency, to the boundary allow-list and to each app's
+`allowPackages`.
 
 ## What the platform does unaided
 
@@ -32,8 +34,8 @@ is there before writing anything.
 | Tooltip | `popover="hint"` + anchor positioning | none |
 | Inputs, select, checkbox, radio, validation | native controls + constraint validation | none |
 | Tabs | route links with `aria-current` — these are server-rendered apps | none |
-| Menu keyboard model | `remix/ui/menu` over a native popover | on hydration |
-| Combobox | `remix/ui/combobox/primitives` over a native `<select>` | on hydration |
+| Menu keyboard model | `@remix-run/ui/menu` over a native popover | on hydration |
+| Combobox | `@remix-run/ui/combobox` over a native `<select>` | on hydration |
 
 ¹ plus the compat shim below.
 
@@ -151,7 +153,7 @@ statically placed popover.
 1. **Design the markup first.** Ask what the feature does with no client
    JavaScript. If the answer is "nothing", walk back down the ladder — start
    from a link, a form, a `<details>`, or a `popover`.
-2. **Check native HTML, then `remix/ui/*`.** Only then write code.
+2. **Check native HTML, then `@remix-run/ui/*`.** Only then write code.
 3. If it is document-wide, give it a `--` command and handle it in the existing
    capture-phase listener. Do not add a second listener.
 4. If it has real logic, export that as a pure function and test it directly.

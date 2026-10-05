@@ -9,6 +9,7 @@ describe("miniTheme", () => {
     // emitTokensCss throws on a missing primitive, but the message lists them
     // and this failure names them without rendering anything.
     const missing = primitiveNames.filter((name) => !(name in miniTheme.base))
+
     expect(missing).toEqual([])
   })
 
@@ -20,8 +21,10 @@ describe("miniTheme", () => {
       const multiplier = Number(name.slice("sp-".length))
       const expected = `${multiplier * 4}px`
       const actual = miniTheme.base[name]
+
       return actual === expected ? [] : [`${name}: ${actual} is not ${expected}`]
     })
+
     expect(wrong).toEqual([])
   })
 
@@ -58,6 +61,7 @@ describe("miniTheme", () => {
     // every tone.
     const darkAxis = { ...miniTheme.base, ...miniTheme.dark }
     const fellBackToBase = tonesWithSubtle.filter((tone) => darkAxis[tone] === miniTheme.base[tone])
+
     expect(fellBackToBase).toEqual([])
   })
 
@@ -75,13 +79,16 @@ const luminance = (hex: string): number => {
   const int = Number.parseInt(hex.slice(1), 16)
   const channels = [(int >> 16) & 255, (int >> 8) & 255, int & 255].map((value) => {
     const srgb = value / 255
+
     return srgb <= 0.03928 ? srgb / 12.92 : ((srgb + 0.055) / 1.055) ** 2.4
   })
+
   return 0.2126 * (channels[0] ?? 0) + 0.7152 * (channels[1] ?? 0) + 0.0722 * (channels[2] ?? 0)
 }
 
 const contrast = (a: string, b: string): number => {
   const [high, low] = [luminance(a), luminance(b)].sort((x, y) => y - x)
+
   return ((high ?? 0) + 0.05) / ((low ?? 0) + 0.05)
 }
 
@@ -106,9 +113,11 @@ describe("miniTheme colour contrast", () => {
     const failures = axes.flatMap(({ name, values }) =>
       tonesWithSubtle.flatMap((tone) => {
         const ratio = contrast(values[`${tone}-ink`], values[tone])
+
         return ratio >= aaNormal ? [] : [`${name}/${tone}: ink on fill is ${ratio.toFixed(2)}`]
       }),
     )
+
     expect(failures).toEqual([])
   })
 
@@ -118,9 +127,11 @@ describe("miniTheme colour contrast", () => {
     const failures = axes.flatMap(({ name, values }) =>
       tonesWithSubtle.flatMap((tone) => {
         const ratio = contrast(values[tone], values[`${tone}-subtle`])
+
         return ratio >= aaNormal ? [] : [`${name}/${tone}: fill on subtle is ${ratio.toFixed(2)}`]
       }),
     )
+
     expect(failures).toEqual([])
   })
 })
@@ -136,6 +147,7 @@ describe("a skin is a set of token values", () => {
         "ui-btn-primary-bg": gradient,
       },
     })
+
     const sheet = emitTokensCss(skinned, { componentTokens })
 
     expect(sheet).toContain(`--ui-btn-primary-bg: ${gradient};`)

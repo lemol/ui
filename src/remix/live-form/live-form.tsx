@@ -18,6 +18,7 @@ export interface LiveFormProps {
 export function LiveForm(handle: Handle<LiveFormProps>) {
   return () => {
     const { id, method = "get", action, mix, children } = handle.props
+
     return (
       <form action={action} id={id} method={method} mix={mix}>
         {children}

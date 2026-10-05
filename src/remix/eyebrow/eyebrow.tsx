@@ -29,6 +29,7 @@ export interface EyebrowProps {
 export function Eyebrow(handle: Handle<EyebrowProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return <p mix={[eyebrowBase, mix]}>{children}</p>
   }
 }

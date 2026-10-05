@@ -33,6 +33,7 @@ export interface ContainerProps {
 export function Container(handle: Handle<ContainerProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return <div mix={[containerBase, mix]}>{children}</div>
   }
 }

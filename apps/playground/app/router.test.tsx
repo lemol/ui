@@ -15,9 +15,11 @@ const html = async (path: string) => (await get(path)).text()
 describe("the home route", () => {
   it("renders a document on the server", async () => {
     const response = await get("/")
+
     expect(response.status).toBe(200)
     expect(response.headers.get("Content-Type")).toContain("text/html")
     const page = await response.text()
+
     expect(page).toContain("lemol ui playground")
     expect(page).toContain("Skip to content")
     expect(page).toContain('href="/c/button"')
@@ -27,6 +29,7 @@ describe("the home route", () => {
 
   it("resolves its browser entry through the asset server", async () => {
     const page = await html("/")
+
     expect(page).toContain('<script type="module" src="/assets/app/actions/public/entry.ts">')
     expect(page).toContain('type="importmap"')
     expect(page).toContain('rel="modulepreload"')
@@ -38,6 +41,7 @@ describe("the home route", () => {
 
   it("carries the switchers as GET forms", async () => {
     const page = await html("/")
+
     expect(page).toContain('name="scheme"')
     expect(page).toContain('name="density"')
     expect(page).toContain('name="nojs"')
@@ -48,6 +52,7 @@ describe("the home route", () => {
 describe("client entries", () => {
   it("hands the runtime a module url and an export name", async () => {
     const page = await html("/")
+
     expect(page).toContain('<script type="application/json" id="rmx-data">')
     expect(page).toContain('"exportName":"RuntimeProbe"')
     expect(page).toContain('"moduleUrl":"/assets/app/ui/public/runtime-probe.tsx"')
@@ -55,12 +60,14 @@ describe("client entries", () => {
 
   it("marks up the entry so the runtime can find the nodes it already rendered", async () => {
     const page = await html("/")
+
     expect(page).toContain("<!-- rmx:h:")
     expect(page).toContain("<!-- /rmx:h -->")
   })
 
   it("serves the module url it advertised", async () => {
     const response = await get("/assets/app/ui/public/runtime-probe.tsx")
+
     expect(response.status).toBe(200)
     expect(response.headers.get("Content-Type")).toContain("application/javascript")
   })
@@ -71,11 +78,13 @@ describe("client entries", () => {
 describe("with ?nojs", () => {
   it("renders the page with no script element at all", async () => {
     const page = await html("/?nojs")
+
     expect(page).not.toContain("<script")
   })
 
   it("still renders the interactive markup, dead", async () => {
     const page = await html("/?nojs")
+
     expect(page).toContain('<button type="button"')
     expect(page).toContain("Not clicked yet")
   })
@@ -98,8 +107,10 @@ const htmlTag = (page: string) => /<html[^>]*>/.exec(page)?.[0] ?? ""
 describe("the catalogue route", () => {
   it("renders the demo for a component it knows", async () => {
     const response = await get("/c/button")
+
     expect(response.status).toBe(200)
     const page = await response.text()
+
     // Not `toContain("Button")`: <title>Button · lemol ui</title> satisfies
     // that on its own, so the route would pass with the demo body missing
     // entirely. These name things only the demo renders.
@@ -109,9 +120,12 @@ describe("the catalogue route", () => {
 
   it("renders every M1 component through its own demo file", async () => {
     const names = Object.keys(demos) as (keyof typeof demos)[]
+
     expect(names.length).toBeGreaterThan(0)
+
     for (const name of names) {
       const response = await get(`/c/${name}`)
+
       expect({ name, status: response.status }).toEqual({ name, status: 200 })
       // The heading, not the title element: the demo body must be present.
       expect(await response.text()).toContain(`>${demos[name].title}</h1>`)
@@ -120,8 +134,10 @@ describe("the catalogue route", () => {
 
   it("is a 404 page, not a bare status, for one it does not", async () => {
     const response = await get("/c/nope")
+
     expect(response.status).toBe(404)
     const page = await response.text()
+
     expect(page).toContain("No such component")
     expect(page).toContain("404")
     expect(page).toContain("Back to the catalogue")
@@ -144,6 +160,7 @@ describe("the catalogue route", () => {
     const page = await html("/c/button")
     const ours = page.indexOf("@layer rmx-reset, base, rmx;")
     const theirs = page.indexOf("data-rmx-style")
+
     expect(ours).toBeGreaterThan(-1)
     expect(theirs).toBeGreaterThan(-1)
     expect(ours).toBeLessThan(theirs)
@@ -159,13 +176,16 @@ describe("the catalogue route", () => {
     // limit is a byte limit and the sheet ahead of it is not all ASCII.
     const page = await html("/c/button")
     const at = page.indexOf("<meta charset")
+
     expect(at).toBeGreaterThan(-1)
     const offset = new TextEncoder().encode(page.slice(0, at)).length
+
     expect(offset).toBeLessThan(1024)
   })
 
   it("carries the theme's own values, and lets them beat the component defaults", async () => {
     const page = await html("/c/button")
+
     expect(page).toContain("--accent: #1F6B5C;")
     // mini softens the button: the component default is emitted first and the
     // theme's value second, under one selector at one specificity.
@@ -181,6 +201,7 @@ describe("the catalogue route", () => {
     // would fail on every request.
     // Unset: no attribute at all, so the media query decides the scheme.
     const unset = await html("/c/button?nojs")
+
     expect(unset).not.toContain("<script")
     expect(htmlTag(unset)).not.toContain("data-scheme")
     expect(htmlTag(unset)).not.toContain("data-density")
@@ -190,32 +211,38 @@ describe("the catalogue route", () => {
     // beats a dark system preference. Unset renders no attribute and does not
     // exercise it.
     const light = await html("/c/button?nojs&scheme=light")
+
     expect(htmlTag(light)).toContain('data-scheme="light"')
     expect(light).not.toContain("<script")
 
     const dark = await html("/c/button?nojs&scheme=dark")
+
     expect(htmlTag(dark)).toContain('data-scheme="dark"')
     expect(dark).not.toContain("<script")
 
     const compact = await html("/c/button?nojs&density=compact")
+
     expect(htmlTag(compact)).toContain('data-density="compact"')
     expect(compact).not.toContain("<script")
   })
 
   it("treats the switchers' explicit defaults as unset", async () => {
     const tag = htmlTag(await html("/c/button?scheme=system&density=default"))
+
     expect(tag).not.toContain("data-scheme")
     expect(tag).not.toContain("data-density")
   })
 
   it("ignores a scheme or density it does not recognise", async () => {
     const tag = htmlTag(await html("/c/button?scheme=sepia&density=roomy"))
+
     expect(tag).not.toContain("data-scheme")
     expect(tag).not.toContain("data-density")
   })
 
   it("still renders every tone with the runtime absent", async () => {
     const page = await html("/c/button?nojs")
+
     for (const tone of ["primary", "neutral", "ghost", "danger"]) {
       expect(page).toContain(`>${tone}</button>`)
     }
@@ -225,8 +252,10 @@ describe("the catalogue route", () => {
 describe("the dashboard route", () => {
   it("renders the composed recipe", async () => {
     const response = await get("/pages/dashboard")
+
     expect(response.status).toBe(200)
     const page = await response.text()
+
     expect(page).toContain("Dashboard")
     expect(page).toContain("Open tasks")
     expect(page).toContain("Renew the TLS certificate")
@@ -236,6 +265,7 @@ describe("the dashboard route", () => {
 
   it("works with the no-JS toggle on", async () => {
     const page = await html("/pages/dashboard?nojs")
+
     expect(page).not.toContain("<script")
     expect(page).toContain("Open tasks")
     expect(page).toContain("Project settings")
@@ -247,12 +277,14 @@ describe("the dashboard route", () => {
 
   it("confirms a form round trip from the query string", async () => {
     const page = await html("/pages/dashboard?nojs&project=Beta&plan=free")
+
     expect(page).toContain("Saved")
     expect(page).toContain("Beta")
   })
 
   it("carries the variant axes like every other page", async () => {
     const dark = await html("/pages/dashboard?scheme=dark")
+
     expect(htmlTag(dark)).toContain('data-scheme="dark"')
     expect(dark).toContain('name="density"')
   })
@@ -261,8 +293,10 @@ describe("the dashboard route", () => {
 describe("the SPA route", () => {
   it("serves a shell resolving the SPA entry through the asset server", async () => {
     const response = await get("/spa")
+
     expect(response.status).toBe(200)
     const page = await response.text()
+
     expect(page).toContain('<script type="module" src="/assets/app/spa/public/entry.tsx">')
     expect(page).toContain('type="importmap"')
     expect(page).toContain("Loading the client")
@@ -271,7 +305,9 @@ describe("the SPA route", () => {
   it("renders the same components with the no-JS toggle on", async () => {
     const server = await html("/c/button?nojs")
     const spa = await html("/spa/button?nojs")
+
     expect(spa).not.toContain("<script")
+
     // The same demo markers the catalogue route asserts.
     for (const marker of ["size md", ">primary</button>"]) {
       expect(server).toContain(marker)
@@ -281,6 +317,7 @@ describe("the SPA route", () => {
 
   it("serves an index with no scripts either", async () => {
     const page = await html("/spa?nojs")
+
     expect(page).not.toContain("<script")
     expect(page).toContain("SPA demo")
     expect(page).toContain('href="/spa/button"')
@@ -290,14 +327,17 @@ describe("the SPA route", () => {
     // An index.html fallback serves the shell for unknown paths too; the
     // client router renders the 404 after boot.
     const response = await get("/spa/nope")
+
     expect(response.status).toBe(200)
     expect(await response.text()).toContain("Loading the client")
   })
 
   it("is a 404 page with no scripts", async () => {
     const response = await get("/spa/nope?nojs")
+
     expect(response.status).toBe(404)
     const page = await response.text()
+
     expect(page).toContain("No such component")
     expect(page).toContain("Back to the SPA index")
   })

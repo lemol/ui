@@ -132,7 +132,9 @@ const groupByName: ReadonlyMap<PrimitiveName, TokenGroup> = new Map(
 
 export function groupOf(name: PrimitiveName): TokenGroup {
   const group = groupByName.get(name)
+
   if (group === undefined) throw new Error(`Unknown primitive token: ${name}`)
+
   return group
 }
 

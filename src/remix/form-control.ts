@@ -37,6 +37,7 @@ export function fieldMessages(
   const described = [hasHint ? hintId : "", hasError ? errorId : ""]
     .filter((id) => id !== "")
     .join(" ")
+
   return {
     describedBy: described === "" ? undefined : described,
     errorId,

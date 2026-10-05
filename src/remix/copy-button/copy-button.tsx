@@ -38,6 +38,7 @@ export function CopyButton(handle: Handle<CopyButtonProps>) {
       forId === undefined
         ? attrs({ "data-copy-confirm-label": confirmLabel, "data-copy-value": value ?? "" })
         : attrs({ "data-copy-confirm-label": confirmLabel })
+
     return (
       <Button {...rest} id={id} invoke={copy} mix={[dataAttrs, mix]}>
         {children ?? "Copy"}

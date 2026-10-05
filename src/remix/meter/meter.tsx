@@ -24,6 +24,7 @@ export interface ProgressProps {
 export function Progress(handle: Handle<ProgressProps>) {
   return () => {
     const { value, max = 1, mix } = handle.props
+
     return <progress max={max} mix={[progressStyle, mix]} value={value} />
   }
 }
@@ -42,6 +43,7 @@ export interface MeterProps {
 export function Meter(handle: Handle<MeterProps>) {
   return () => {
     const { value, min, max = 1, low, high, optimum, mix } = handle.props
+
     return (
       <meter
         high={high}

@@ -8,6 +8,7 @@ const button = <CataloguePage entry={demos.button} location="/c/button" name="bu
 describe("CataloguePage", () => {
   it("renders the demo with the component index", async () => {
     const page = await renderToHtml(button)
+
     expect(page).toContain("size md")
     expect(page).toContain(">primary</button>")
     expect(page).toContain('href="/c/badge"')
@@ -17,6 +18,7 @@ describe("CataloguePage", () => {
     const page = await renderToHtml(
       <CataloguePage entry={demos.button} location="/c/button?tone=danger&size=sm" name="button" />,
     )
+
     expect(page).toContain('tone="danger" size="sm"')
   })
 
@@ -24,6 +26,7 @@ describe("CataloguePage", () => {
     const page = await renderToHtml(
       <CataloguePage entry={demos.button} location="/c/button?tone=primay&size=xl" name="button" />,
     )
+
     expect(page).toContain('tone="neutral" size="md"')
   })
 
@@ -35,6 +38,7 @@ describe("CataloguePage", () => {
         name="button"
       />,
     )
+
     // The knobs form preserves the scheme; the scheme forms preserve the knob.
     expect(page).toContain('type="hidden"')
     expect(page).toContain('value="dark"')
@@ -45,16 +49,19 @@ describe("CataloguePage", () => {
     const badge = await renderToHtml(
       <CataloguePage entry={demos.badge} location="/c/badge?tone=success" name="badge" />,
     )
+
     expect(badge).toContain('tone="success"')
 
     const text = await renderToHtml(
       <CataloguePage entry={demos.text} location="/c/text?tone=muted&size=lg" name="text" />,
     )
+
     expect(text).toContain('tone="muted" size="lg"')
 
     const heading = await renderToHtml(
       <CataloguePage entry={demos.heading} location="/c/heading?level=4" name="heading" />,
     )
+
     expect(heading).toContain("level={4}")
   })
 
@@ -62,6 +69,7 @@ describe("CataloguePage", () => {
     const page = await renderToHtml(
       <CataloguePage entry={demos.stack} location="/c/stack" name="stack" />,
     )
+
     expect(page).not.toContain("Knobs")
   })
 })

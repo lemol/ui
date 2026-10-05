@@ -21,6 +21,7 @@ const launch = async (): Promise<Browser> => {
   } catch (error) {
     throw new Error(
       `Could not launch Chromium. Run: bunx playwright install chromium\n${String(error)}`,
+      { cause: error },
     )
   }
 }
@@ -34,11 +35,15 @@ export async function withPage(
   body: (page: Page, baseUrl: string) => Promise<void>,
 ): Promise<void> {
   browser ??= await launch()
+
   if (server === undefined) {
     const router = createPlaygroundRouter()
+
     server = Bun.serve({ port: 0, fetch: (request) => router.fetch(request) })
   }
+
   const page = await browser.newPage()
+
   try {
     await body(page, `http://localhost:${server.port}`)
   } finally {

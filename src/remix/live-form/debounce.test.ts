@@ -9,6 +9,7 @@ describe("debounce", () => {
     const debounced = debounce(20, () => {
       calls += 1
     })
+
     debounced.trigger()
     expect(calls).toBe(0)
     await wait(40)
@@ -20,6 +21,7 @@ describe("debounce", () => {
     const debounced = debounce(20, () => {
       calls += 1
     })
+
     debounced.trigger()
     await wait(10)
     debounced.trigger()
@@ -37,6 +39,7 @@ describe("debounce", () => {
     const debounced = debounce(10, () => {
       calls += 1
     })
+
     debounced.trigger()
     debounced.cancel()
     await wait(30)
@@ -48,6 +51,7 @@ describe("debounce", () => {
     const debounced = debounce(10, () => {
       calls += 1
     })
+
     expect(() => {
       debounced.cancel()
       debounced.cancel()

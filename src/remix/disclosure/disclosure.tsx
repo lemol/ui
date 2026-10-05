@@ -74,6 +74,7 @@ export interface DisclosureProps {
 export function Disclosure(handle: Handle<DisclosureProps>) {
   return () => {
     const { summary, open, name, mix, children } = handle.props
+
     return (
       <details mix={[detailsStyle, mix]} name={name} open={open}>
         <summary mix={summaryStyle}>
@@ -116,6 +117,7 @@ export interface AccordionProps {
 export function Accordion(handle: Handle<AccordionProps>) {
   return () => {
     const { name, items } = handle.props
+
     return (
       <>
         {items.map((item) => (

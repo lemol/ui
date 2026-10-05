@@ -73,6 +73,7 @@ export function Heading(handle: Handle<HeadingProps>) {
   return () => {
     const { level, size = level, id, mix, children } = handle.props
     const Tag = tags[level]
+
     return (
       <Tag id={id} mix={[headingBase, sizeStyles[size], mix]}>
         {children}

@@ -133,6 +133,7 @@ export interface SegmentedControlProps {
 export function SegmentedControl(handle: Handle<SegmentedControlProps>) {
   return () => {
     const { name, label, options, value, disabled, mix } = handle.props
+
     return (
       <fieldset disabled={disabled} mix={[trackStyle(options.length), mix]}>
         <legend mix={legendStyle}>{label}</legend>

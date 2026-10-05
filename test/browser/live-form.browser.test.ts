@@ -8,6 +8,7 @@ test("changing the field resubmits the form after the debounce window, with no c
     await page.goto(`${baseUrl}/c/liveForm`)
 
     const navigated = page.waitForURL((url) => url.searchParams.get("role") === "editor")
+
     await page.getByLabel("Role").selectOption("editor")
     await navigated
 
@@ -22,6 +23,7 @@ test("the page is complete with no client javascript: the field is a plain selec
     // the input bridge finds it with closest() from wherever the event
     // actually targets.
     const trigger = page.locator('[command="--live-submit"]')
+
     expect(await trigger.getAttribute("commandfor")).toBe("live-filter")
     expect(await page.getByLabel("Role").isVisible()).toBe(true)
     expect(await page.locator("script").count()).toBe(0)

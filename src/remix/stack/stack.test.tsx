@@ -27,6 +27,7 @@ const primitives = new Set<string>(primitiveNames)
 describe("Stack", () => {
   it("renders a div carrying its children", async () => {
     const html = await renderToHtml(<Stack>content</Stack>)
+
     expect(html).toContain("<div")
     expect(html).toContain("content")
   })
@@ -37,6 +38,7 @@ describe("Stack", () => {
     for (const align of aligns) {
       for (const step of steps) {
         const styles = stylesOf(await renderToHtml(<Stack align={align} gap={step} />))
+
         expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
         expect(styles).not.toContain("--ui-")
       }
@@ -48,6 +50,7 @@ describe("Stack", () => {
     // charge of which one paints, and that order follows render order rather
     // than source order. One block, always, is what makes the default safe.
     const blocks = styleBlocksOf(await renderToHtml(<Stack />))
+
     expect(blocks.filter((block) => block.includes("gap:"))).toHaveLength(1)
   })
 
@@ -82,6 +85,7 @@ describe("Stack", () => {
     for (const align of aligns) {
       for (const step of steps) {
         const blocks = styleBlocksOf(await renderToHtml(<Stack align={align} gap={step} />))
+
         expect(sharedProperties(blocks)).toEqual([])
       }
     }
@@ -90,6 +94,7 @@ describe("Stack", () => {
   it("adds through mix a property it does not declare itself", async () => {
     const pinned = css({ position: "fixed" })
     const blocks = styleBlocksOf(await renderToHtml(<Stack mix={pinned} />))
+
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
   })
@@ -101,7 +106,9 @@ describe("StackDemo", () => {
     // demoGaps — so an axis value added to either is covered here rather than
     // silently left out of a loop that still passes.
     const html = await renderToHtml(<StackDemo />)
+
     for (const align of aligns) expect(html).toContain(`align ${align}`)
+
     for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
   })
 })

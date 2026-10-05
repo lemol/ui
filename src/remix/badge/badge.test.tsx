@@ -25,6 +25,7 @@ const keywords = new Set(["inline-flex", "center", "solid", "inherit", "nowrap"]
 describe("Badge", () => {
   it("renders a span carrying its children", async () => {
     const html = await renderToHtml(<Badge>Draft</Badge>)
+
     expect(html).toContain("<span")
     expect(html).toContain("Draft")
   })
@@ -38,6 +39,7 @@ describe("Badge", () => {
     // which asserts border-color and border-width, never border-style —
     // keeps passing.
     const styles = stylesOf(await renderToHtml(<Badge>Draft</Badge>))
+
     expect(styles).toContain("border-style: solid")
   })
 
@@ -50,6 +52,7 @@ describe("Badge", () => {
       const offenders = valuesOf(styles).filter(
         (value) => !keywords.has(value) && !/^var\(--ui-badge-[\w-]+\)$/.test(value),
       )
+
       expect(offenders).toEqual([])
     }
   })
@@ -65,21 +68,25 @@ describe("Badge", () => {
         </Badge>
       )),
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-badge-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(badgeTokens).sort())
   })
 
   it("gives every tone its own three tokens and nothing borrowed", async () => {
     for (const tone of tones) {
       const styles = stylesOf(await renderToHtml(<Badge tone={tone}>{tone}</Badge>))
+
       expect(styles).toContain(`background: var(--ui-badge-${tone}-bg)`)
       expect(styles).toContain(`border-color: var(--ui-badge-${tone}-border)`)
       expect(styles).toContain(`color: var(--ui-badge-${tone}-ink)`)
       const borrowed = tones
         .filter((other) => other !== tone)
         .filter((other) => styles.includes(`--ui-badge-${other}-`))
+
       expect(borrowed).toEqual([])
     }
   })
@@ -97,6 +104,7 @@ describe("Badge", () => {
     // invisible text: the tone-on-fill or ink-on-subtle pair Badge would then
     // render fails contrast even though the theme's own values are fine.
     const semanticTones: Exclude<BadgeTone, "neutral">[] = ["success", "warning", "danger", "info"]
+
     for (const tone of semanticTones) {
       expect(badgeTokens[`ui-badge-${tone}-bg`]).toBe(`var(--${tone}-subtle)`)
       expect(badgeTokens[`ui-badge-${tone}-ink`]).toBe(`var(--${tone})`)
@@ -106,6 +114,7 @@ describe("Badge", () => {
 
   it("defaults to neutral, so a badge with no status has one to use", async () => {
     const styles = stylesOf(await renderToHtml(<Badge>v2.1</Badge>))
+
     expect(styles).toContain("background: var(--ui-badge-neutral-bg)")
   })
 
@@ -114,6 +123,7 @@ describe("Badge", () => {
     // across a client session, so two blocks that could both set `background`
     // would be correct only under the order observed today.
     const blocks = styleBlocksOf(await renderToHtml(<Badge tone="info">Beta</Badge>))
+
     expect(blocks).toHaveLength(2)
     expect(sharedProperties(blocks)).toEqual([])
   })
@@ -121,6 +131,7 @@ describe("Badge", () => {
   it("adds through mix a property it does not declare itself", async () => {
     const placed = css({ marginInlineStart: "var(--sp-2)" })
     const blocks = styleBlocksOf(await renderToHtml(<Badge mix={placed}>Draft</Badge>))
+
     expect(
       blocks.filter((block) => block.includes("margin-inline-start: var(--sp-2)")),
     ).toHaveLength(1)
@@ -134,10 +145,12 @@ describe("BadgeDemo", () => {
     // as part of a --ui-badge-<tone>-* custom property, so a raw toContain
     // would pass without a single badge having rendered.
     const markup = markupOf(await renderToHtml(<BadgeDemo />))
+
     // Anchored between the tags, not a bare substring: the demo's own prose
     // says "five tones", and a tone name loose in a sentence would satisfy a
     // bare toContain without a badge having rendered.
     for (const tone of tones) expect(markup).toContain(`>${tone}<`)
+
     expect(markup).toContain(">mid-sentence<")
   })
 })

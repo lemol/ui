@@ -84,6 +84,7 @@ export interface BadgeProps {
 export function Badge(handle: Handle<BadgeProps>) {
   return () => {
     const { tone = "neutral", mix, children } = handle.props
+
     return <span mix={[badgeBase, toneStyles[tone], mix]}>{children}</span>
   }
 }

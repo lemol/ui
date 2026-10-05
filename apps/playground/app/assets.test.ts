@@ -3,6 +3,7 @@ import { assetServer } from "./assets.ts"
 import { createPlaygroundRouter } from "./router.ts"
 
 const router = createPlaygroundRouter()
+
 const get = (href: string) => router.fetch(new Request(new URL(href, "http://localhost")))
 
 /** Every module the browser is expected to reach, by the path the asset server
@@ -17,6 +18,7 @@ const browserEntries = [
 describe("browser assets", () => {
   it("serves every module in each entry's graph", async () => {
     const hrefs = await assetServer.getPreloads(browserEntries)
+
     // The graph reaches into `remix` through the Bun store and into `src`
     // through the source mount, so it is much wider than the three entries —
     // which is the part a mount gets wrong.
@@ -24,16 +26,19 @@ describe("browser assets", () => {
 
     for (const href of hrefs) {
       const response = await get(href)
+
       expect({ href, status: response.status }).toEqual({ href, status: 200 })
     }
   })
 
   it("compiles browser source to javascript", async () => {
     const probe = await get(await assetServer.getHref("app/ui/public/runtime-probe.tsx"))
+
     expect(probe.headers.get("Content-Type")).toContain("application/javascript")
     expect(await probe.text()).toContain("RuntimeProbe")
 
     const spa = await get(await assetServer.getHref("app/spa/public/entry.tsx"))
+
     expect(spa.headers.get("Content-Type")).toContain("application/javascript")
     expect(await spa.text()).toContain("createSpaRouter")
   })
@@ -56,6 +61,7 @@ describe("browser assets", () => {
       "app/ui/public/does-not-exist.tsx",
     ]) {
       const response = await get(`/assets/${path}`)
+
       expect({ path, status: response.status }).toEqual({ path, status: 404 })
     }
   })

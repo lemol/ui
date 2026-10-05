@@ -32,7 +32,9 @@ describe("@lemol/ui", () => {
 
   test("ships TypeScript from src, with no build step", async () => {
     const targets = Object.values((await manifest()).exports ?? {})
+
     expect(targets.length).toBeGreaterThan(0)
+
     for (const target of targets) {
       expect([target, target.startsWith("./src/") && /\.tsx?$/.test(target)]).toEqual([
         target,
@@ -54,7 +56,9 @@ describe("@lemol/ui", () => {
   // the same reason mini does not re-export remix.
   test("publishes each layer on its own subpath, and no root barrel", async () => {
     const exports = (await manifest()).exports ?? {}
+
     expect(exports["."]).toBeUndefined()
+
     for (const { dir, subpath } of layers) {
       expect([subpath, exports[subpath]]).toEqual([subpath, `./src/${dir}/index.ts`])
     }
@@ -68,6 +72,7 @@ describe("@lemol/ui", () => {
 
   test("declares remix as its only peer, and never effect", async () => {
     const pkg = await manifest()
+
     expect(Object.keys(pkg.peerDependencies ?? {})).toEqual(["remix"])
     expect(Object.keys(pkg.dependencies ?? {})).not.toContain("effect")
   })
@@ -77,6 +82,7 @@ describe("@lemol/ui", () => {
 // stylesheet with it, which one import in the barrel would quietly undo.
 test("keeps the design barrel clear of the css subpath", async () => {
   const barrel = await Bun.file(`${root}src/design/index.ts`).text()
+
   expect(barrel).not.toContain("./css")
 })
 
@@ -87,10 +93,13 @@ test("keeps the design barrel clear of the css subpath", async () => {
 // module graph rather than tree-shaking it.
 test("keeps the mini barrel clear of the document subpath", async () => {
   const exports = (await manifest()).exports ?? {}
+
   expect(exports["./mini/document"]).toBe("./src/mini/document.tsx")
   const barrel = await Bun.file(`${root}src/mini/index.ts`).text()
+
   expect(barrel).not.toContain("./document")
   const server = await Bun.file(`${root}src/mini/document.tsx`).text()
+
   expect(server).toContain("remix/component/server")
 })
 
@@ -106,22 +115,28 @@ describe("apps/playground", () => {
   // specifier and imports it by name for real.
   test("takes no @lemol/* dependency, and imports no @lemol/ui specifier", async () => {
     const deps = (await playground()).dependencies ?? {}
+
     expect(Object.keys(deps).filter((name) => name.startsWith("@lemol/"))).toEqual([])
 
     const files = await Array.fromAsync(
       new Glob("apps/playground/app/**/*.{ts,tsx}").scan({ cwd: root, onlyFiles: true }),
     )
+
     expect(files.length).toBeGreaterThan(0)
     const offenders: string[] = []
+
     for (const file of files) {
       const source = await Bun.file(`${root}${file}`).text()
+
       if (/(?:from|import\()\s*["']@lemol\/ui/.test(source)) offenders.push(file)
     }
+
     expect(offenders).toEqual([])
   })
 
   test("pins remix to the version the package declares as its peer", async () => {
     const pinned = (await manifest()).peerDependencies?.remix
+
     expect(pinned).toBeString()
     expect((await playground()).dependencies?.remix).toBe(pinned)
   })

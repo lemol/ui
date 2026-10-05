@@ -9,6 +9,7 @@ const keywords = new Set(["100%"])
 describe("Progress", () => {
   it("renders determinate with its value and max", async () => {
     const markup = markupOf(await renderToHtml(<Progress max={100} value={60} />))
+
     expect(markup).toContain("<progress")
     expect(markup).toContain('value="60"')
     expect(markup).toContain('max="100"')
@@ -16,11 +17,13 @@ describe("Progress", () => {
 
   it("renders indeterminate with no value attribute at all", async () => {
     const markup = markupOf(await renderToHtml(<Progress />))
+
     expect(markup).not.toContain("value=")
   })
 
   it("defaults max to 1, for a value already expressed as a fraction", async () => {
     const markup = markupOf(await renderToHtml(<Progress value={0.6} />))
+
     expect(markup).toContain('max="1"')
     expect(markup).toContain('value="0.6"')
   })
@@ -30,6 +33,7 @@ describe("Progress", () => {
     const offenders = valuesOf(styles).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-meter-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 })
@@ -39,6 +43,7 @@ describe("Meter", () => {
     const markup = markupOf(
       await renderToHtml(<Meter high={0.8} low={0.3} max={1} min={0} optimum={1} value={0.9} />),
     )
+
     expect(markup).toContain("<meter")
     expect(markup).toContain('value="0.9"')
     expect(markup).toContain('min="0"')
@@ -50,11 +55,13 @@ describe("Meter", () => {
 
   it("defaults max to 1", async () => {
     const markup = markupOf(await renderToHtml(<Meter value={0.5} />))
+
     expect(markup).toContain('max="1"')
   })
 
   it("carries no fill-colour token — the UA's own low/high/optimum semantics decide it", async () => {
     const styles = stylesOf(await renderToHtml(<Meter value={0.5} />))
+
     expect(styles).not.toContain("accent-color")
   })
 
@@ -63,6 +70,7 @@ describe("Meter", () => {
     const offenders = valuesOf(styles).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-meter-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 })
@@ -75,9 +83,11 @@ describe("the shared token contract", () => {
         <Meter value={0.5} />
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-meter-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(meterTokens).sort())
   })
 })

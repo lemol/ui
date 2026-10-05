@@ -4,6 +4,7 @@ import { createAssetServer } from "remix/assets"
 import { loadConfig } from "remix/cli"
 
 const config = await loadConfig(path.resolve(import.meta.dirname, ".."))
+
 if (config.assets === undefined) {
   throw new Error("apps/playground/remix.json is missing its `assets` block")
 }

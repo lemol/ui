@@ -60,6 +60,7 @@ export function overlay(name: string): Overlay {
   function Dialog(handle: Handle<OverlayDialogProps>) {
     return () => {
       const { title, mix, children } = handle.props
+
       return (
         <DialogPanel close={close} id={name} mix={mix} title={title}>
           {children}

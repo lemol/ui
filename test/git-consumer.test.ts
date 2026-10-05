@@ -18,10 +18,12 @@ import { join } from "node:path"
 
 const root = mkdtempSync(join(tmpdir(), "ui-git-consumer-"))
 const remote = join(root, "remote.git")
+
 const git = (cwd: string, ...args: string[]) => execFileSync("git", args, { cwd, stdio: "pipe" })
 
 beforeAll(() => {
   const tagged = join(root, "tagged")
+
   git(root, "clone", "--local", process.cwd(), tagged)
   git(tagged, "tag", "-f", "ui@0.1.0")
   git(root, "clone", "--bare", tagged, remote)
@@ -31,6 +33,7 @@ afterAll(() => rmSync(root, { recursive: true, force: true }))
 
 test("installs from Git, then renders a component and emits a theme", () => {
   const consumer = join(root, "consumer")
+
   mkdirSync(consumer, { recursive: true })
 
   writeFileSync(
@@ -89,9 +92,11 @@ test("installs from Git, then renders a component and emits a theme", () => {
   )
 
   const install = spawnSync("bun", ["install"], { cwd: consumer, encoding: "utf8" })
+
   expect([install.status, install.stderr]).toEqual([0, install.stderr])
 
   const run = spawnSync("bun", ["run", "contract"], { cwd: consumer, encoding: "utf8" })
+
   expect([run.status, run.stderr]).toEqual([0, run.stderr])
   expect(run.stdout).toContain("rendered")
   expect(run.stdout).toContain("themed")

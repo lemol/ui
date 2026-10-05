@@ -20,6 +20,7 @@ const keywords = new Set([
 describe("CommandPaletteInput", () => {
   it("carries command/commandfor pointed at the list, invoked by typing", async () => {
     const markup = markupOf(await renderToHtml(<CommandPaletteInput listId="palette-list" />))
+
     expect(markup).toContain('command="--palette"')
     expect(markup).toContain('commandfor="palette-list"')
     expect(markup).toContain('aria-controls="palette-list"')
@@ -27,6 +28,7 @@ describe("CommandPaletteInput", () => {
 
   it("renders complete markup with no script", async () => {
     const html = await renderToHtml(<CommandPaletteInput listId="palette-list" />)
+
     expect(html).not.toContain("<script")
   })
 })
@@ -41,6 +43,7 @@ describe("CommandPaletteList and CommandPaletteItem", () => {
         </CommandPaletteList>,
       ),
     )
+
     expect(markup).not.toContain("hidden")
     expect(markup).toContain('id="a"')
     expect(markup).toContain('id="b"')
@@ -52,6 +55,7 @@ describe("CommandPaletteList and CommandPaletteItem", () => {
         <CommandPaletteItem id="settings" keywords="preferences config" label="Settings" />,
       ),
     )
+
     expect(markup).toContain('data-palette-label="Settings"')
     expect(markup).toContain('data-palette-keywords="preferences config"')
   })
@@ -65,6 +69,7 @@ describe("CommandPaletteList and CommandPaletteItem", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('<a href="#a"')
     expect(markup).toContain("<button")
   })
@@ -77,6 +82,7 @@ describe("CommandPaletteList and CommandPaletteItem", () => {
         </CommandPaletteItem>,
       ),
     )
+
     expect(markup).toContain("<strong>A</strong>")
   })
 })
@@ -91,9 +97,11 @@ describe("the token contract", () => {
         </CommandPaletteList>
       </>,
     )
+
     const offenders = valuesOf(stylesOf(html)).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-palette-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -106,9 +114,11 @@ describe("the token contract", () => {
         </CommandPaletteList>
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-palette-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(commandPaletteTokens).sort())
   })
 })

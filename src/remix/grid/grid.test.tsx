@@ -26,6 +26,7 @@ const primitives = new Set<string>(primitiveNames)
 describe("Grid", () => {
   it("renders a div carrying its children", async () => {
     const html = await renderToHtml(<Grid>content</Grid>)
+
     expect(html).toContain("<div")
     expect(html).toContain("content")
   })
@@ -34,6 +35,7 @@ describe("Grid", () => {
     for (const cols of counts) {
       for (const step of steps) {
         const styles = stylesOf(await renderToHtml(<Grid cols={cols} gap={step} />))
+
         expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
         expect(styles).not.toContain("--ui-")
       }
@@ -42,6 +44,7 @@ describe("Grid", () => {
 
   it("emits exactly one gap block, default included", async () => {
     const blocks = styleBlocksOf(await renderToHtml(<Grid />))
+
     expect(blocks.filter((block) => block.includes("gap:"))).toHaveLength(1)
   })
 
@@ -74,6 +77,7 @@ describe("Grid", () => {
     for (const cols of counts) {
       for (const step of steps) {
         const blocks = styleBlocksOf(await renderToHtml(<Grid cols={cols} gap={step} />))
+
         expect(sharedProperties(blocks)).toEqual([])
       }
     }
@@ -82,6 +86,7 @@ describe("Grid", () => {
   it("adds through mix a property it does not declare itself", async () => {
     const pinned = css({ position: "fixed" })
     const blocks = styleBlocksOf(await renderToHtml(<Grid mix={pinned} />))
+
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
   })
@@ -93,7 +98,9 @@ describe("GridDemo", () => {
     // count added to the Record is covered here instead of being skipped by a
     // loop that keeps passing over the old six.
     const html = await renderToHtml(<GridDemo />)
+
     for (const cols of counts) expect(html).toContain(`cols ${cols}`)
+
     for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
   })
 })

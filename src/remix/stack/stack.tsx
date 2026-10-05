@@ -49,6 +49,7 @@ export interface StackProps {
 export function Stack(handle: Handle<StackProps>) {
   return () => {
     const { gap = 0, align, mix, children } = handle.props
+
     return (
       <div mix={[stackBase, gaps[gap], align === undefined ? undefined : alignStyles[align], mix]}>
         {children}

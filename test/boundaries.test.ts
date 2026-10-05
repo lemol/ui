@@ -46,6 +46,7 @@ const denied = [
 // Tests live beside the component they cover, so they need the runner and the
 // shared server-render harness. Nothing else in src may reach for either.
 const testPackages = ["bun:test"]
+
 const isTest = (file: string) => file.includes(".test.")
 
 type Manifest = { exports: Record<string, string> }
@@ -58,15 +59,20 @@ const manifest = JSON.parse(readFileSync(join(root, "package.json"), "utf8")) as
  */
 const entriesOf = (): Map<string, Set<string>> => {
   const byLayer = new Map<string, Set<string>>()
+
   for (const target of Object.values(manifest.exports)) {
     const absolute = resolve(root, target)
     const inside = relative(srcRoot, absolute)
+
     if (inside.startsWith("..")) continue
+
     const layer = inside.split(sep)[0] ?? ""
     const set = byLayer.get(layer) ?? new Set<string>()
+
     set.add(absolute)
     byLayer.set(layer, set)
   }
+
   return byLayer
 }
 
@@ -88,32 +94,44 @@ export const violations = (file: string, source: string): string[] => {
   const layer = file.split(sep)[0] ?? ""
   const allow = allowed[layer]
   const reach = reachable[layer]
+
   if (allow === undefined || reach === undefined) return [`${file}: not inside a known layer`]
 
   return specifiersOf(source).flatMap((specifier) => {
     if (specifier.startsWith(".")) {
       const target = resolve(srcRoot, dirname(file), specifier)
+
       if (harnesses.includes(target)) {
         return isTest(file) ? [] : [`${file}: runtime code imports the test harness (${specifier})`]
       }
+
       const inside = relative(srcRoot, target)
+
       if (inside.startsWith("..")) return [`${file}: imports ${specifier}, outside src`]
 
       const other = inside.split(sep)[0] ?? ""
+
       if (other === layer) return []
+
       if (!reach.includes(other)) return [`${file}: ${layer} must not import ${other}`]
+
       // A layer is reached only where the exports map publishes it, so
       // package.json still records every edge in the graph.
       if (!entries.get(other)?.has(target)) {
         return [`${file}: imports ${specifier}, which ${other} does not export`]
       }
+
       return []
     }
+
     if (isTest(file) && testPackages.includes(specifier)) return []
+
     if (denied.some((entry) => matches(entry, specifier))) {
       return [`${file}: ${specifier} is not SPA-safe`]
     }
+
     if (allow.some((entry) => matches(entry, specifier))) return []
+
     return [`${file}: ${layer} must not import ${specifier}`]
   })
 }
@@ -130,6 +148,7 @@ describe("the SPA import boundary", () => {
       .filter((entry) => entry.isDirectory())
       .map((entry) => entry.name)
       .sort()
+
     expect(dirs).toEqual(Object.keys(allowed).sort())
   })
 
@@ -142,10 +161,12 @@ describe("the SPA import boundary", () => {
 
   test("every source file imports only what the graph allows", () => {
     const files = sourceFiles()
+
     expect(files.length).toBeGreaterThan(0)
     const found = files.flatMap((file) =>
       violations(file, readFileSync(join(srcRoot, file), "utf8")),
     )
+
     expect(found).toEqual([])
   })
 
@@ -164,8 +185,10 @@ describe("the SPA import boundary", () => {
         'import { assets } from "remix/assets"',
         'import { run } from "remix/spa"',
       ].join("\n")
+
       for (const layer of Object.keys(allowed)) {
         const file = at(layer, "index.ts")
+
         expect(violations(file, source)).toEqual([
           `${file}: node:fs/promises is not SPA-safe`,
           `${file}: bun is not SPA-safe`,
@@ -187,11 +210,13 @@ describe("the SPA import boundary", () => {
         'export * from "./tokens.ts"',
         'import { buttonTokens } from "../button/tokens.ts"',
       ].join("\n")
+
       expect(violations(at("remix", "dialog", "dialog.tsx"), source)).toEqual([])
     })
 
     test("keeps design renderer-agnostic", () => {
       const file = at("design", "css", "emit.ts")
+
       expect(violations(file, 'import { css } from "remix/component"')).toEqual([
         `${file}: design must not import remix/component`,
       ])
@@ -214,6 +239,7 @@ describe("the SPA import boundary", () => {
 
     test("sends cross-layer imports through a published entry point", () => {
       const file = at("remix", "button", "button.tsx")
+
       expect(violations(file, 'import { v } from "../../design/ref.ts"')).toEqual([
         `${file}: imports ../../design/ref.ts, which design does not export`,
       ])
@@ -223,6 +249,7 @@ describe("the SPA import boundary", () => {
 
     test("keeps relative imports inside src", () => {
       const file = at("remix", "button", "button.tsx")
+
       expect(violations(file, 'const lazy = import("../../../package.json")')).toEqual([
         `${file}: imports ../../../package.json, outside src`,
       ])
@@ -235,9 +262,11 @@ describe("the SPA import boundary", () => {
         'import { renderToHtml } from "../../../test/render.ts"',
         'import { styleBlocksOf } from "../../../test/styles.ts"',
       ].join("\n")
+
       expect(violations(spec, source)).toEqual([])
 
       const runtime = at("remix", "button", "button.tsx")
+
       expect(violations(runtime, source)).toEqual([
         `${runtime}: bun:test is not SPA-safe`,
         `${runtime}: runtime code imports the test harness (../../../test/render.ts)`,

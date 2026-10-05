@@ -21,6 +21,7 @@ export interface PlaygroundShellProps {
 export function PlaygroundShell(handle: Handle<PlaygroundShellProps>) {
   return () => {
     const { location, nav, children } = handle.props
+
     return (
       <AppShell
         actions={<PlaygroundSwitchers location={location} />}

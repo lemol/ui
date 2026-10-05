@@ -52,17 +52,21 @@ export const valuesOf = (styles: string): string[] =>
 const topLevelPropertiesOf = (block: string): string[] => {
   let depth = 0
   let flat = ""
+
   for (const char of block) {
     if (char === "{") {
       depth += 1
       continue
     }
+
     if (char === "}") {
       depth = Math.max(0, depth - 1)
       continue
     }
+
     flat += depth === 2 ? char : ""
   }
+
   return [...flat.matchAll(/(?:^|;)\s*([\w-]+)\s*:/g)].map((match) => match[1] ?? "")
 }
 
@@ -90,13 +94,17 @@ const topLevelPropertiesOf = (block: string): string[] => {
 export const sharedProperties = (blocks: string[]): string[] => {
   const seenIn = new Map<string, number>()
   const shared = new Set<string>()
+
   for (const block of new Set(blocks)) {
     for (const property of new Set(topLevelPropertiesOf(block))) {
       const count = (seenIn.get(property) ?? 0) + 1
+
       seenIn.set(property, count)
+
       if (count > 1) shared.add(property)
     }
   }
+
   return [...shared].sort()
 }
 
@@ -130,7 +138,9 @@ export const nonPrimitiveValues = (
 ): string[] =>
   valuesOf(styles).filter((value) => {
     if (keywords.has(value)) return false
+
     const referenced = /^var\(--([\w-]+)\)$/.exec(value)?.[1]
+
     return referenced === undefined || !primitives.has(referenced)
   })
 
@@ -169,6 +179,7 @@ export const blocksOn = (html: string, tag: string, occurrence = 0): string[] =>
   const names = new Set(
     (/class="([^"]*)"/.exec(opening)?.[1] ?? "").split(/\s+/).filter((name) => name !== ""),
   )
+
   return hashedBlocksOf(html)
     .filter(({ hash }) => names.has(hash))
     .map(({ block }) => block)

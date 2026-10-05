@@ -64,6 +64,7 @@ export interface CalloutProps {
 export function Callout(handle: Handle<CalloutProps>) {
   return () => {
     const { tone = "neutral", title, description, icon, action, mix } = handle.props
+
     return (
       <div mix={[calloutBase, toneStyles[tone], mix]}>
         {icon !== undefined ? <div mix={iconStyle}>{icon}</div> : undefined}

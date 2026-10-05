@@ -19,6 +19,7 @@ const toggle = invoke("--set-scheme", documentRootId)
 export function SchemeToggle(handle: Handle<SchemeToggleProps>) {
   return () => {
     const { children, ...rest } = handle.props
+
     return (
       <Button {...rest} invoke={toggle}>
         {children ?? "Toggle theme"}

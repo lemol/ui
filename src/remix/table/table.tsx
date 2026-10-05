@@ -53,6 +53,7 @@ export interface TableProps {
 export function Table(handle: Handle<TableProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return <table mix={[tableStyle, mix]}>{children}</table>
   }
 }
@@ -81,6 +82,7 @@ export interface TableRowProps {
 export function TableRow(handle: Handle<TableRowProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return <tr mix={[rowStyle, mix]}>{children}</tr>
   }
 }
@@ -94,6 +96,7 @@ export interface TableHeaderCellProps {
 export function TableHeaderCell(handle: Handle<TableHeaderCellProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return (
       <th mix={[headCellStyle, mix]} scope="col">
         {children}
@@ -110,6 +113,7 @@ export interface TableCellProps {
 export function TableCell(handle: Handle<TableCellProps>) {
   return () => {
     const { mix, children } = handle.props
+
     return <td mix={[cellStyle, mix]}>{children}</td>
   }
 }
@@ -122,7 +126,9 @@ export type SortDirection = "asc" | "desc"
  */
 export function sortDirectionOf(location: string, field: string): SortDirection | undefined {
   const params = new URL(location, "http://localhost").searchParams
+
   if (params.get("sort") !== field) return undefined
+
   return params.get("dir") === "desc" ? "desc" : "asc"
 }
 
@@ -136,8 +142,10 @@ export function sortHrefFor(location: string, field: string): string {
   const url = new URL(location, "http://localhost")
   const current = sortDirectionOf(location, field)
   const next: SortDirection = current === "asc" ? "desc" : "asc"
+
   url.searchParams.set("sort", field)
   url.searchParams.set("dir", next)
+
   return `${url.pathname}?${url.searchParams.toString()}`
 }
 
@@ -161,6 +169,7 @@ export function SortableColumnHeader(handle: Handle<SortableColumnHeaderProps>) 
     const direction = sortDirectionOf(location, field)
     const ariaSort =
       direction === undefined ? undefined : direction === "asc" ? "ascending" : "descending"
+
     return (
       <th aria-sort={ariaSort} mix={[headCellStyle, mix]} scope="col">
         <a href={sortHrefFor(location, field)} mix={sortLinkStyle}>

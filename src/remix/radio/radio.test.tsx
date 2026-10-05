@@ -11,6 +11,7 @@ describe("Radio", () => {
     const markup = markupOf(
       await renderToHtml(<Radio label="Compact" name="density" value="compact" />),
     )
+
     expect(markup).toContain('type="radio"')
     expect(markup).toContain('name="density"')
     expect(markup).toContain('value="compact"')
@@ -28,6 +29,7 @@ describe("Radio", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('id="density-compact"')
     expect(markup).toContain('id="density-comfortable"')
   })
@@ -36,6 +38,7 @@ describe("Radio", () => {
     const markup = markupOf(
       await renderToHtml(<Radio checked disabled label="Compact" name="density" value="compact" />),
     )
+
     expect(markup).toContain("checked")
     expect(markup).toContain("disabled")
   })
@@ -46,6 +49,7 @@ describe("Radio", () => {
         <Radio error="Pick one" hint="Row height" label="Compact" name="density" value="compact" />,
       ),
     )
+
     expect(markup).toContain('aria-describedby="density-compact-hint density-compact-error"')
     expect(markup).toContain('aria-invalid="true"')
   })
@@ -54,6 +58,7 @@ describe("Radio", () => {
     const markup = markupOf(
       await renderToHtml(<Radio id="density-1" label="Compact" name="density" value="compact" />),
     )
+
     expect(markup).toContain('id="density-1"')
     expect(markup).toContain('for="density-1"')
   })
@@ -69,9 +74,11 @@ describe("Radio", () => {
         value="compact"
       />,
     )
+
     const offenders = valuesOf(stylesOf(html)).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-radio-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -83,9 +90,11 @@ describe("Radio", () => {
         <Radio disabled label="Comfortable" name="density" value="comfortable" />
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-radio-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(radioTokens).sort())
   })
 
@@ -100,8 +109,10 @@ describe("Radio", () => {
         value="compact"
       />,
     )
+
     for (const tag of ["input", "label"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }

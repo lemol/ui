@@ -69,6 +69,7 @@ export interface BreadcrumbsProps {
 export function Breadcrumbs(handle: Handle<BreadcrumbsProps>) {
   return () => {
     const { items, label = "Breadcrumb", mix } = handle.props
+
     return (
       <nav aria-label={label} mix={[navStyle, mix]}>
         <ol mix={listStyle}>
@@ -86,6 +87,7 @@ export function Breadcrumbs(handle: Handle<BreadcrumbsProps>) {
                   {item.label}
                 </a>
               )
+
             return (
               <li key={item.label} mix={itemStyle}>
                 {content}

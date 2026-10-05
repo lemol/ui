@@ -31,6 +31,7 @@ interface SeenCommand {
 const installCommandProbe = (page: Page): Promise<void> =>
   page.evaluate(() => {
     const seen: { trusted: boolean; prevented: boolean }[] = []
+
     ;(window as unknown as { seen: typeof seen }).seen = seen
     document.addEventListener(
       "command",
@@ -80,6 +81,7 @@ test("the shim path does the same with the platform's own invocation suppressed"
     // is listening during every action below — including the click whose
     // double-invocation the error-count assertion further down depends on.
     const errors: string[] = []
+
     page.on("pageerror", (error) => errors.push(error.message))
 
     await page.goto(`${baseUrl}/c/dialog?compat=1`)
@@ -147,11 +149,13 @@ test("a disabled invoker does not open the dialog under the shim", async () => {
 
     const opened = await page.evaluate(() => {
       const button = document.createElement("button")
+
       button.setAttribute("command", "show-modal")
       button.setAttribute("commandfor", "new-task")
       button.disabled = true
       document.body.append(button)
       button.dispatchEvent(new MouseEvent("click", { bubbles: true, cancelable: true, button: 0 }))
+
       return document.querySelector("dialog")?.open
     })
 
@@ -166,6 +170,7 @@ test("the page is complete with no client javascript", async () => {
   await withPage(async (page, baseUrl) => {
     await page.goto(`${baseUrl}/c/dialog?nojs`)
     const trigger = page.getByRole("button", { name: "New task" })
+
     expect(await trigger.getAttribute("command")).toBe("show-modal")
     expect(await trigger.getAttribute("commandfor")).toBe("new-task")
     expect(await page.locator("script").count()).toBe(0)

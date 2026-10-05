@@ -29,9 +29,11 @@ const app = run({
   async loadModule(moduleUrl, exportName) {
     const module: Record<string, unknown> = await import(moduleUrl)
     const component = module[exportName]
+
     if (typeof component !== "function") {
       throw new Error(`Unknown component: ${moduleUrl}#${exportName}`)
     }
+
     return component
   },
 })

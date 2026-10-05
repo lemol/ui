@@ -146,6 +146,7 @@ export function Button(handle: Handle<ButtonProps>) {
   return () => {
     const { tone = "neutral", size = "md", type = "button" } = handle.props
     const { disabled, id, name, value, invoke, mix, children } = handle.props
+
     return (
       <button
         command={invoke?.command}
@@ -184,6 +185,7 @@ export interface LinkButtonProps {
 export function LinkButton(handle: Handle<LinkButtonProps>) {
   return () => {
     const { href, tone = "neutral", size = "md", mix, children } = handle.props
+
     return (
       <a href={href} mix={[buttonBase, toneStyles[tone], sizeStyles[size], mix]}>
         {children}

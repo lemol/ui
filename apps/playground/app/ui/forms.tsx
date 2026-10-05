@@ -8,6 +8,7 @@ import type { Handle } from "remix/component"
  */
 export function splitLocation(location: string): { pathname: string; params: URLSearchParams } {
   const url = new URL(location, "http://localhost")
+
   return { pathname: url.pathname, params: url.searchParams }
 }
 
@@ -31,6 +32,7 @@ export function HiddenFields(handle: Handle<HiddenFieldsProps>) {
   return () => {
     const { params, except = [] } = handle.props
     const names = [...new Set(params.keys())].filter((name) => !except.includes(name))
+
     return (
       <>
         {names.flatMap((name, index) =>

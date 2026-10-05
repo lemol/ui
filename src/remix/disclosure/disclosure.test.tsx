@@ -21,6 +21,7 @@ const keywords = new Set([
 describe("Disclosure", () => {
   it("renders a details/summary pair carrying its children", async () => {
     const markup = markupOf(await renderToHtml(<Disclosure summary="Title">Body</Disclosure>))
+
     expect(markup).toContain("<details")
     expect(markup).toContain("<summary")
     expect(markup).toContain("Title")
@@ -35,7 +36,9 @@ describe("Disclosure", () => {
         </Disclosure>,
       ),
     )
+
     const detailsTag = /<details[^>]*>/.exec(markup)?.[0] ?? ""
+
     expect(detailsTag).toContain("open")
   })
 
@@ -47,12 +50,14 @@ describe("Disclosure", () => {
         </Disclosure>,
       ),
     )
+
     expect(markup).toContain('name="faq"')
   })
 
   it("hides the platform marker on the engines that draw it through display", async () => {
     const html = await renderToHtml(<Disclosure summary="Title">Body</Disclosure>)
     const summaryBlock = blocksOn(html, "summary")[0] ?? ""
+
     expect(summaryBlock).toContain("display: flex")
     expect(summaryBlock).toContain("&::-webkit-details-marker")
   })
@@ -60,6 +65,7 @@ describe("Disclosure", () => {
   it("rotates the marker from the parent's open state, not a class it toggles itself", async () => {
     const html = await renderToHtml(<Disclosure summary="Title">Body</Disclosure>)
     const markerBlock = blocksOn(html, "svg")[0] ?? ""
+
     expect(markerBlock).toContain(":where(details[open]) &")
     expect(markerBlock).toContain("rotate: 90deg")
   })
@@ -70,6 +76,7 @@ describe("Disclosure", () => {
     const offenders = valuesOf(styles).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-disclosure-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -80,13 +87,16 @@ describe("Disclosure", () => {
         (match) => match[1] ?? "",
       ),
     )
+
     expect([...read].sort()).toEqual(Object.keys(disclosureTokens).sort())
   })
 
   it("keeps its blocks disjoint by property", async () => {
     const html = await renderToHtml(<Disclosure summary="Title">Body</Disclosure>)
+
     for (const tag of ["details", "summary", "svg", "div"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }
@@ -103,11 +113,13 @@ describe("Accordion", () => {
   it("gives every item the same name, the platform's own mutual exclusion", async () => {
     const markup = markupOf(await renderToHtml(<Accordion items={items} name="faq" />))
     const names = [...markup.matchAll(/name="([^"]*)"/g)].map((match) => match[1])
+
     expect(names).toEqual(["faq", "faq", "faq"])
   })
 
   it("renders every item's summary and body", async () => {
     const markup = markupOf(await renderToHtml(<Accordion items={items} name="faq" />))
+
     for (const item of items) {
       expect(markup).toContain(item.summary)
       expect(markup).toContain(item.children)
@@ -126,7 +138,9 @@ describe("Accordion", () => {
         />,
       ),
     )
+
     const detailsTags = [...markup.matchAll(/<details[^>]*>/g)].map((match) => match[0])
+
     expect(detailsTags[0]).toContain("open")
     expect(detailsTags[1]).not.toContain("open")
   })

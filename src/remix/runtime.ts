@@ -72,7 +72,9 @@ export function registerCommand(name: CommandName, handler: CommandHandler): voi
   // "close" would otherwise fire on every native dialog dismissal, since
   // nothing here would ever have checked the namespace.
   if (!name.startsWith("--")) throw new Error(`Not a custom command: ${name}`)
+
   if (handlers.has(name)) throw new Error(`Command already registered: ${name}`)
+
   handlers.set(name, handler)
 }
 
@@ -86,15 +88,18 @@ const pendingToastDismissals = new WeakMap<Element, () => void>()
 registerCommand("--dismiss-toast", ({ target }) => {
   pendingToastDismissals.get(target)?.()
   const popoverTarget = target as HTMLElement
+
   // Retriggering an already-open toast only has to reset its timer:
   // showPopover() throws on an element already showing, so it is called
   // only from the closed state.
   if (!popoverTarget.matches(":popover-open")) popoverTarget.showPopover()
+
   const ms = Number(target.getAttribute(TOAST_DURATION_ATTR) ?? DEFAULT_TOAST_DURATION_MS)
   const cancel = scheduleDismiss(ms, () => {
     pendingToastDismissals.delete(target)
     popoverTarget.hidePopover()
   })
+
   pendingToastDismissals.set(target, cancel)
 })
 
@@ -110,11 +115,14 @@ const pendingCopyReverts = new WeakMap<Element, () => void>()
  */
 registerCommand("--copy", ({ source, target }) => {
   if (!(source instanceof HTMLButtonElement)) return
+
   const text = target.getAttribute("data-copy-value") ?? target.textContent ?? ""
+
   void navigator.clipboard.writeText(text)
 
   pendingCopyReverts.get(source)?.()
   const original = source.dataset.copyOriginalLabel ?? source.textContent ?? ""
+
   source.dataset.copyOriginalLabel = original
   source.textContent = source.getAttribute("data-copy-confirm-label") ?? "Copied!"
   const cancel = scheduleDismiss(COPY_CONFIRM_DURATION_MS, () => {
@@ -122,6 +130,7 @@ registerCommand("--copy", ({ source, target }) => {
     delete source.dataset.copyOriginalLabel
     pendingCopyReverts.delete(source)
   })
+
   pendingCopyReverts.set(source, cancel)
 })
 
@@ -145,8 +154,10 @@ const persist = (key: string, value: string | null): void => {
  */
 registerCommand("--toggle-density", ({ target }) => {
   const next = target.getAttribute("data-density") === "compact" ? null : "compact"
+
   if (next === null) target.removeAttribute("data-density")
   else target.setAttribute("data-density", next)
+
   persist(densityStorageKey, next)
 })
 
@@ -160,7 +171,9 @@ registerCommand("--set-scheme", ({ target }) => {
   const current =
     target.getAttribute("data-scheme") ??
     (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light")
+
   const next = current === "dark" ? "light" : "dark"
+
   target.setAttribute("data-scheme", next)
   persist(schemeStorageKey, next)
 })
@@ -176,11 +189,14 @@ const liveSubmitDebouncers = new WeakMap<Element, Debounced>()
  */
 registerCommand("--live-submit", ({ target }) => {
   if (!(target instanceof HTMLFormElement)) return
+
   let debounced = liveSubmitDebouncers.get(target)
+
   if (debounced === undefined) {
     debounced = debounce(LIVE_SUBMIT_DELAY_MS, () => target.requestSubmit())
     liveSubmitDebouncers.set(target, debounced)
   }
+
   debounced.trigger()
 })
 
@@ -195,12 +211,15 @@ registerCommand("--palette", ({ source, target }) => {
   const rows = Array.from(target.children).filter(
     (child): child is HTMLLIElement => child instanceof HTMLLIElement,
   )
+
   const items: PaletteItem[] = rows.map((row) => ({
     id: row.id,
     keywords: row.dataset.paletteKeywords,
     label: row.dataset.paletteLabel ?? "",
   }))
+
   const visible = new Set(matchItems(query, items).map((item) => item.id))
+
   for (const row of rows) row.hidden = !visible.has(row.id)
 })
 
@@ -213,12 +232,18 @@ const onCommand = (event: Event): void => {
   // invocation. Without this guard the trusted event's arrival here, after
   // being cancelled, would run the handler a second time.
   if (event.defaultPrevented) return
+
   const invocation = event as Event & { command?: string; source?: unknown }
   const handler = handlers.get(invocation.command ?? "")
+
   if (handler === undefined) return
+
   const target = event.target
+
   if (!(target instanceof Element)) return
+
   const source = invocation.source
+
   handler({
     source: source instanceof Element ? source : null,
     target,
@@ -247,16 +272,24 @@ const onCommand = (event: Event): void => {
  */
 const onInput = (event: Event): void => {
   const origin = event.target
+
   if (!(origin instanceof Element)) return
+
   const trigger = origin.closest("[command][commandfor]")
+
   if (trigger === null) return
+
   const command = trigger.getAttribute("command")
   const commandforId = trigger.getAttribute("commandfor")
+
   if (command === null || commandforId === null || !command.startsWith("--")) return
+
   const receiver = document.getElementById(commandforId)
+
   if (receiver === null) return
 
   const invocation = new Event("command", { bubbles: false, cancelable: true, composed: true })
+
   Object.defineProperties(invocation, {
     command: { enumerable: true, value: command },
     source: { enumerable: true, value: trigger },
@@ -266,6 +299,7 @@ const onInput = (event: Event): void => {
 
 export function installCommandRuntime(): void {
   if (listening || typeof document === "undefined") return
+
   listening = true
   document.addEventListener("command", onCommand, true)
   document.addEventListener("input", onInput, true)

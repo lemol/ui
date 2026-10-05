@@ -54,8 +54,10 @@ export interface SpaNoJsProps {
 export function SpaNoJs(handle: Handle<SpaNoJsProps>) {
   return () => {
     const { location, name } = handle.props
+
     if (name === null) {
       const names = Object.keys(demos) as DemoName[]
+
       return (
         <PlaygroundShell location={location} nav="spa">
           <Stack gap={8}>
@@ -83,6 +85,7 @@ export function SpaNoJs(handle: Handle<SpaNoJsProps>) {
     }
 
     const { title, Demo } = demos[name]
+
     return (
       <PlaygroundShell location={location} nav="spa">
         <Stack gap={4}>

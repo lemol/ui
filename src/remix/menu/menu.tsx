@@ -97,6 +97,7 @@ export function menu(name: string): Menu {
   function List(handle: Handle<MenuListProps>) {
     return () => {
       const { mix, children } = handle.props
+
       return (
         <base.Surface>
           <div mix={[listStyle, mix]} role="menu">
@@ -114,6 +115,7 @@ export function menu(name: string): Menu {
 export function MenuItem(handle: Handle<MenuItemProps>) {
   return () => {
     const { href, disabled, mix, children } = handle.props
+
     if (href !== undefined) {
       return (
         <a href={href} mix={[itemBase, mix]} role="menuitem">
@@ -121,6 +123,7 @@ export function MenuItem(handle: Handle<MenuItemProps>) {
         </a>
       )
     }
+
     return (
       <button disabled={disabled} mix={[itemBase, mix]} role="menuitem" type="button">
         {children}

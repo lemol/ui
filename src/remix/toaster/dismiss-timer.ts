@@ -8,5 +8,6 @@
  */
 export function scheduleDismiss(ms: number, onFire: () => void): () => void {
   const id = setTimeout(onFire, ms)
+
   return () => clearTimeout(id)
 }

@@ -19,6 +19,7 @@ const toggle = invoke("--toggle-density", documentRootId)
 export function DensityToggle(handle: Handle<DensityToggleProps>) {
   return () => {
     const { children, ...rest } = handle.props
+
     return (
       <Button {...rest} invoke={toggle}>
         {children ?? "Compact density"}

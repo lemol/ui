@@ -51,13 +51,16 @@ const ellipsisStyle = css({
 /** `?page=n` on `location`, every other query param preserved. */
 export function pageHref(location: string, page: number): string {
   const url = new URL(location, "http://localhost")
+
   url.searchParams.set("page", String(page))
+
   return `${url.pathname}?${url.searchParams.toString()}`
 }
 
 /** The current page, read from `location`'s own query string — 1 when absent or not a positive integer. */
 export function currentPageOf(location: string): number {
   const raw = Number(new URL(location, "http://localhost").searchParams.get("page"))
+
   return Number.isInteger(raw) && raw > 0 ? raw : 1
 }
 

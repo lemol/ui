@@ -52,6 +52,7 @@ function SpaIndex() {
 function SpaDemo(handle: Handle<{ name: DemoName }>) {
   return () => {
     const { title, Demo } = demos[handle.props.name]
+
     return (
       <Stack gap={4}>
         <Heading level={1}>{title}</Heading>
@@ -82,6 +83,7 @@ export function createSpaRouter() {
     middleware: [
       render((node, context) => {
         const pathname = context.url.pathname
+
         return (
           <AppShell
             brand="lemol ui"
@@ -128,7 +130,9 @@ export function createSpaRouter() {
       },
       demo({ render, params }) {
         const name = params.component
+
         if (!isDemoName(name)) return render(<SpaNotFound />, { status: 404 })
+
         return render(<SpaDemo name={name} />)
       },
     },

@@ -20,6 +20,7 @@ const theme = defineTheme<ComponentTokenName>({
 describe("ThemeStyle", () => {
   it("renders one style element and nothing else", async () => {
     const html = await renderToHtml(<ThemeStyle theme={theme} />)
+
     expect(html.match(/<style/g) ?? []).toHaveLength(1)
   })
 
@@ -28,12 +29,14 @@ describe("ThemeStyle", () => {
     // text content, and this component uses innerHTML precisely so the sheet
     // is not at the mercy of that.
     const html = await renderToHtml(<ThemeStyle theme={theme} />)
+
     expect(html).toContain(emitTokensCss(theme, { componentTokens }))
   })
 
   it("opens with the layer statement, which nothing may precede", async () => {
     const html = await renderToHtml(<ThemeStyle theme={theme} />)
     const style = html.indexOf("<style")
+
     expect(html.indexOf("@layer rmx-reset, base, rmx;")).toBeGreaterThan(style)
     expect(html.indexOf("--canvas:")).toBeGreaterThan(html.indexOf("@layer rmx-reset, base, rmx;"))
   })
@@ -46,7 +49,9 @@ describe("ThemeStyle", () => {
     const skinned = defineTheme<ComponentTokenName>({
       base: { ...fullBase, "ui-btn-radius": "skinned-radius" },
     })
+
     const html = await renderToHtml(<ThemeStyle theme={skinned} />)
+
     expect(html.indexOf("--ui-btn-radius: var(--r-sm);")).toBeLessThan(
       html.indexOf("--ui-btn-radius: skinned-radius;"),
     )
@@ -56,6 +61,7 @@ describe("ThemeStyle", () => {
     const html = await renderToHtml(
       <ThemeStyle componentTokens={{ ...componentTokens, "ui-app-x": "1px" }} theme={theme} />,
     )
+
     expect(html).toContain("--ui-app-x: 1px;")
   })
 
@@ -71,6 +77,7 @@ describe("ThemeStyle", () => {
     // on ThemeStyle for why that's a real future, not a hypothetical one).
     const handle = { props: { theme } } as unknown as Handle<ThemeStyleProps>
     const element = ThemeStyle(handle)()
+
     expect(element.type).toBe("style")
     expect(element.props.innerHTML).toBeDefined()
     expect(element.props.children).toBeUndefined()
@@ -88,6 +95,7 @@ describe("ThemeStyle", () => {
     const raw = "a & b < c > d"
     const viaInnerHtml = await renderToHtml(<style innerHTML={unsafeHTML(raw)} />)
     const viaChildren = await renderToHtml(<style>{raw}</style>)
+
     expect(viaInnerHtml).toContain(raw)
     expect(viaChildren).not.toContain(raw)
     expect(viaChildren).toContain("a &amp; b &lt; c &gt; d")

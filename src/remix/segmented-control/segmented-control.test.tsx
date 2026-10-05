@@ -43,6 +43,7 @@ describe("SegmentedControl", () => {
     const markup = markupOf(
       await renderToHtml(<SegmentedControl label="Density" name="density" options={options} />),
     )
+
     expect(markup).toContain("<fieldset")
     expect(markup).toContain("<legend")
     expect(markup).toContain("Density")
@@ -56,7 +57,9 @@ describe("SegmentedControl", () => {
         <SegmentedControl label="Density" name="density" options={options} value="comfortable" />,
       ),
     )
+
     const inputs = [...markup.matchAll(/<input[^>]*>/g)].map((match) => match[0])
+
     expect(inputs[0]).not.toContain("checked")
     expect(inputs[1]).toContain("checked")
     expect(inputs[2]).not.toContain("checked")
@@ -68,6 +71,7 @@ describe("SegmentedControl", () => {
         <SegmentedControl disabled label="Density" name="density" options={options} />,
       ),
     )
+
     expect(markup).toContain("<fieldset disabled")
   })
 
@@ -77,8 +81,11 @@ describe("SegmentedControl", () => {
         <SegmentedControl disabled label="Density" name="density" options={options} />,
       ),
     )
+
     const inputs = [...markup.matchAll(/<input[^>]*>/g)].map((match) => match[0])
+
     expect(inputs).toHaveLength(3)
+
     for (const input of inputs) expect(input).not.toContain("disabled")
   })
 
@@ -86,10 +93,13 @@ describe("SegmentedControl", () => {
     const html = await renderToHtml(
       <SegmentedControl label="Density" name="density" options={options} />,
     )
+
     const indicatorBlock = blocksOn(html, "div")[0] ?? ""
+
     for (let index = 1; index <= options.length; index++) {
       expect(indicatorBlock).toContain(`label:nth-of-type(${index})`)
     }
+
     expect(indicatorBlock).not.toContain(options[0]?.value ?? "")
   })
 
@@ -103,18 +113,25 @@ describe("SegmentedControl", () => {
         value="compact"
       />,
     )
+
     // The two dynamic values — the `calc()` inline-size and the per-index
     // `translate` percentage — are checked structurally rather than as a
     // bare var(): a calc() mixing a token with arithmetic, and an integer
     // percentage generated from the option count.
     const isCleanValue = (value: string): boolean => {
       if (keywords.has(value)) return true
+
       if (/^var\(--ui-segmented-[\w-]+\)$/.test(value)) return true
+
       if (/^\d+%$/.test(value)) return true
+
       if (value.startsWith("calc(") && value.includes("--ui-segmented-")) return true
+
       return false
     }
+
     const offenders = valuesOf(stylesOf(html)).filter((value) => !isCleanValue(value))
+
     expect(offenders).toEqual([])
   })
 
@@ -128,11 +145,13 @@ describe("SegmentedControl", () => {
         value="compact"
       />,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-segmented-[\w-]+)\)/g)].map(
         (match) => match[1] ?? "",
       ),
     )
+
     expect([...read].sort()).toEqual(Object.keys(segmentedControlTokens).sort())
   })
 })

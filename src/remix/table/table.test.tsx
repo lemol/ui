@@ -44,6 +44,7 @@ describe("Table", () => {
         </Table>,
       ),
     )
+
     expect(markup).toContain("<table")
     expect(markup).toContain("<thead")
     expect(markup).toContain("<tbody")
@@ -66,9 +67,11 @@ describe("Table", () => {
         </TableBody>
       </Table>,
     )
+
     const offenders = valuesOf(stylesOf(html)).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-table-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -92,9 +95,11 @@ describe("Table", () => {
         </SortableColumnHeader>
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-table-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(tableTokens).sort())
   })
 
@@ -113,8 +118,10 @@ describe("Table", () => {
         </TableBody>
       </Table>,
     )
+
     for (const tag of ["table", "tr", "th", "td"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }
@@ -161,8 +168,10 @@ describe("SortableColumnHeader", () => {
         Name
       </SortableColumnHeader>,
     )
+
     expect(html).not.toContain("<script")
     const markup = markupOf(html)
+
     // & is HTML-escaped as &amp; in an attribute value.
     expect(markup).toContain('href="/c/table?sort=name&amp;dir=asc"')
     expect(markup).toContain("Name")
@@ -176,6 +185,7 @@ describe("SortableColumnHeader", () => {
         </SortableColumnHeader>,
       ),
     )
+
     expect(active).toContain('aria-sort="descending"')
     const inactive = markupOf(
       await renderToHtml(
@@ -184,6 +194,7 @@ describe("SortableColumnHeader", () => {
         </SortableColumnHeader>,
       ),
     )
+
     expect(inactive).not.toContain("aria-sort")
   })
 })

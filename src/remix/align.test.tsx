@@ -15,6 +15,7 @@ describe("the shared align scale", () => {
     // nothing — so the expected value is the key.
     for (const align of aligns) {
       const html = await renderToHtml(<div mix={alignStyles[align]} />)
+
       expect(styleBlocksOf(html)).toHaveLength(1)
       expect(valuesOf(stylesOf(html))).toEqual([align])
     }

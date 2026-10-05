@@ -32,6 +32,7 @@ export interface SkeletonProps {
 export function Skeleton(handle: Handle<SkeletonProps>) {
   return () => {
     const { mix } = handle.props
+
     // aria-hidden: a skeleton stands in for content that has not arrived, so
     // it names nothing to assistive tech — the region it sits in is what
     // should carry the loading announcement, once, rather than one per

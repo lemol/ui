@@ -70,6 +70,7 @@ export function Text(handle: Handle<TextProps>) {
   return () => {
     const { size = "md", tone = "default", as = "p", mix, children } = handle.props
     const Tag = as
+
     return <Tag mix={[textBase, sizeStyles[size], toneStyles[tone], mix]}>{children}</Tag>
   }
 }

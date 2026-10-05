@@ -18,6 +18,7 @@ const htmlTag = (page: string) => /<html[^>]*>/.exec(page)?.[0] ?? ""
 describe("Document", () => {
   it("renders a whole document around its children", async () => {
     const page = await renderToHtml(<Document title="Tasks">body content</Document>)
+
     expect(page).toContain("<html")
     expect(page).toContain("<head>")
     expect(page).toContain("<body>")
@@ -37,6 +38,7 @@ describe("Document", () => {
     // is a byte limit, and the title's separator is not ASCII.
     const page = await renderToHtml(<Document site="todo-md" title="Tasks" />)
     const at = page.indexOf("<meta charset")
+
     expect(at).toBeGreaterThan(-1)
     expect(new TextEncoder().encode(page.slice(0, at)).length).toBeLessThan(1024)
   })
@@ -48,6 +50,7 @@ describe("Document", () => {
     const page = await renderToHtml(<Document title="Tasks" />)
     const boot = page.indexOf("localStorage.getItem")
     const sheet = page.indexOf("@layer rmx-reset, base, rmx;")
+
     expect(boot).toBeGreaterThan(-1)
     expect(sheet).toBeGreaterThan(-1)
     expect(boot).toBeLessThan(sheet)
@@ -58,6 +61,7 @@ describe("Document", () => {
     // of the three by construction, and this is the half of that defence that
     // does not depend on boot.ts keeping the rule.
     const page = await renderToHtml(<Document title="Tasks" />)
+
     expect(page).toContain('r.setAttribute("data-scheme"')
     expect(page).not.toContain("&quot;data-scheme&quot;")
   })
@@ -67,12 +71,14 @@ describe("Document", () => {
     // script element of any kind. The boot script is not an enhancement, so
     // it is a separate switch from `entry`.
     const page = await renderToHtml(<Document boot={false} title="Tasks" />)
+
     expect(page).not.toContain("<script")
     expect(page).toContain("@layer rmx-reset, base, rmx;")
   })
 
   it("keeps the boot script on a page that carries no browser entry", async () => {
     const page = await renderToHtml(<Document entry={null} title="Tasks" />)
+
     expect(page).toContain("localStorage.getItem")
     expect(page).not.toContain('type="module"')
   })
@@ -84,6 +90,7 @@ describe("Document", () => {
     const map = page.indexOf('type="importmap"')
     const preload = page.indexOf('rel="modulepreload"')
     const script = page.indexOf('src="/assets/app/entry.ts"')
+
     expect(map).toBeGreaterThan(-1)
     expect(preload).toBeGreaterThan(map)
     expect(script).toBeGreaterThan(preload)
@@ -98,6 +105,7 @@ describe("Document", () => {
     const chosen = htmlTag(
       await renderToHtml(<Document density="compact" scheme="dark" title="T" />),
     )
+
     expect(chosen).toContain('data-scheme="dark"')
     expect(chosen).toContain('data-density="compact"')
   })
@@ -112,6 +120,7 @@ describe("Document", () => {
 
     const branded = extendTheme(miniTheme, { base: { accent: "#7A3E9D" } })
     const page = await renderToHtml(<Document theme={branded} title="Tasks" />)
+
     expect(page).toContain("--accent: #7A3E9D;")
   })
 
@@ -119,7 +128,9 @@ describe("Document", () => {
     const page = await renderToHtml(
       <Document head={<link rel="icon" href="/icon.svg" />} title="Tasks" />,
     )
+
     const icon = page.indexOf('href="/icon.svg"')
+
     expect(page.indexOf("<meta charset")).toBeLessThan(icon)
     expect(icon).toBeLessThan(page.indexOf("@layer rmx-reset, base, rmx;"))
   })

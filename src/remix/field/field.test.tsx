@@ -37,10 +37,15 @@ const referencesOf = (value: string): string[] =>
 const offendersIn = (styles: string): string[] =>
   valuesOf(styles).filter((value) => {
     if (keywords.has(value)) return false
+
     const references = referencesOf(value)
+
     if (references.length === 0) return true
+
     if (!references.every((name) => name.startsWith("ui-field-"))) return true
+
     const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/calc|[()+\-*/\s]/g, "")
+
     return rest !== ""
   })
 
@@ -51,6 +56,7 @@ const describedIds = (html: string): string[] =>
 describe("Field", () => {
   it("renders a labelled text input by default", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(html).toContain("<input")
     expect(html).toContain('type="text"')
     expect(html).toContain('name="email"')
@@ -63,6 +69,7 @@ describe("Field", () => {
     // string "email" twice and proving only that both were spelled the same.
     const html = await renderToHtml(<Field label="Email" name="email" />)
     const bound = /for="([^"]*)"/.exec(html)?.[1]
+
     expect(bound).toBeDefined()
     expect(html).toContain(`id="${bound}"`)
   })
@@ -70,6 +77,7 @@ describe("Field", () => {
   it("takes the id stem from name, and lets id replace it", async () => {
     // The escape hatch for two forms on one page sharing a field name.
     const html = await renderToHtml(<Field id="billing-email" label="Email" name="email" />)
+
     expect(html).toContain('id="billing-email"')
     expect(html).toContain('for="billing-email"')
     expect(html).toContain('name="email"')
@@ -82,6 +90,7 @@ describe("Field", () => {
     const html = markupOf(
       await renderToHtml(<Field hint="Work address" id="" label="Email" name="email" />),
     )
+
     expect(html).toContain('id="email"')
     expect(html).toContain('for="email"')
     expect(html).toContain('id="email-hint"')
@@ -91,6 +100,7 @@ describe("Field", () => {
 
   it("describes the control with no messages when it has none", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(markupOf(html)).not.toContain("aria-describedby")
   })
 
@@ -98,16 +108,19 @@ describe("Field", () => {
     // Pointing aria-describedby at an id that is not in the document is its
     // own silent failure: some assistive technology reads nothing at all.
     const hintOnly = await renderToHtml(<Field hint="Work address" label="Email" name="email" />)
+
     expect(describedIds(hintOnly)).toEqual(["email-hint"])
 
     const both = await renderToHtml(
       <Field error="Already registered" hint="Work address" label="Email" name="email" />,
     )
+
     expect(describedIds(both)).toEqual(["email-hint", "email-error"])
 
     const errorOnly = await renderToHtml(
       <Field error="Already registered" label="Email" name="email" />,
     )
+
     expect(describedIds(errorOnly)).toEqual(["email-error"])
 
     for (const html of [hintOnly, both, errorOnly]) {
@@ -116,6 +129,7 @@ describe("Field", () => {
         // aria-describedby exists exactly once in the markup", and toContain
         // cannot fail on a duplicate id.
         const count = [...html.matchAll(new RegExp(`id="${id}"`, "g"))].length
+
         expect(count).toBe(1)
       }
     }
@@ -127,6 +141,7 @@ describe("Field", () => {
     // pins the behaviour down: no aria-describedby, no aria-invalid, no
     // empty <p>.
     const html = markupOf(await renderToHtml(<Field error="" hint="" label="Email" name="email" />))
+
     expect(html).not.toContain("aria-describedby")
     expect(html).not.toContain("aria-invalid")
     expect(html).not.toContain("<p")
@@ -138,6 +153,7 @@ describe("Field", () => {
     const html = await renderToHtml(
       <Field error="Already registered" hint="Work address" label="Email" name="email" />,
     )
+
     expect(html).toContain("Work address")
     expect(html).toContain("Already registered")
   })
@@ -147,10 +163,12 @@ describe("Field", () => {
     // selector is in the stylesheet on every render, so the negative
     // assertion could never pass and the positive one could never fail.
     const plain = markupOf(await renderToHtml(<Field label="Email" name="email" />))
+
     expect(plain).not.toContain("aria-invalid")
     const withError = markupOf(
       await renderToHtml(<Field error="Already registered" label="Email" name="email" />),
     )
+
     expect(withError).toContain('aria-invalid="true"')
     // The "only" in this test's name: a hint with no error must not be read as
     // invalid. Mutating `invalid` to `(hasError || hasHint) ? "true" : undefined`
@@ -159,6 +177,7 @@ describe("Field", () => {
     const hintOnly = markupOf(
       await renderToHtml(<Field hint="Work address" label="Email" name="email" />),
     )
+
     expect(hintOnly).not.toContain("aria-invalid")
   })
 
@@ -166,6 +185,7 @@ describe("Field", () => {
     // `required` is on the control, and that is what gets announced. The
     // asterisk is for eyes only, so it must not be read out as well.
     const html = markupOf(await renderToHtml(<Field label="Email" name="email" required />))
+
     expect(html).toContain(" required")
     expect(html).toContain('aria-hidden="true"')
     // A component that dropped the asterisk but kept the span would satisfy
@@ -180,6 +200,7 @@ describe("Field", () => {
     // A `=== true` check loosened to `!== undefined` would still pass every
     // other test here, since none of them renders `required={false}`.
     const html = markupOf(await renderToHtml(<Field label="Email" name="email" required={false} />))
+
     expect(html).not.toContain("aria-hidden")
     expect(html).not.toContain(" *</span>")
   })
@@ -202,6 +223,7 @@ describe("Field", () => {
     const html = await renderToHtml(
       <Field label="Age" max={120} min={18} name="age" required step={1} type="number" />,
     )
+
     expect(html).toContain('type="number"')
     expect(html).toContain('min="18"')
     expect(html).toContain('max="120"')
@@ -222,6 +244,7 @@ describe("Field", () => {
         value="a@b.co"
       />,
     )
+
     expect(text).toContain('autocomplete="email"')
     expect(text).toContain('minlength="5"')
     expect(text).toContain('maxlength="80"')
@@ -233,6 +256,7 @@ describe("Field", () => {
 
   it("renders the disabled attribute", async () => {
     const html = markupOf(await renderToHtml(<Field disabled label="Email" name="email" />))
+
     expect(html).toContain(" disabled")
   })
 
@@ -242,12 +266,14 @@ describe("Field", () => {
     const html = await renderToHtml(
       <Field error="Already registered" hint="Work address" label="Email" name="email" required />,
     )
+
     expect(offendersIn(stylesOf(html))).toEqual([])
   })
 
   it("keeps the control's own blocks property-disjoint", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
     const blocks = blocksOn(html, "input")
+
     // Non-empty first: sharedProperties([]) is [], so an empty list would
     // satisfy the assertion below without proving anything.
     expect(blocks.length).toBeGreaterThan(1)
@@ -260,6 +286,7 @@ describe("Field", () => {
     // passes. Longhands throughout is what closes that.
     const html = await renderToHtml(<Field label="Email" name="email" />)
     const styles = stylesOf(html)
+
     expect(styles).not.toContain("padding-inline:")
     expect(styles).not.toContain("padding-block:")
     expect(styles).not.toContain("padding:")
@@ -277,6 +304,7 @@ describe("Field", () => {
     const base = blocksOn(html, "input").find((block) =>
       block.includes("border-color: var(--ui-field-border)"),
     )
+
     expect(base).toBeDefined()
     expect(base).toContain("&:user-invalid")
     expect(base).toContain('&[aria-invalid="true"]')
@@ -300,21 +328,25 @@ describe("Field", () => {
     const html = await renderToHtml(<Field label="Email" mix={placed} name="email" />)
     const onWrapper = blocksOn(html, "div").some((block) => block.includes("grid-column"))
     const onControl = blocksOn(html, "input").some((block) => block.includes("grid-column"))
+
     expect([onWrapper, onControl]).toEqual([true, false])
   })
 
   it("carries the wrapper's gap token in its own block", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(blocksOn(html, "div")[0]).toContain("gap: var(--ui-field-gap)")
   })
 
   it("carries the label's ink token in its own block", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(blocksOn(html, "label")[0]).toContain("color: var(--ui-field-label-ink)")
   })
 
   it("carries the required marker's ink token in its own block", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" required />)
+
     expect(blocksOn(html, "span")[0]).toContain("color: var(--ui-field-required-ink)")
   })
 
@@ -323,17 +355,20 @@ describe("Field", () => {
     // both messages would make this assertion true of whichever message
     // happens to come first rather than of the hint specifically.
     const html = await renderToHtml(<Field hint="Work address" label="Email" name="email" />)
+
     expect(blocksOn(html, "p")[0]).toContain("color: var(--ui-field-hint-ink)")
   })
 
   it("carries the error's ink token in its own block", async () => {
     // error only, no hint — the complement of the hint assertion above.
     const html = await renderToHtml(<Field error="Already registered" label="Email" name="email" />)
+
     expect(blocksOn(html, "p")[0]).toContain("color: var(--ui-field-error-ink)")
   })
 
   it("carries the input's height token in its own block", async () => {
     const html = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(
       blocksOn(html, "input").some((block) => block.includes("height: var(--ui-field-height)")),
     ).toBe(true)
@@ -360,10 +395,13 @@ describe("Field", () => {
         </Field>,
       ),
     ]
+
     const names = renders.flatMap((html) =>
       [...stylesOf(html).matchAll(/var\(--(ui-field-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect(names.length).toBeGreaterThan(0)
+
     for (const name of names) expect(Object.hasOwn(fieldTokens, name)).toBe(true)
   })
 })
@@ -371,6 +409,7 @@ describe("Field", () => {
 describe("Field, as a textarea", () => {
   it("renders a labelled textarea", async () => {
     const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
+
     expect(html).toContain("<textarea")
     expect(html).toContain('id="notes"')
     expect(html).toContain('for="notes"')
@@ -384,6 +423,7 @@ describe("Field, as a textarea", () => {
     const html = await renderToHtml(
       <Field control="textarea" error="Too short" hint="Optional" label="Notes" name="notes" />,
     )
+
     expect(describedIds(html)).toEqual(["notes-hint", "notes-error"])
     expect(markupOf(html)).toContain('aria-invalid="true"')
   })
@@ -392,6 +432,7 @@ describe("Field, as a textarea", () => {
     const html = markupOf(
       await renderToHtml(<Field control="textarea" disabled label="Notes" name="notes" />),
     )
+
     expect(html).toContain(" disabled")
   })
 
@@ -402,6 +443,7 @@ describe("Field, as a textarea", () => {
     const html = await renderToHtml(
       <Field control="textarea" label="Notes" name="notes" value="typed earlier" />,
     )
+
     expect(html).toContain("<textarea")
     expect(html).toContain("typed earlier")
   })
@@ -419,6 +461,7 @@ describe("Field, as a textarea", () => {
         rows={4}
       />,
     )
+
     expect(html).toContain('rows="4"')
     expect(html).toContain('minlength="10"')
     expect(html).toContain('maxlength="500"')
@@ -434,6 +477,7 @@ describe("Field, as a textarea", () => {
     const html = markupOf(
       await renderToHtml(<Field control="textarea" label="Notes" name="notes" readonly />),
     )
+
     expect(html).toContain(" readonly")
   })
 
@@ -442,6 +486,7 @@ describe("Field, as a textarea", () => {
     // it was given, and a height would fight that.
     const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
     const blocks = blocksOn(html, "textarea")
+
     expect(blocks.length).toBeGreaterThan(1)
     expect(blocks.some((block) => block.includes("height:"))).toBe(false)
   })
@@ -449,6 +494,7 @@ describe("Field, as a textarea", () => {
   it("keeps the textarea's blocks property-disjoint", async () => {
     const html = await renderToHtml(<Field control="textarea" label="Notes" name="notes" />)
     const blocks = blocksOn(html, "textarea")
+
     expect(blocks.length).toBeGreaterThan(1)
     expect(sharedProperties(blocks)).toEqual([])
   })
@@ -457,6 +503,7 @@ describe("Field, as a textarea", () => {
     const html = await renderToHtml(
       <Field control="textarea" error="Too short" hint="Optional" label="Notes" name="notes" />,
     )
+
     expect(offendersIn(stylesOf(html))).toEqual([])
   })
 })
@@ -477,6 +524,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(html).toContain("<select")
     expect(html).toContain('id="plan"')
     expect(html).toContain('for="plan"')
@@ -491,6 +539,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(describedIds(html)).toEqual(["plan-hint", "plan-error"])
     expect(markupOf(html)).toContain('aria-invalid="true"')
   })
@@ -504,12 +553,14 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     // The first div is the wrapper; the frame is the second. Self-checking
     // rather than trusting the index: a <div> added before the frame would
     // silently retarget occurrence 1 at the wrapper without this failing, so
     // the wrapper's own block set is asserted to differ from the frame's.
     const wrapper = blocksOn(html, "div", 0)
     const frame = blocksOn(html, "div", 1)
+
     expect(frame[0]).toContain("display: grid")
     expect(frame).not.toEqual(wrapper)
   })
@@ -523,6 +574,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(blocksOn(html, "select").some((block) => block.includes("grid-area: 1 / 1"))).toBe(true)
     expect(blocksOn(html, "svg").some((block) => block.includes("grid-area: 1 / 1"))).toBe(true)
   })
@@ -537,6 +589,7 @@ describe("Field, as a select", () => {
         </Field>,
       ),
     )
+
     expect(html).toContain(" required")
     expect(html).toContain(" disabled")
   })
@@ -547,6 +600,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(blocksOn(html, "select").some((block) => block.includes("appearance: none"))).toBe(true)
     expect(html).toContain("<svg")
     expect(html).toContain("<path")
@@ -561,8 +615,10 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(blocksOn(select, "select").some((block) => block.includes("padding-block"))).toBe(false)
     const input = await renderToHtml(<Field label="Email" name="email" />)
+
     expect(blocksOn(input, "input").some((block) => block.includes("padding-block-start"))).toBe(
       true,
     )
@@ -578,6 +634,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(html).toContain('viewBox="0 0 12 12"')
     expect(html).toContain('fill="none"')
     expect(html).toContain('d="M3 4.5L6 7.5L9 4.5"')
@@ -592,6 +649,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(/<svg[^>]*aria-hidden="true"/.test(html)).toBe(true)
     expect(blocksOn(html, "svg")[0]).toContain("pointer-events: none")
   })
@@ -605,7 +663,9 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     const blocks = blocksOn(html, "svg")
+
     expect(blocks.length).toBe(1)
     expect(blocks[0]).toContain("color: var(--ui-field-chevron-ink)")
     // offendersIn scans CSS only, so a hard-coded colour on the <path>
@@ -619,6 +679,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(
       blocksOn(html, "select").some((block) =>
         block.includes(
@@ -634,7 +695,9 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     const blocks = blocksOn(html, "select")
+
     expect(blocks.length).toBeGreaterThan(1)
     expect(sharedProperties(blocks)).toEqual([])
   })
@@ -647,6 +710,7 @@ describe("Field, as a select", () => {
         {plans}
       </Field>,
     )
+
     expect(offendersIn(stylesOf(html))).toEqual([])
   })
 })
@@ -656,6 +720,7 @@ describe("FieldDemo", () => {
     // Derived from fieldControls, so a kind the component gains is a kind this
     // demo has to show.
     const html = await renderToHtml(<FieldDemo />)
+
     for (const control of fieldControls) expect(html).toContain(`<${control}`)
   })
 
@@ -663,6 +728,7 @@ describe("FieldDemo", () => {
     // A GET form with no action submits to the current URL, so the catalogue
     // route reloads with the values in the query string.
     const html = await renderToHtml(<FieldDemo />)
+
     expect(html).toContain('method="get"')
     expect(html).toContain('type="submit"')
   })
@@ -672,6 +738,7 @@ describe("FieldDemo", () => {
     // and `readonly` in the stylesheet on every render — asserted against the
     // raw html, two of these four would pass with no such field on the page.
     const html = markupOf(await renderToHtml(<FieldDemo />))
+
     expect(html).toContain(" required")
     expect(html).toContain(" disabled")
     expect(html).toContain(" readonly")

@@ -31,9 +31,12 @@ describe("the component token aggregate", () => {
   it("prefixes every name with ui- and writes no leading dashes", () => {
     const problems = entries.flatMap(([name]) => {
       if (name.startsWith("--")) return [`${name}: carries its own leading dashes`]
+
       if (!name.startsWith("ui-")) return [`${name}: is not ui- prefixed`]
+
       return []
     })
+
     expect(problems).toEqual([])
   })
 
@@ -43,15 +46,20 @@ describe("the component token aggregate", () => {
     // at the rendered page.
     const problems = entries.flatMap(([name, value]) => {
       if (allowedLiterals.has(value)) return []
+
       const referenced = /^var\(--([\w-]+)\)$/.exec(value)?.[1]
+
       if (referenced === undefined) {
         return [`${name}: ${value} is neither var(--primitive) nor an allowed literal`]
       }
+
       if (!primitives.has(referenced)) {
         return [`${name}: --${referenced} is not a name the schema holds`]
       }
+
       return []
     })
+
     expect(problems).toEqual([])
   })
 
@@ -61,6 +69,7 @@ describe("the component token aggregate", () => {
     const problems = entries
       .filter(([, value]) => value.includes("color-mix("))
       .map(([name]) => `${name}: contains color-mix()`)
+
     expect(problems).toEqual([])
   })
 
@@ -69,6 +78,7 @@ describe("the component token aggregate", () => {
     // A component missing from it ships a contract whose every default
     // resolves to nothing, and no component test can see that.
     const prefixes = new Set(entries.map(([name]) => name.split("-").slice(0, 2).join("-")))
+
     expect([...prefixes].sort()).toEqual([
       "ui-badge",
       "ui-breadcrumbs",

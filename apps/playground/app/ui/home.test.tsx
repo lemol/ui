@@ -9,6 +9,7 @@ import { HomePage } from "./home.tsx"
 describe("HomePage", () => {
   it("renders the catalogue index in mini's shell", async () => {
     const page = await renderToHtml(<HomePage location="/" scripts={false} />)
+
     expect(page).toContain("lemol ui playground")
     expect(page).toContain("Skip to content")
     expect(page).toContain('href="/c/button"')
@@ -18,6 +19,7 @@ describe("HomePage", () => {
 
   it("renders complete markup with scripts off", async () => {
     const page = await renderToHtml(<HomePage location="/" scripts={false} />)
+
     expect(page).toContain('<button type="button"')
     expect(page).toContain("Not clicked yet")
   })
@@ -33,6 +35,7 @@ describe("HomePage", () => {
 
   it("carries the switchers, preserving the current query", async () => {
     const page = await renderToHtml(<HomePage location="/?scheme=dark" scripts />)
+
     expect(page).toContain('name="scheme"')
     expect(page).toContain('name="density"')
     expect(page).toContain('name="nojs"')
@@ -47,6 +50,7 @@ describe("HomePage", () => {
     // button is never disabled and every other switcher stays enabled, so on
     // this page a disabled button can only be the compat pair.
     const disabledButton = /<button[^>]*disabled/
+
     expect(await renderToHtml(<HomePage location="/" scripts />)).not.toMatch(disabledButton)
     expect(await renderToHtml(<HomePage location="/?nojs" scripts={false} />)).toMatch(
       disabledButton,

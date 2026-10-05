@@ -21,6 +21,7 @@ describe("Heading", () => {
   it("renders the element its level names, carrying its children", async () => {
     for (const level of levels) {
       const html = await renderToHtml(<Heading level={level}>Title</Heading>)
+
       expect(html).toContain(`<h${level}`)
       expect(html).toContain("Title")
     }
@@ -35,6 +36,7 @@ describe("Heading", () => {
       const offenders = valuesOf(styles).filter(
         (value) => !/^var\(--ui-heading-[\w-]+\)$/.test(value),
       )
+
       expect(offenders).toEqual([])
     }
   })
@@ -53,12 +55,14 @@ describe("Heading", () => {
     // Two blocks that could both declare font-size would hand sub-layer order
     // the decision, and that order follows render order, not source order.
     const blocks = styleBlocksOf(await renderToHtml(<Heading level={2}>Title</Heading>))
+
     expect(blocks.filter((block) => block.includes("font-size:"))).toHaveLength(1)
   })
 
   it("sizes a heading from its level by default", async () => {
     for (const level of levels) {
       const styles = stylesOf(await renderToHtml(<Heading level={level}>Title</Heading>))
+
       expect(styles).toContain(`font-size: var(--ui-heading-${level}-size)`)
     }
   })
@@ -71,6 +75,7 @@ describe("Heading", () => {
         Title
       </Heading>,
     )
+
     expect(html).toContain("<h2")
     expect(stylesOf(html)).toContain("font-size: var(--ui-heading-5-size)")
     expect(stylesOf(html)).not.toContain("var(--ui-heading-2-size)")
@@ -87,6 +92,7 @@ describe("Heading", () => {
         </Heading>,
       ),
     )
+
     expect(markup).toContain('id="new-task-title"')
   })
 
@@ -100,6 +106,7 @@ describe("Heading", () => {
             </Heading>,
           ),
         )
+
         expect(sharedProperties(blocks)).toEqual([])
       }
     }
@@ -114,6 +121,7 @@ describe("Heading", () => {
         </Heading>,
       ),
     )
+
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
   })
@@ -128,14 +136,16 @@ describe("Heading", () => {
       ["ui-heading-weight", "font-weight"],
       ["ui-heading-tracking", "letter-spacing"],
       ["ui-heading-leading", "line-height"],
-    ] as const)
+    ] as const) {
       expect(resetCss).toContain(`${property}: ${headingTokens[token]}`)
+    }
   })
 })
 
 describe("HeadingDemo", () => {
   it("renders every level it demonstrates", async () => {
     const html = await renderToHtml(<HeadingDemo />)
+
     for (const level of demoLevels) expect(html).toContain(`<h${level}`)
   })
 })

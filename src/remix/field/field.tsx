@@ -344,6 +344,7 @@ export function Field(handle: Handle<FieldProps>) {
     const described = [hasHint ? hintId : "", hasError ? errorId : ""]
       .filter((id) => id !== "")
       .join(" ")
+
     const describedBy = described === "" ? undefined : described
     const invalid = hasError ? "true" : undefined
 

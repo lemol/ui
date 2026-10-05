@@ -139,6 +139,7 @@ export function toast(name: string): Toaster {
         mix,
         children,
       } = handle.props
+
       return (
         <div
           aria-live="polite"

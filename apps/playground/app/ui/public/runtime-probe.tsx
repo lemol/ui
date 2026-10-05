@@ -19,6 +19,7 @@ export interface RuntimeProbeViewProps {
 export function RuntimeProbeView(handle: Handle<RuntimeProbeViewProps>) {
   return () => {
     const { clicks, behaviour } = handle.props
+
     return (
       <button type="button" mix={behaviour === undefined ? style : [style, behaviour]}>
         {clicks === 0 ? "Not clicked yet" : `Clicked ${clicks}×`}

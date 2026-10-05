@@ -15,12 +15,14 @@ describe("overlay", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('command="show-modal"')
     expect(markup).toContain('commandfor="new-task"')
     // Attribute by attribute, not as one string: the renderer emits them in
     // the order the JSX lists them, so a single substring would break the day
     // someone reorders two props that have no ordering.
     const dialogTag = /<dialog[^>]*>/.exec(markup)?.[0] ?? ""
+
     expect(dialogTag).toContain('id="new-task"')
     expect(dialogTag).toContain('aria-labelledby="new-task-title"')
   })
@@ -28,6 +30,7 @@ describe("overlay", () => {
   it("gives Close the dismissal, so a caller's cancel button needs no id", async () => {
     const NewTask = overlay("new-task")
     const markup = markupOf(await renderToHtml(<NewTask.Close tone="ghost">Cancel</NewTask.Close>))
+
     expect(markup).toContain('command="close"')
     expect(markup).toContain('commandfor="new-task"')
     expect(markup).toContain("Cancel")
@@ -43,6 +46,7 @@ describe("overlay", () => {
         </NewTask.Trigger>,
       ),
     )
+
     expect(markup).toContain("disabled")
   })
 
@@ -67,7 +71,9 @@ describe("overlay", () => {
         </>,
       ),
     )
+
     const targets = [...markup.matchAll(/commandfor="([^"]*)"/g)].map((match) => match[1])
+
     expect(targets).toEqual(["first", "second", "first", "second"])
   })
 
@@ -81,6 +87,7 @@ describe("overlay", () => {
         <NewTask.Dialog title="New task">Body</NewTask.Dialog>
       </>,
     )
+
     expect(html).not.toContain("<script")
   })
 })
@@ -88,6 +95,7 @@ describe("overlay", () => {
 describe("DialogDemo", () => {
   it("shows a trigger, a dialog and a form that cancels", async () => {
     const markup = markupOf(await renderToHtml(<DialogDemo />))
+
     expect(markup).toContain('command="show-modal"')
     expect(markup).toContain('command="close"')
     expect(markup).toContain("<form")

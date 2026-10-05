@@ -67,6 +67,7 @@ export interface GridProps {
 export function Grid(handle: Handle<GridProps>) {
   return () => {
     const { gap = 0, cols, mix, children } = handle.props
+
     return (
       <div mix={[gridBase, gaps[gap], cols === undefined ? undefined : columnStyles[cols], mix]}>
         {children}

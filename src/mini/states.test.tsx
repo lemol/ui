@@ -46,6 +46,7 @@ describe("EmptyState", () => {
         />,
       ),
     )
+
     expect(html).toContain("Today")
     expect(html).toContain("No tasks yet")
     expect(html).toContain("Everything you capture here")
@@ -54,19 +55,23 @@ describe("EmptyState", () => {
 
   it("renders no eyebrow when it was given none", async () => {
     const html = markupOf(await renderToHtml(<EmptyState title="No tasks yet" />))
+
     expect(html).not.toContain("<p")
     expect(html).toContain("No tasks yet")
   })
 
   it("heads the panel at level 2, because the page already has its h1", async () => {
     const html = markupOf(await renderToHtml(<EmptyState title="No tasks yet" />))
+
     expect(html).toContain("<h2")
     const deeper = markupOf(await renderToHtml(<EmptyState level={3} title="No tasks yet" />))
+
     expect(deeper).toContain("<h3")
   })
 
   it("draws its edge dashed, which is the state said without a sentence", async () => {
     const styles = stylesOf(await renderToHtml(<EmptyState title="No tasks yet" />))
+
     expect(styles).toContain("border-style: dashed")
     expect(styles).toContain("border-color: var(--hairline-strong)")
     // canvas, not surface: the panel recedes from the page rather than
@@ -76,6 +81,7 @@ describe("EmptyState", () => {
 
   it("holds the description to a reading measure", async () => {
     const styles = stylesOf(await renderToHtml(<EmptyState description="d" title="t" />))
+
     expect(styles).toContain("max-inline-size: 42ch")
   })
 })
@@ -83,9 +89,11 @@ describe("EmptyState", () => {
 describe("ErrorState", () => {
   it("carries a status a user can quote, defaulting to Error", async () => {
     const plain = markupOf(await renderToHtml(<ErrorState title="Something broke" />))
+
     expect(plain).toContain("Error")
 
     const found = markupOf(await renderToHtml(<ErrorState status="404" title="No such page" />))
+
     expect(found).toContain("404")
     expect(found).not.toContain(">Error<")
   })
@@ -94,6 +102,7 @@ describe("ErrorState", () => {
     // Badge already owns the semantic vocabulary, and the tone is what makes
     // the panel legible before a word of it is read.
     const html = await renderToHtml(<ErrorState status="503" title="Unavailable" />)
+
     // The badge reads its own tier, which mini's theme resolves to the danger
     // tone — so the assertion is that the panel delegated to Badge rather than
     // painting a status pill of its own.
@@ -103,6 +112,7 @@ describe("ErrorState", () => {
 
   it("tints the panel solid, because an error is not a placeholder", async () => {
     const styles = stylesOf(await renderToHtml(<ErrorState title="Something broke" />))
+
     expect(styles).toContain("border-style: solid")
     expect(styles).toContain("border-color: var(--danger-border)")
   })
@@ -119,6 +129,7 @@ describe("ErrorState", () => {
         </ErrorState>,
       ),
     )
+
     expect(html.indexOf("did not reach")).toBeLessThan(html.indexOf("request 8f21c"))
     expect(html.indexOf("request 8f21c")).toBeLessThan(html.indexOf("Back to tasks"))
   })
@@ -134,6 +145,7 @@ describe("the shared panel", () => {
       await renderToHtml(<ErrorState description="d" title="t" />),
     ]) {
       const styles = panelBlocks(html).join("\n")
+
       expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
       expect(styles).not.toContain("--ui-")
     }
@@ -147,6 +159,7 @@ describe("the shared panel", () => {
       await renderToHtml(<ErrorState title="t" />),
     ]) {
       const blocks = panelBlocks(html)
+
       expect(blocks).toHaveLength(2)
       expect(sharedProperties(blocks)).toEqual([])
     }
@@ -155,6 +168,7 @@ describe("the shared panel", () => {
   it("gives both states the same geometry, so one product renders both", async () => {
     const empty = stylesOf(await renderToHtml(<EmptyState title="t" />))
     const failed = stylesOf(await renderToHtml(<ErrorState title="t" />))
+
     for (const declaration of ["padding-block: var(--sp-12)", "border-radius: var(--r-lg)"]) {
       expect(empty).toContain(declaration)
       expect(failed).toContain(declaration)

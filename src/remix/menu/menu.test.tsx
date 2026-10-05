@@ -33,6 +33,7 @@ describe("menu", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('command="toggle-popover"')
     expect(markup).toContain('commandfor="view-menu"')
     expect(markup).toContain('role="menu"')
@@ -53,8 +54,10 @@ describe("menu", () => {
         </View.List>
       </>,
     )
+
     expect(html).not.toContain("<script")
     const markup = markupOf(html)
+
     expect(markup).toContain('href="#a"')
     expect(markup).toContain("<button")
   })
@@ -68,6 +71,7 @@ describe("menu", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('<a href="#a"')
     expect(markup).toContain("<button")
     expect([...markup.matchAll(/role="menuitem"/g)]).toHaveLength(2)
@@ -75,12 +79,14 @@ describe("menu", () => {
 
   it("disables a button item without breaking a link item", async () => {
     const markup = markupOf(await renderToHtml(<MenuItem disabled>Zoom in</MenuItem>))
+
     expect(markup).toContain("disabled")
   })
 
   it("renders a separator", async () => {
     // <hr>'s role is separator implicitly; an explicit one is redundant.
     const markup = markupOf(await renderToHtml(<MenuSeparator />))
+
     expect(markup).toContain("<hr")
   })
 
@@ -92,10 +98,12 @@ describe("menu", () => {
         <MenuSeparator />
       </>,
     )
+
     const styles = stylesOf(html)
     const offenders = valuesOf(styles).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-menu-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -111,9 +119,11 @@ describe("menu", () => {
         </View.List>
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-menu-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(menuTokens).sort())
   })
 
@@ -124,8 +134,10 @@ describe("menu", () => {
         <MenuSeparator />
       </>,
     )
+
     for (const tag of ["a", "hr"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }

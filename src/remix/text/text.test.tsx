@@ -11,6 +11,7 @@ const tags = textTags
 describe("Text", () => {
   it("renders a p by default, carrying its children", async () => {
     const html = await renderToHtml(<Text>prose</Text>)
+
     expect(html).toContain("<p")
     expect(html).toContain("prose")
   })
@@ -33,9 +34,11 @@ describe("Text", () => {
             </Text>,
           ),
         )
+
         const offenders = valuesOf(styles).filter(
           (value) => !/^var\(--ui-text-[\w-]+\)$/.test(value),
         )
+
         expect(offenders).toEqual([])
       }
     }
@@ -47,11 +50,13 @@ describe("Text", () => {
         `font-size: var(--ui-text-size-${size})`,
       )
     }
+
     const inks = {
       default: "ui-text-ink",
       muted: "ui-text-ink-muted",
       subtle: "ui-text-ink-subtle",
     }
+
     for (const tone of tones) {
       expect(stylesOf(await renderToHtml(<Text tone={tone}>prose</Text>))).toContain(
         `color: var(--${inks[tone]})`,
@@ -61,6 +66,7 @@ describe("Text", () => {
 
   it("defaults to md and the plain ink", async () => {
     const styles = stylesOf(await renderToHtml(<Text>prose</Text>))
+
     expect(styles).toContain("font-size: var(--ui-text-size-md)")
     expect(styles).toContain("color: var(--ui-text-ink)")
   })
@@ -75,6 +81,7 @@ describe("Text", () => {
             </Text>,
           ),
         )
+
         expect(sharedProperties(blocks)).toEqual([])
       }
     }
@@ -86,6 +93,7 @@ describe("Text", () => {
     expect(stylesOf(await renderToHtml(<Text>prose</Text>))).not.toContain("font-weight")
     const bold = css({ fontWeight: "var(--fw-semibold)" })
     const blocks = styleBlocksOf(await renderToHtml(<Text mix={bold}>prose</Text>))
+
     expect(blocks.filter((block) => block.includes("font-weight:"))).toHaveLength(1)
   })
 })
@@ -93,7 +101,9 @@ describe("Text", () => {
 describe("TextDemo", () => {
   it("renders every value of every axis it demonstrates", async () => {
     const html = await renderToHtml(<TextDemo />)
+
     for (const size of sizes) expect(html).toContain(`size ${size}`)
+
     for (const tone of tones) expect(html).toContain(`tone ${tone}`)
   })
 })

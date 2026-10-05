@@ -11,11 +11,13 @@ describe("the shared gap scale", () => {
     // Derived from schema.space, so a step can only go missing if the
     // derivation breaks — which is exactly when nothing else would notice.
     const missing = schema.space.filter((name) => !Object.hasOwn(gaps, name.slice(3)))
+
     expect(missing).toEqual([])
   })
 
   it("holds no step the schema does not", () => {
     const names = new Set<string>(schema.space.map((name) => name.slice(3)))
+
     expect(Object.keys(gaps).filter((key) => !names.has(key))).toEqual([])
   })
 
@@ -24,6 +26,7 @@ describe("the shared gap scale", () => {
     // component's own base block and hand sub-layer order the decision.
     for (const name of schema.space) {
       const html = await renderToHtml(<div mix={gaps[stepOf(name)]} />)
+
       expect(styleBlocksOf(html)).toHaveLength(1)
       expect(valuesOf(stylesOf(html))).toEqual([`var(--${name})`])
     }

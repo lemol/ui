@@ -65,9 +65,11 @@ describe("Button", () => {
             </Button>,
           ),
         )
+
         const offenders = valuesOf(styles).filter(
           (value) => !keywords.has(value) && !/^var\(--ui-btn-[\w-]+\)$/.test(value),
         )
+
         expect(offenders).toEqual([])
       }
     }
@@ -82,6 +84,7 @@ describe("Button", () => {
         .map((part) => `ui-btn-${tone}-${part}`)
         .filter((name) => !Object.hasOwn(buttonTokens, name)),
     )
+
     expect(missing).toEqual([])
   })
 
@@ -104,6 +107,7 @@ describe("Button", () => {
     // contend with the caller's and sub-layer order cannot matter.
     const pinned = css({ position: "fixed" })
     const blocks = styleBlocksOf(await renderToHtml(<Button mix={pinned}>Save</Button>))
+
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
   })
@@ -127,8 +131,10 @@ describe("Button", () => {
         </div>,
       ),
     )
+
     const caller = blocks.findIndex((block) => block.includes("rebeccapurple"))
     const tone = blocks.findIndex((block) => block.includes("var(--ui-btn-primary-ink)"))
+
     expect(caller).toBeGreaterThanOrEqual(0)
     expect(tone).toBeGreaterThanOrEqual(0)
     // Both set `color`. The caller's block is earlier, so Button's tone wins.
@@ -152,6 +158,7 @@ describe("Button", () => {
       const toneBlock = blocks.find(
         (block) => block.includes(`var(--ui-btn-${tone}-bg)`) && block.includes(":disabled"),
       )
+
       expect(toneBlock).toBeDefined()
       expect(toneBlock).toContain("var(--ui-btn-disabled-bg)")
       expect(toneBlock).toContain("var(--ui-btn-disabled-border)")
@@ -168,6 +175,7 @@ describe("Button", () => {
     // is what stops that split from reintroducing itself unnoticed.
     const blocks = styleBlocksOf(await renderToHtml(<Button>Save</Button>))
     const baseBlock = blocks.find((block) => block.includes("inline-flex"))
+
     expect(baseBlock).toBeDefined()
     expect(baseBlock).not.toContain(":disabled")
   })
@@ -179,10 +187,12 @@ describe("Button", () => {
     const markup = markupOf(
       await renderToHtml(<Button invoke={invoke("show-modal", "new-task")}>Open</Button>),
     )
+
     expect(markup).toContain('command="show-modal"')
     expect(markup).toContain('commandfor="new-task"')
 
     const bare = markupOf(await renderToHtml(<Button>Plain</Button>))
+
     expect(bare).not.toContain("command")
   })
 
@@ -198,6 +208,7 @@ describe("Button", () => {
     for (const tone of tones) {
       for (const size of sizes) {
         const blocks = styleBlocksOf(await renderToHtml(<Button size={size} tone={tone} />))
+
         expect(sharedProperties(blocks)).toEqual([])
       }
     }
@@ -207,6 +218,7 @@ describe("Button", () => {
 describe("LinkButton", () => {
   it("renders an anchor carrying its href", async () => {
     const html = await renderToHtml(<LinkButton href="/docs">Docs</LinkButton>)
+
     expect(html).toContain('<a href="/docs"')
     expect(html).toContain("Docs")
   })
@@ -216,6 +228,7 @@ describe("LinkButton", () => {
     // lives in rmx, which is ordered after it. This asserts which side of
     // that line the reset is on.
     const styles = stylesOf(await renderToHtml(<LinkButton href="/docs">Docs</LinkButton>))
+
     expect(styles).toContain("text-decoration: none")
     expect(styles).toContain("@layer rmx.")
   })
@@ -228,6 +241,7 @@ describe("LinkButton", () => {
         </LinkButton>,
       ),
     )
+
     expect(styles).toContain("var(--ui-btn-primary-bg)")
   })
 })
@@ -247,7 +261,9 @@ describe("ButtonDemo", () => {
       // only appears in the other size's section.
       expect(start).toBeGreaterThanOrEqual(0)
       const section = html.slice(start, starts[i + 1] ?? html.length)
+
       for (const tone of tones) expect(section).toContain(`>${tone}</button>`)
+
       expect(section).toContain("disabled")
     }
   })

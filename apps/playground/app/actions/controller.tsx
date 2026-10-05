@@ -35,6 +35,7 @@ function pageQuery(url: URL): PageQuery {
   const params = url.searchParams
   const scheme = params.get("scheme")
   const density = params.get("density")
+
   return {
     scripts: !params.has("nojs"),
     scheme: scheme === "dark" || scheme === "light" ? scheme : undefined,
@@ -58,6 +59,7 @@ export default createController(routes, {
      */
     async home(context) {
       const query = pageQuery(context.url)
+
       return context.render(
         <Document
           boot={query.scripts}
@@ -81,6 +83,7 @@ export default createController(routes, {
     async component(context) {
       const name = context.params.component
       const query = pageQuery(context.url)
+
       if (!isDemoName(name)) {
         return context.render(
           <Document
@@ -114,6 +117,7 @@ export default createController(routes, {
     /** The composed recipe: stats, tasks, settings and a dialog in one layout. */
     async dashboard(context) {
       const query = pageQuery(context.url)
+
       return context.render(
         <Document
           boot={query.scripts}

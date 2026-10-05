@@ -43,6 +43,7 @@ describe("pageRange", () => {
     for (let current = 1; current <= 10; current++) {
       const items = pageRange(current, 10)
       const pages = items.filter((item): item is number => item !== "ellipsis")
+
       expect(new Set(pages).size).toBe(pages.length)
     }
   })

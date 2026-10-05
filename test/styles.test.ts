@@ -80,6 +80,7 @@ describe("blocksOn", () => {
 describe("markupOf", () => {
   it("strips a single style block, leaving the markup around it", () => {
     const withStyle = `${styleElement("rmxc-aaa", "color: red")}<div class="rmxc-aaa">hi</div>`
+
     expect(markupOf(withStyle)).toBe('<div class="rmxc-aaa">hi</div>')
   })
 
@@ -92,7 +93,9 @@ describe("markupOf", () => {
       "<div>between the style blocks</div>" +
       styleElement("rmxc-bbb", "gap: 1px") +
       "<p>after</p>"
+
     const stripped = markupOf(doc)
+
     expect(stripped).toContain("<div>between the style blocks</div>")
     expect(stripped).toContain("<p>after</p>")
     expect(stripped).not.toContain("<style")
@@ -111,6 +114,7 @@ describe("markupOf", () => {
     // both directions. This pins that the attribute survives when it is on
     // the actual markup, not just inside a <style> block.
     const html = `${styleElement("rmxc-aaa", "color: red")}<input aria-invalid="true" />`
+
     expect(markupOf(html)).toContain('aria-invalid="true"')
   })
 })

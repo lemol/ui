@@ -20,11 +20,15 @@ export interface PaletteItem {
 
 function isSubsequence(needle: string, haystack: string): boolean {
   if (needle === "") return true
+
   let index = 0
+
   for (const character of haystack) {
     if (character === needle[index]) index += 1
+
     if (index === needle.length) return true
   }
+
   return false
 }
 
@@ -35,8 +39,10 @@ function isSubsequence(needle: string, haystack: string): boolean {
  */
 export function matchItems(query: string, items: readonly PaletteItem[]): readonly PaletteItem[] {
   const needle = query.trim().toLowerCase()
+
   return items.filter((item) => {
     const haystack = item.keywords === undefined ? item.label : `${item.label} ${item.keywords}`
+
     return isSubsequence(needle, haystack.toLowerCase())
   })
 }

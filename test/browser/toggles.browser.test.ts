@@ -62,6 +62,7 @@ test("both toggles are inert with the runtime absent", async () => {
   await withPage(async (page, baseUrl) => {
     await page.goto(`${baseUrl}/c/densityToggle?nojs`)
     const button = page.getByRole("button", { name: "Compact density" })
+
     expect(await button.getAttribute("command")).toBe("--toggle-density")
     expect(await page.locator("script").count()).toBe(0)
   })

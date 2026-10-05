@@ -110,6 +110,7 @@ export function popover(name: string): Popover {
   function Surface(handle: Handle<PopoverSurfaceProps>) {
     return () => {
       const { mix, children } = handle.props
+
       return (
         <div id={name} mix={[surfaceStyle(anchorName), mix]} popover="auto">
           {children}

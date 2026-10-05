@@ -52,6 +52,7 @@ export interface CommandPaletteInputProps {
 export function CommandPaletteInput(handle: Handle<CommandPaletteInputProps>) {
   return () => {
     const { listId, placeholder = "Type a command…" } = handle.props
+
     return (
       <input
         aria-controls={listId}
@@ -77,6 +78,7 @@ export interface CommandPaletteListProps {
 export function CommandPaletteList(handle: Handle<CommandPaletteListProps>) {
   return () => {
     const { id, children } = handle.props
+
     return (
       <ul id={id} mix={listStyle}>
         {children}
@@ -104,6 +106,7 @@ export function CommandPaletteItem(handle: Handle<CommandPaletteItemProps>) {
   return () => {
     const { id, label, keywords, href, children } = handle.props
     const content = children ?? label
+
     return (
       <li data-palette-keywords={keywords} data-palette-label={label} id={id}>
         {href !== undefined ? (

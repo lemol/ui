@@ -38,6 +38,7 @@ describe("Pagination", () => {
     const markup = markupOf(
       await renderToHtml(<Pagination location="/c/pagination?page=5" totalPages={10} />),
     )
+
     expect(markup).toContain('href="/c/pagination?page=4"')
     expect(markup).toContain('href="/c/pagination?page=6"')
     expect(markup).toContain('href="/c/pagination?page=1"')
@@ -48,8 +49,10 @@ describe("Pagination", () => {
     const markup = markupOf(
       await renderToHtml(<Pagination location="/c/pagination?page=5" totalPages={10} />),
     )
+
     expect(markup).toContain('aria-current="page"')
     const currentTag = /<a aria-current="page"[^>]*>(\d+)<\/a>/.exec(markup)
+
     expect(currentTag?.[1]).toBe("5")
   })
 
@@ -57,6 +60,7 @@ describe("Pagination", () => {
     const markup = markupOf(
       await renderToHtml(<Pagination location="/c/pagination?page=1" totalPages={10} />),
     )
+
     expect(markup).not.toContain('href="/c/pagination?page=0"')
     expect(/<span[^>]*>Previous<\/span>/.test(markup)).toBe(true)
     expect(markup).toContain('href="/c/pagination?page=2"')
@@ -66,6 +70,7 @@ describe("Pagination", () => {
     const markup = markupOf(
       await renderToHtml(<Pagination location="/c/pagination?page=10" totalPages={10} />),
     )
+
     expect(markup).not.toContain('href="/c/pagination?page=11"')
     expect(/<span[^>]*>Next<\/span>/.test(markup)).toBe(true)
   })
@@ -74,6 +79,7 @@ describe("Pagination", () => {
     const markup = markupOf(
       await renderToHtml(<Pagination location="/c/pagination?page=5" totalPages={20} />),
     )
+
     expect(markup).toContain("…")
     expect([...markup.matchAll(/aria-hidden="true"/g)].length).toBeGreaterThan(0)
   })
@@ -82,9 +88,11 @@ describe("Pagination", () => {
     const styles = stylesOf(
       await renderToHtml(<Pagination location="/c/pagination?page=5" totalPages={20} />),
     )
+
     const offenders = valuesOf(styles).filter(
       (value) => !keywords.has(value) && !/^var\(--ui-pagination-[\w-]+\)$/.test(value),
     )
+
     expect(offenders).toEqual([])
   })
 
@@ -97,11 +105,13 @@ describe("Pagination", () => {
         <Pagination location="/c/pagination?page=20" totalPages={20} />
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-pagination-[\w-]+)\)/g)].map(
         (match) => match[1] ?? "",
       ),
     )
+
     expect([...read].sort()).toEqual(Object.keys(paginationTokens).sort())
   })
 
@@ -110,8 +120,10 @@ describe("Pagination", () => {
     // only forwards the caller's `mix` to `nav`, and every `li` is bare
     // markup around the `a`/`span` that actually reads the contract.
     const html = await renderToHtml(<Pagination location="/c/pagination?page=5" totalPages={20} />)
+
     for (const tag of ["ul", "a"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }

@@ -34,16 +34,22 @@ const referencesOf = (value: string): string[] =>
  */
 const isCleanValue = (value: string): boolean => {
   if (keywords.has(value)) return true
+
   const references = referencesOf(value)
+
   if (references.length === 0) return false
+
   if (!references.every((name) => name.startsWith("ui-switch-"))) return false
+
   const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/calc|[()+\-*/,\s%\d]/g, "")
+
   return rest === ""
 }
 
 describe("Switch", () => {
   it("is a real checkbox with role=switch, bound to its label", async () => {
     const markup = markupOf(await renderToHtml(<Switch label="Dark mode" name="dark-mode" />))
+
     expect(markup).toContain('type="checkbox"')
     expect(markup).toContain('role="switch"')
     expect(markup).toContain('id="dark-mode"')
@@ -54,6 +60,7 @@ describe("Switch", () => {
     const markup = markupOf(
       await renderToHtml(<Switch checked disabled label="Dark mode" name="dark-mode" />),
     )
+
     expect(markup).toContain("checked")
     expect(markup).toContain("disabled")
   })
@@ -64,6 +71,7 @@ describe("Switch", () => {
         <Switch error="Required" hint="This browser only" label="Dark mode" name="dark-mode" />,
       ),
     )
+
     expect(markup).toContain('aria-describedby="dark-mode-hint dark-mode-error"')
     expect(markup).toContain('aria-invalid="true"')
   })
@@ -72,6 +80,7 @@ describe("Switch", () => {
     const html = await renderToHtml(<Switch label="Dark mode" name="dark-mode" />)
     const trackBlock = blocksOn(html, "input")[0] ?? ""
     const checkedBefore = /&:checked::before\s*\{([^}]*)\}/.exec(trackBlock)?.[1] ?? ""
+
     expect(checkedBefore).toContain("translate:")
     expect(trackBlock.replace(/&:checked::before[^}]*\}/g, "")).not.toContain(
       "calc(var(--ui-switch-track-width)",
@@ -88,7 +97,9 @@ describe("Switch", () => {
         name="dark-mode"
       />,
     )
+
     const offenders = valuesOf(stylesOf(html)).filter((value) => !isCleanValue(value))
+
     expect(offenders).toEqual([])
   })
 
@@ -100,9 +111,11 @@ describe("Switch", () => {
         <Switch disabled label="Auto-save" name="auto-save" />
       </>,
     )
+
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-switch-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(switchTokens).sort())
   })
 
@@ -116,8 +129,10 @@ describe("Switch", () => {
         name="dark-mode"
       />,
     )
+
     for (const tag of ["input", "label"]) {
       const blocks = blocksOn(html, tag)
+
       expect(blocks.length).toBeGreaterThan(0)
       expect(sharedProperties(blocks)).toEqual([])
     }

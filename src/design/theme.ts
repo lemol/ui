@@ -26,6 +26,7 @@ function mergeAxis<C extends string>(
   next: Overrides<C> | undefined,
 ): Overrides<C> | undefined {
   if (current === undefined && next === undefined) return undefined
+
   return Object.freeze({ ...current, ...next }) as Overrides<C>
 }
 

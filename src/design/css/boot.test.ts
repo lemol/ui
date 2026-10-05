@@ -25,13 +25,17 @@ function boot(
       },
     },
   }
+
   const localStorage = {
     getItem(key: string): string | null {
       if (failing) throw new Error("access denied")
+
       return store[key] ?? null
     },
   }
+
   new Function("document", "localStorage", schemeBootScript)(document, localStorage)
+
   return attributes
 }
 
@@ -91,6 +95,7 @@ describe("schemeBootScript", () => {
 
   it("ships as one line with nothing a document would escape", () => {
     expect(schemeBootScript).not.toContain("\n")
+
     for (const character of ["`", "<", ">", "&"]) {
       expect(schemeBootScript).not.toContain(character)
     }

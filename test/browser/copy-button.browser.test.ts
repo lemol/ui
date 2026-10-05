@@ -11,6 +11,7 @@ afterAll(closeHarness)
 const stubClipboard = (page: import("playwright").Page): Promise<void> =>
   page.evaluate(() => {
     const written: string[] = []
+
     ;(window as unknown as { written: string[] }).written = written
     Object.defineProperty(navigator, "clipboard", {
       value: { writeText: (text: string) => Promise.resolve(void written.push(text)) },
@@ -23,6 +24,7 @@ test("copies the literal value and swaps the label, then reverts", async () => {
     await stubClipboard(page)
 
     const button = page.getByRole("button", { name: "Copy API key" })
+
     await button.click()
 
     expect(await page.evaluate(() => (window as unknown as { written: string[] }).written)).toEqual(
@@ -58,6 +60,7 @@ test("retriggering before the revert resets it instead of racing it", async () =
     await stubClipboard(page)
 
     const button = page.getByRole("button", { name: "Copy API key" })
+
     await button.click()
     await page.waitForFunction(
       () => document.getElementById("api-key-copy")?.textContent === "Copied!",
@@ -79,6 +82,7 @@ test("the page is complete with no client javascript: the button is inert", asyn
   await withPage(async (page, baseUrl) => {
     await page.goto(`${baseUrl}/c/copyButton?nojs`)
     const button = page.getByRole("button", { name: "Copy API key" })
+
     expect(await button.getAttribute("command")).toBe("--copy")
     expect(await button.getAttribute("commandfor")).toBe("api-key-copy")
     expect(await page.locator("script").count()).toBe(0)

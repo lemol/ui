@@ -29,6 +29,8 @@ declare module "remix" {
 
 export function createPlaygroundRouter(): Router<PlaygroundContext> {
   const router = createRouter({ middleware: createMiddleware() })
+
   router.map(routes, rootController)
+
   return router
 }

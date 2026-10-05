@@ -49,37 +49,52 @@ const isDialog = (element: Element): element is HTMLDialogElement =>
 
 const perform = (element: Element, command: string): void => {
   if (!builtins.has(command)) return
+
   if (isDialog(element)) {
     if (command === "show-modal" && !element.open) element.showModal()
+
     if (command === "close" && element.open) element.close()
+
     if (command === "request-close" && element.open) {
       // requestClose() is Chrome 135, the same floor as the feature this
       // module backfills, so on the engines that need this it is absent.
       const dialog = element as HTMLDialogElement & { requestClose?: () => void }
+
       if (typeof dialog.requestClose === "function") dialog.requestClose()
       else element.close()
     }
+
     return
   }
+
   const popover = element as Element & {
     togglePopover?: () => void
     showPopover?: () => void
     hidePopover?: () => void
   }
+
   if (command === "toggle-popover") popover.togglePopover?.()
+
   if (command === "show-popover") popover.showPopover?.()
+
   if (command === "hide-popover") popover.hidePopover?.()
 }
 
 const onClick = (event: MouseEvent): void => {
   if (event.defaultPrevented || event.button !== 0) return
+
   const origin = event.target
+
   if (!(origin instanceof Element)) return
+
   const button = origin.closest("button[command][commandfor]")
+
   if (!(button instanceof HTMLButtonElement) || button.disabled) return
 
   const receiver = document.getElementById(button.getAttribute("commandfor") ?? "")
+
   if (receiver === null) return
+
   const command = button.getAttribute("command") ?? ""
 
   // A real CommandEvent where the constructor exists, and an Event carrying
@@ -87,13 +102,16 @@ const onClick = (event: MouseEvent): void => {
   // needs this module. Non-bubbling, composed and cancellable, as the
   // platform's own is, so `runtime.ts` reads one shape either way.
   const invocation = new Event("command", { bubbles: false, composed: true, cancelable: true })
+
   Object.defineProperties(invocation, {
     command: { value: command, enumerable: true },
     source: { value: button, enumerable: true },
   })
 
   receiver.dispatchEvent(invocation)
+
   if (invocation.defaultPrevented) return
+
   perform(receiver, command)
 }
 
@@ -106,9 +124,11 @@ export function installInvokerCommands(options?: InstallInvokerCommandsOptions):
   if (typeof document === "undefined") return
 
   const flags = globalThis as unknown as InstallFlags
+
   if (flags[installedFlag] === true) return
 
   const native = "commandForElement" in HTMLButtonElement.prototype
+
   if (native && options?.force !== true) return
 
   flags[installedFlag] = true

@@ -56,6 +56,7 @@ export function KnobsForm(handle: Handle<KnobsFormProps>) {
   return () => {
     const { pathname, params } = splitLocation(handle.props.location)
     const { fields } = handle.props
+
     return (
       <form action={pathname} method="get">
         <HiddenFields except={fields.map((field) => field.name)} params={params} />
@@ -106,6 +107,7 @@ export function ButtonKnobs(handle: Handle<KnobSectionProps>) {
     const { params } = splitLocation(handle.props.location)
     const tone = oneOf(params.get("tone"), buttonTones, "neutral")
     const size = oneOf(params.get("size"), buttonSizes, "md")
+
     return (
       <Stack gap={4}>
         <Eyebrow>Knobs</Eyebrow>
@@ -133,6 +135,7 @@ export function BadgeKnobs(handle: Handle<KnobSectionProps>) {
   return () => {
     const { params } = splitLocation(handle.props.location)
     const tone = oneOf(params.get("tone"), badgeTones, "neutral")
+
     return (
       <Stack gap={4}>
         <Eyebrow>Knobs</Eyebrow>
@@ -156,6 +159,7 @@ export function TextKnobs(handle: Handle<KnobSectionProps>) {
     const { params } = splitLocation(handle.props.location)
     const tone = oneOf(params.get("tone"), textTones, "default")
     const size = oneOf(params.get("size"), textSizes, "md")
+
     return (
       <Stack gap={4}>
         <Eyebrow>Knobs</Eyebrow>
@@ -182,6 +186,7 @@ export function HeadingKnobs(handle: Handle<KnobSectionProps>) {
     const { params } = splitLocation(handle.props.location)
     const level = oneOf(params.get("level"), ["1", "2", "3", "4", "5", "6"], "2")
     const parsed = Number(level) as HeadingLevel
+
     return (
       <Stack gap={4}>
         <Eyebrow>Knobs</Eyebrow>

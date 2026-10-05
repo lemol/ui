@@ -7,6 +7,7 @@ import { DensityToggle } from "./density-toggle.tsx"
 describe("DensityToggle", () => {
   it("carries command/commandfor pointed at the document root", async () => {
     const markup = markupOf(await renderToHtml(<DensityToggle />))
+
     expect(markup).toContain('command="--toggle-density"')
     expect(markup).toContain(`commandfor="${documentRootId}"`)
   })
@@ -20,6 +21,7 @@ describe("DensityToggle", () => {
 
   it("passes tone and size through to the underlying Button", async () => {
     const markup = markupOf(await renderToHtml(<DensityToggle disabled tone="ghost" />))
+
     expect(markup).toContain("disabled")
   })
 

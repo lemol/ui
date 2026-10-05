@@ -7,6 +7,7 @@ import { SchemeToggle } from "./scheme-toggle.tsx"
 describe("SchemeToggle", () => {
   it("carries command/commandfor pointed at the document root", async () => {
     const markup = markupOf(await renderToHtml(<SchemeToggle />))
+
     expect(markup).toContain('command="--set-scheme"')
     expect(markup).toContain(`commandfor="${documentRootId}"`)
   })

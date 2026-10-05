@@ -26,7 +26,9 @@ describe("the reset", () => {
     // A typo here resolves to nothing at all: no error, no warning, no style.
     const referenced = [...resetCss.matchAll(/var\(--([\w-]+)\)/g)].map((match) => match[1] ?? "")
     const names: readonly string[] = primitiveNames
+
     expect(referenced.length).toBeGreaterThan(0)
+
     for (const name of referenced) expect(names).toContain(name)
   })
 
@@ -68,6 +70,7 @@ describe("the unlayered rule", () => {
 describe("the reduced-motion reset", () => {
   it("zeroes every duration the schema names", () => {
     expect(durationNames.length).toBeGreaterThan(0)
+
     for (const name of durationNames) {
       expect(reducedMotionCss).toContain(`--${name}: 0ms !important;`)
     }
@@ -75,6 +78,7 @@ describe("the reduced-motion reset", () => {
 
   it("zeroes the durations and nothing else", () => {
     const zeroed = [...reducedMotionCss.matchAll(/--([\w-]+): 0ms/g)].map((match) => match[1] ?? "")
+
     expect(zeroed).toEqual([...durationNames])
   })
 

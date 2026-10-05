@@ -8,6 +8,7 @@ describe("invoke", () => {
     // type too, and this assertion is about the two plain fields a consumer
     // reads, not the brand that keeps them from being forged.
     const { command, commandfor } = invoke("show-modal", "new-task")
+
     expect({ command, commandfor }).toEqual({
       command: "show-modal",
       commandfor: "new-task",
@@ -20,6 +21,7 @@ describe("invoke", () => {
     // below fails the gate the day the brand stops working.
     // @ts-expect-error a plain object is not an Invocation
     const forged: Invocation = { command: "show-modal", commandfor: "new-task" }
+
     expect(forged.commandfor).toBe("new-task")
   })
 })

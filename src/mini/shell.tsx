@@ -148,6 +148,7 @@ export interface AppShellProps {
 export function AppShell(handle: Handle<AppShellProps>) {
   return () => {
     const { brand, brandHref, nav, actions, footer, mix, children } = handle.props
+
     return (
       <div mix={[shellStyle, mix]}>
         <a href={`#${mainId}`} mix={skipLinkStyle}>
@@ -265,6 +266,7 @@ export interface NavProps {
 export function Nav(handle: Handle<NavProps>) {
   return () => {
     const { items, label = "Primary", mix } = handle.props
+
     return (
       <nav aria-label={label} mix={mix}>
         <ul mix={navListStyle}>

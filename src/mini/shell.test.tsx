@@ -62,6 +62,7 @@ describe("AppShell", () => {
         </AppShell>,
       ),
     )
+
     expect(html).toContain("<header")
     expect(html).toContain("<main")
     expect(html).toContain("<footer")
@@ -73,6 +74,7 @@ describe("AppShell", () => {
     // Every page here is a header of links above the content, so a keyboard
     // user pays for the navigation on every page without this.
     const html = markupOf(await renderToHtml(<AppShell nav={<Nav items={items} />}>x</AppShell>))
+
     expect(html).toContain('href="#main"')
     expect(html).toContain('id="main"')
     expect(html.indexOf('href="#main"')).toBeLessThan(html.indexOf("<header"))
@@ -82,6 +84,7 @@ describe("AppShell", () => {
     // display:none and visibility:hidden both remove it from the focus order,
     // which makes a skip link decoration.
     const styles = stylesOf(await renderToHtml(<AppShell>x</AppShell>))
+
     expect(styles).toContain("clip-path: inset(50%)")
     expect(styles).toContain(":focus-visible")
     expect(styles).not.toContain("display: none")
@@ -89,11 +92,13 @@ describe("AppShell", () => {
 
   it("renders no footer band at all when there is nothing in it", async () => {
     const html = markupOf(await renderToHtml(<AppShell>x</AppShell>))
+
     expect(html).not.toContain("<footer")
   })
 
   it("makes the brand a link only when it has somewhere to go", async () => {
     const plain = markupOf(await renderToHtml(<AppShell brand="todo-md">x</AppShell>))
+
     // The skip link is the only anchor a shell with no brand href renders.
     expect([...plain.matchAll(/<a\b/g)]).toHaveLength(1)
 
@@ -104,6 +109,7 @@ describe("AppShell", () => {
         </AppShell>,
       ),
     )
+
     expect(linked).toContain('<a href="/"')
   })
 
@@ -111,12 +117,14 @@ describe("AppShell", () => {
     // Container is what holds the measure, and the header agreeing with the
     // content is most of what makes a page look composed rather than assembled.
     const html = await renderToHtml(<AppShell footer="f">x</AppShell>)
+
     expect(stylesOf(html)).toContain("max-inline-size: var(--page-max)")
     expect([...markupOf(html).matchAll(/max-inline-size/g)]).toHaveLength(0)
   })
 
   it("stands the footer at the bottom of a short page without knowing its height", async () => {
     const styles = stylesOf(await renderToHtml(<AppShell footer="f">x</AppShell>))
+
     expect(styles).toContain("grid-template-rows: auto 1fr auto")
     expect(styles).toContain("min-block-size: 100dvh")
   })
@@ -125,6 +133,7 @@ describe("AppShell", () => {
     // A shadow under a sticky header is what turns a document into an
     // application chrome. The hairline already says where the header ends.
     const styles = stylesOf(await renderToHtml(<AppShell>x</AppShell>))
+
     expect(styles).toContain("border-block-end-color: var(--hairline)")
     expect(styles).not.toContain("box-shadow")
   })
@@ -140,6 +149,7 @@ describe("AppShell", () => {
         </AppShell>,
       ),
     )
+
     expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
     expect(styles).not.toContain("--ui-")
   })
@@ -149,8 +159,10 @@ describe("AppShell", () => {
     // on one element that can both set a property are decided by whichever
     // page rendered first.
     const html = await renderToHtml(<AppShell footer="f">x</AppShell>)
+
     for (const tag of ["div", "header", "main", "footer"]) {
       const blocks = blocksOn(html, tag)
+
       expect([tag, blocks.length]).not.toEqual([tag, 0])
       expect([tag, sharedProperties(blocks)]).toEqual([tag, []])
     }
@@ -160,6 +172,7 @@ describe("AppShell", () => {
 describe("Nav", () => {
   it("renders links in a list inside a named landmark", async () => {
     const html = markupOf(await renderToHtml(<Nav items={items} />))
+
     expect(html).toContain('aria-label="Primary"')
     expect(html).toContain("<ul")
     expect(html).toContain('<li><a aria-current="page" href="/tasks"')
@@ -168,6 +181,7 @@ describe("Nav", () => {
 
   it("takes a label, which matters the moment a page has a second nav", async () => {
     const html = markupOf(await renderToHtml(<Nav items={items} label="Sections" />))
+
     expect(html).toContain('aria-label="Sections"')
   })
 
@@ -175,6 +189,7 @@ describe("Nav", () => {
     // aria-current is both the announcement and the selector the selected
     // style hangs off — one source of truth rather than a class beside it.
     const html = markupOf(await renderToHtml(<Nav items={items} />))
+
     expect([...html.matchAll(/aria-current/g)]).toHaveLength(1)
     expect(stylesOf(await renderToHtml(<Nav items={items} />))).toContain('[aria-current="page"]')
   })
@@ -184,6 +199,7 @@ describe("Nav", () => {
     // system landed, waiting for a consumer. This is it: a filled accent here
     // would put a button in the header.
     const styles = stylesOf(await renderToHtml(<Nav items={items} />))
+
     expect(styles).toContain("background: var(--accent-subtle)")
     expect(styles).toContain("border-color: var(--accent-border)")
     expect(styles).toContain("color: var(--accent)")
@@ -191,18 +207,21 @@ describe("Nav", () => {
 
   it("moves between its states on tokens, never on literals", async () => {
     const styles = stylesOf(await renderToHtml(<Nav items={items} />))
+
     expect(styles).toContain("transition-duration: var(--dur-fast)")
     expect(styles).toContain("transition-timing-function: var(--ease-out-quad)")
   })
 
   it("reads no contract token, only primitives and structural keywords", async () => {
     const styles = stylesOf(await renderToHtml(<Nav items={items} />))
+
     expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
     expect(styles).not.toContain("--ui-")
   })
 
   it("scrolls its own row rather than wrapping into a second navigation", async () => {
     const styles = stylesOf(await renderToHtml(<Nav items={items} />))
+
     expect(styles).toContain("overflow-x: auto")
     // Hiding the scrollbar would hide the affordance along with it.
     expect(styles).not.toContain("scrollbar-width")

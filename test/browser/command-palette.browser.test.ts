@@ -28,6 +28,7 @@ test("typing filters the list, hiding items the query does not match", async () 
     // not a one-shot narrowing.
     await page.getByPlaceholder("Type a command…").fill("")
     await page.waitForFunction(() => document.getElementById("cmd-new-task")?.hidden === false)
+
     for (const id of ["cmd-new-task", "cmd-new-project", "cmd-settings", "cmd-sign-out"]) {
       expect(await isHidden(id)).toBe(false)
     }
@@ -53,12 +54,15 @@ test("keywords are matchable even when absent from the visible label", async () 
 test("the page is complete with no client javascript: every item carries no hidden attribute", async () => {
   await withPage(async (page, baseUrl) => {
     await page.goto(`${baseUrl}/c/commandPalette?nojs`)
+
     for (const id of ["cmd-new-task", "cmd-new-project", "cmd-settings", "cmd-sign-out"]) {
       expect(
         await page.evaluate((elementId) => document.getElementById(elementId)?.hidden, id),
       ).toBe(false)
     }
+
     const input = page.getByPlaceholder("Type a command…")
+
     expect(await input.getAttribute("command")).toBe("--palette")
     expect(await page.locator("script").count()).toBe(0)
   })

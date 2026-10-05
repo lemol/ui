@@ -48,10 +48,15 @@ const offendersIn = (styles: string): string[] =>
     .map(([, , value]) => (value ?? "").trim())
     .filter((value) => {
       if (keywords.has(value)) return false
+
       const references = referencesOf(value)
+
       if (references.length === 0) return true
+
       if (!references.every((name) => name.startsWith("ui-dialog-"))) return true
+
       const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/min|calc|[()+\-*/,\s%\d]/g, "")
+
       return rest !== ""
     })
 
@@ -78,6 +83,7 @@ const panelBlockOf = (html: string): string => blocksOn(html, "dialog")[0] ?? ""
 describe("DialogPanel", () => {
   it("renders a dialog carrying its id, its title and its children", async () => {
     const markup = markupOf(await renderToHtml(panel()))
+
     expect(markup).toContain("<dialog")
     expect(markup).toContain('id="new-task"')
     expect(markup).toContain("New task")
@@ -89,6 +95,7 @@ describe("DialogPanel", () => {
     // and an aria-label duplicating the visible title drifts the first time
     // one copy is edited.
     const markup = markupOf(await renderToHtml(panel()))
+
     expect(markup).toContain('aria-labelledby="new-task-title"')
     expect(markup).toContain('id="new-task-title"')
     expect(markup).not.toContain('aria-label="New task"')
@@ -96,6 +103,7 @@ describe("DialogPanel", () => {
 
   it("renders a close button bound to its own dialog", async () => {
     const markup = markupOf(await renderToHtml(panel()))
+
     expect(markup).toContain('command="close"')
     expect(markup).toContain('commandfor="new-task"')
     expect(markup).toContain('aria-label="Close"')
@@ -111,6 +119,7 @@ describe("DialogPanel", () => {
         (match) => match[1] ?? "",
       ),
     )
+
     expect([...read].sort()).toEqual(Object.keys(dialogTokens).sort())
   })
 
@@ -121,6 +130,7 @@ describe("DialogPanel", () => {
     // every dialog on the page, open or not.
     const styles = panelBlockOf(await renderToHtml(panel()))
     const openBlock = /&\[open\]\s*\{([^}]*)\}/.exec(styles)?.[1] ?? ""
+
     expect(openBlock).toContain("display: grid")
     expect(styles.replace(/&\[open\][^}]*\}/g, "")).not.toContain("display: grid")
   })
@@ -134,10 +144,12 @@ describe("DialogPanel", () => {
     const declarations = [...styles.matchAll(/transition:\s*([^;]+);/g)].map(
       (match) => match[1] ?? "",
     )
+
     expect(declarations).toHaveLength(2)
     expect(declarations[0]).not.toContain("allow-discrete")
     expect(declarations[1]).toContain("overlay var(--ui-dialog-transition-duration) allow-discrete")
     expect(declarations[1]).toContain("display var(--ui-dialog-transition-duration) allow-discrete")
+
     for (const declaration of declarations) {
       expect(declaration).not.toMatch(/\d+m?s|cubic-bezier/)
     }
@@ -150,9 +162,12 @@ describe("DialogPanel", () => {
     // is captured from the rule enclosing its transition: line, so this
     // fails if either declaration's rule stops including the bare `&`.
     const rules = [...styles.matchAll(/([^{}\n]+)\{\s*transition:\s*[^;]+;\s*\}/g)]
+
     expect(rules).toHaveLength(2)
+
     for (const [, selectorList] of rules) {
       const selectors = (selectorList ?? "").split(",").map((selector) => selector.trim())
+
       expect(selectors).toContain("&")
     }
   })
@@ -162,12 +177,14 @@ describe("DialogPanel", () => {
     // most common way to get no animation at all.
     const styles = panelBlockOf(await renderToHtml(panel()))
     const startingStyle = /@starting-style\s*\{([\s\S]*?)\n\}/.exec(styles)?.[1] ?? ""
+
     expect(startingStyle).toContain("&[open]")
     expect(startingStyle).toContain("&[open]::backdrop")
   })
 
   it("tints the backdrop from its own token", async () => {
     const styles = panelBlockOf(await renderToHtml(panel()))
+
     expect(styles).toContain("&::backdrop")
     expect(styles).toContain("background: var(--ui-dialog-backdrop-bg)")
   })
@@ -181,6 +198,7 @@ describe("DialogPanel", () => {
     const html = await renderToHtml(panel())
     const panelBlock = blocksOn(html, "dialog")[0] ?? ""
     const closeBlock = blocksOn(html, "button")[0] ?? ""
+
     expect(panelBlock).toContain("background: var(--ui-dialog-bg)")
     expect(panelBlock).toContain("color: var(--ui-dialog-ink)")
     expect(panelBlock).not.toContain("--ui-dialog-close-")
@@ -191,8 +209,10 @@ describe("DialogPanel", () => {
 
   it("keeps each element's blocks disjoint by property", async () => {
     const html = await renderToHtml(panel())
+
     for (const tag of ["dialog", "header", "button", "svg"]) {
       const blocks = blocksOn(html, tag)
+
       expect({ tag, blocks: blocks.length }).toEqual({ tag, blocks: 1 })
       expect(sharedProperties(blocks)).toEqual([])
     }
@@ -205,6 +225,7 @@ describe("DialogPanel", () => {
         Body
       </DialogPanel>,
     )
+
     expect(blocksOn(html, "dialog").filter((block) => block.includes("z-index"))).toHaveLength(1)
   })
 })

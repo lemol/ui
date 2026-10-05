@@ -33,7 +33,9 @@ function entriesOf(values: object): Entries {
   const entries = Object.entries(values).filter(
     (entry): entry is [string, string] => typeof entry[1] === "string",
   )
+
   const at = (name: string) => rankOf.get(name) ?? primitiveNames.length
+
   return entries.sort(([a], [b]) => at(a) - at(b))
 }
 
@@ -59,19 +61,24 @@ function rootRule(componentTokens: Entries, base: Entries): string {
   const body = [declarations(componentTokens, "  "), declarations(base, "  ")]
     .filter((text) => text !== "")
     .join("\n")
+
   return `:root {\n${body}\n}`
 }
 
 function problemsIn(where: string, entries: Entries): string[] {
   return entries.flatMap(([name, value]) => {
     const found: string[] = []
+
     if (!primitiveSet.has(name) && !name.startsWith("ui-")) {
       found.push(`${where}: ${name} is neither a primitive name nor a ui- prefixed component token`)
     }
+
     const unsafe = `${name}${value}`.match(unsafeCharacter)?.[0]
+
     if (unsafe !== undefined) {
       found.push(`${where}: ${name} contains ${unsafe}, which cannot ship inside a style element`)
     }
+
     return found
   })
 }
@@ -96,6 +103,7 @@ function validate(componentTokens: Entries, base: Entries, dark: Entries, compac
     ...problemsIn("theme.dark", dark),
     ...problemsIn("theme.compact", compact),
   ]
+
   if (problems.length > 0) {
     throw new Error(`emitTokensCss cannot emit this theme:\n${problems.join("\n")}`)
   }
@@ -125,6 +133,7 @@ export function emitTokensCss<C extends string = never>(
   validate(componentTokens, base, dark, compact)
 
   const parts = [layerStatement, rootRule(componentTokens, base)]
+
   // The :not() guard is what lets a manual choice beat the media query; the
   // unguarded block is what lets a manual dark choice win on a light system.
   if (dark.length > 0) {
@@ -133,7 +142,9 @@ export function emitTokensCss<C extends string = never>(
       rule(':root[data-scheme="dark"]', dark),
     )
   }
+
   if (compact.length > 0) parts.push(rule(':root[data-density="compact"]', compact))
+
   parts.push(resetCss, unlayeredCss, reducedMotionCss)
 
   return `${parts.join("\n\n")}\n`

@@ -10,6 +10,7 @@ const keywords = new Set(["block", "100%", "1em", "200% 100%", "200% 0", "-200% 
 describe("Skeleton", () => {
   it("renders a div hidden from assistive tech", async () => {
     const markup = markupOf(await renderToHtml(<Skeleton />))
+
     expect(markup).toContain("<div")
     expect(markup).toContain('aria-hidden="true"')
   })
@@ -17,6 +18,7 @@ describe("Skeleton", () => {
   it("declares an animation naming its own keyframes, duration and easing tokens", async () => {
     const html = await renderToHtml(<Skeleton />)
     const block = blocksOn(html, "div")[0] ?? ""
+
     expect(block).toContain(
       "animation: ui-skeleton-shimmer var(--ui-skeleton-duration) var(--ui-skeleton-easing) infinite",
     )
@@ -29,6 +31,7 @@ describe("Skeleton", () => {
       .filter(([, property]) => property !== "animation" && property !== "background-image")
       .map(([, , value]) => (value ?? "").trim())
       .filter((value) => !keywords.has(value) && !/^var\(--ui-skeleton-[\w-]+\)$/.test(value))
+
     expect(offenders).toEqual([])
   })
 
@@ -37,6 +40,7 @@ describe("Skeleton", () => {
     const read = new Set(
       [...stylesOf(html).matchAll(/var\(--(ui-skeleton-[\w-]+)\)/g)].map((match) => match[1] ?? ""),
     )
+
     expect([...read].sort()).toEqual(Object.keys(skeletonTokens).sort())
   })
 
@@ -44,6 +48,7 @@ describe("Skeleton", () => {
     const placed = css({ inlineSize: "2.5rem" })
     const html = await renderToHtml(<Skeleton mix={placed} />)
     const blocks = blocksOn(html, "div")
+
     expect(blocks.filter((block) => block.includes("2.5rem"))).toHaveLength(1)
   })
 

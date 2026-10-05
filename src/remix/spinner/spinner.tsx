@@ -35,6 +35,7 @@ export interface SpinnerProps {
 export function Spinner(handle: Handle<SpinnerProps>) {
   return () => {
     const { label = "Loading" } = handle.props
+
     return <span aria-label={label} mix={spinnerStyle} role="status" />
   }
 }

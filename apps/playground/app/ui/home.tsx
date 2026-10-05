@@ -28,6 +28,7 @@ export function HomePage(handle: Handle<HomePageProps>) {
   return () => {
     const { scripts, location } = handle.props
     const names = Object.keys(demos) as DemoName[]
+
     return (
       <PlaygroundShell location={location} nav="catalogue">
         <Stack gap={8}>

@@ -144,6 +144,7 @@ export function DialogPanel(handle: Handle<DialogPanelProps>) {
   return () => {
     const { id, title, close, mix, children } = handle.props
     const titleId = `${id}-title`
+
     return (
       <dialog aria-labelledby={titleId} id={id} mix={[panelStyle, mix]}>
         <header mix={headerStyle}>

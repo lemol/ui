@@ -63,6 +63,7 @@ export function Radio(handle: Handle<RadioProps>) {
     const { name, value, label, hint, error, checked, required, disabled, mix } = handle.props
     const stem =
       handle.props.id !== undefined && handle.props.id !== "" ? handle.props.id : `${name}-${value}`
+
     const messages = fieldMessages(stem, hint, error)
 
     return (

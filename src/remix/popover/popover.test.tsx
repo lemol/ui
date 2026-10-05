@@ -14,9 +14,11 @@ describe("popover", () => {
         </>,
       ),
     )
+
     expect(markup).toContain('command="toggle-popover"')
     expect(markup).toContain('commandfor="account-menu"')
     const surfaceTag = /<div[^>]*id="account-menu"[^>]*>/.exec(markup)?.[0] ?? ""
+
     expect(surfaceTag).toContain('popover="auto"')
   })
 
@@ -35,7 +37,9 @@ describe("popover", () => {
         </>,
       ),
     )
+
     const targets = [...markup.matchAll(/commandfor="([^"]*)"/g)].map((match) => match[1])
+
     expect(targets).toEqual(["first", "second"])
   })
 
@@ -50,6 +54,7 @@ describe("popover", () => {
         <Menu.Surface>Body</Menu.Surface>
       </>,
     )
+
     expect(html).not.toContain("<script")
   })
 
@@ -62,6 +67,7 @@ describe("popover", () => {
         </Menu.Trigger>,
       ),
     )
+
     expect(markup).toContain("disabled")
   })
 
@@ -72,6 +78,7 @@ describe("popover", () => {
     const html = await renderToHtml(<Menu.Surface>Body</Menu.Surface>)
     const surfaceBlock = blocksOn(html, "div")[0] ?? ""
     const openBlock = /&:popover-open\s*\{([^}]*)\}/.exec(surfaceBlock)?.[1] ?? ""
+
     expect(openBlock).toContain("display: grid")
     expect(surfaceBlock.replace(/&:popover-open[^}]*\}/g, "")).not.toContain("display: grid")
   })
@@ -83,6 +90,7 @@ describe("popover", () => {
     const declarations = [...surfaceBlock.matchAll(/transition:\s*([^;]+);/g)].map(
       (match) => match[1] ?? "",
     )
+
     expect(declarations).toHaveLength(2)
     expect(declarations[0]).not.toContain("allow-discrete")
     expect(declarations[1]).toContain(
@@ -91,6 +99,7 @@ describe("popover", () => {
     expect(declarations[1]).toContain(
       "display var(--ui-popover-transition-duration) allow-discrete",
     )
+
     for (const declaration of declarations) {
       expect(declaration).not.toMatch(/\d+m?s|cubic-bezier/)
     }
@@ -101,6 +110,7 @@ describe("popover", () => {
     const html = await renderToHtml(<Menu.Surface>Body</Menu.Surface>)
     const surfaceBlock = blocksOn(html, "div")[0] ?? ""
     const startingStyle = /@starting-style\s*\{([\s\S]*?)\n\}/.exec(surfaceBlock)?.[1] ?? ""
+
     expect(startingStyle).toContain("&:popover-open")
   })
 
@@ -115,6 +125,7 @@ describe("popover", () => {
         <Second.Surface>Body two</Second.Surface>
       </>,
     )
+
     expect(html).toContain("@supports (anchor-name: --a)")
     const triggerBlocks = blocksOn(html, "button")
     const anchorNames = triggerBlocks
@@ -122,8 +133,10 @@ describe("popover", () => {
       // prelude, which contains the same substring mid-line.
       .map((block) => /^\s*anchor-name:\s*([^;]+);/m.exec(block)?.[1]?.trim())
       .filter((name): name is string => name !== undefined)
+
     expect(new Set(anchorNames).size).toBe(anchorNames.length)
     const surfaceBlocks = blocksOn(html, "div")
+
     for (const [index, name] of anchorNames.entries()) {
       expect(surfaceBlocks[index] ?? "").toContain(`position-anchor: ${name}`)
     }
@@ -133,6 +146,7 @@ describe("popover", () => {
     const Menu = popover("account-menu")
     const html = await renderToHtml(<Menu.Surface>Body</Menu.Surface>)
     const blocks = blocksOn(html, "div")
+
     expect(blocks).toHaveLength(1)
     expect(sharedProperties(blocks)).toEqual([])
   })

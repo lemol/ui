@@ -39,6 +39,7 @@ const primitives = new Set<string>(primitiveNames)
 describe("Row", () => {
   it("renders a div carrying its children", async () => {
     const html = await renderToHtml(<Row>content</Row>)
+
     expect(html).toContain("<div")
     expect(html).toContain("content")
   })
@@ -50,6 +51,7 @@ describe("Row", () => {
           const styles = stylesOf(
             await renderToHtml(<Row align={align} gap={step} justify={justify} wrap />),
           )
+
           expect(nonPrimitiveValues(styles, keywords, primitives)).toEqual([])
           expect(styles).not.toContain("--ui-")
         }
@@ -59,6 +61,7 @@ describe("Row", () => {
 
   it("emits exactly one gap block and one align block, defaults included", async () => {
     const blocks = styleBlocksOf(await renderToHtml(<Row />))
+
     expect(blocks.filter((block) => block.includes("gap:"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("align-items:"))).toHaveLength(1)
   })
@@ -85,6 +88,7 @@ describe("Row", () => {
 
   it("declares neither justify-content nor flex-wrap until asked", async () => {
     const styles = stylesOf(await renderToHtml(<Row gap={4} />))
+
     expect(styles).not.toContain("justify-content")
     expect(styles).not.toContain("flex-wrap")
   })
@@ -98,6 +102,7 @@ describe("Row", () => {
       around: "space-around",
       evenly: "space-evenly",
     }
+
     for (const justify of justifies) {
       expect(stylesOf(await renderToHtml(<Row justify={justify} />))).toContain(
         `justify-content: ${expected[justify]}`,
@@ -117,6 +122,7 @@ describe("Row", () => {
           const blocks = styleBlocksOf(
             await renderToHtml(<Row align={align} gap={step} justify={justify} wrap />),
           )
+
           expect(sharedProperties(blocks)).toEqual([])
         }
       }
@@ -126,6 +132,7 @@ describe("Row", () => {
   it("adds through mix a property it does not declare itself", async () => {
     const pinned = css({ position: "fixed" })
     const blocks = styleBlocksOf(await renderToHtml(<Row mix={pinned} />))
+
     expect(blocks.filter((block) => block.includes("position: fixed"))).toHaveLength(1)
     expect(blocks.filter((block) => block.includes("position:"))).toHaveLength(1)
   })
@@ -138,9 +145,13 @@ describe("RowDemo", () => {
     // sample, so a value added to any of them cannot slip past a loop that
     // covers the old set and still passes.
     const html = await renderToHtml(<RowDemo />)
+
     for (const justify of justifies) expect(html).toContain(`justify ${justify}`)
+
     for (const align of aligns) expect(html).toContain(`align ${align}`)
+
     for (const gap of demoGaps) expect(html).toContain(`gap ${gap}`)
+
     // wrap is a boolean, so its one value is checked by the CSS it produces
     // rather than by a label, which a Row that forgot the prop would still
     // print.

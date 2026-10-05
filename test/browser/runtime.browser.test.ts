@@ -21,11 +21,15 @@ const runtimeUrlOf = (page: Page): Promise<string> =>
       imports?: Record<string, string>
       scopes?: Record<string, Record<string, string>>
     }
+
     const tables = [parsed.imports ?? {}, ...Object.values(parsed.scopes ?? {})]
+
     for (const entries of tables) {
       const url = entries["/src/remix/runtime.ts"]
+
       if (url !== undefined) return url
     }
+
     throw new Error("the import map does not name /src/remix/runtime.ts")
   })
 
@@ -46,7 +50,9 @@ test("a registered command reaches its handler through the capture phase", async
           handler: (context: { source: unknown; target: Element }) => void,
         ) => void
       }
+
       const received: { sourceId: string; targetId: string }[] = []
+
       runtime.registerCommand("--probe", ({ source, target }) => {
         received.push({
           sourceId: (source as HTMLElement | null)?.id ?? "",
@@ -55,6 +61,7 @@ test("a registered command reaches its handler through the capture phase", async
       })
 
       const button = document.createElement("button")
+
       button.id = "probe-trigger"
       button.setAttribute("command", "--probe")
       button.setAttribute("commandfor", "new-task")
@@ -83,7 +90,9 @@ test("an input carrying command/commandfor invokes through the input bridge", as
           handler: (context: { source: unknown; target: Element }) => void,
         ) => void
       }
+
       const received: { sourceId: string; targetId: string; value: string }[] = []
+
       runtime.registerCommand("--probe-input", ({ source, target }) => {
         received.push({
           sourceId: (source as HTMLInputElement | null)?.id ?? "",
@@ -93,6 +102,7 @@ test("an input carrying command/commandfor invokes through the input bridge", as
       })
 
       const input = document.createElement("input")
+
       input.id = "probe-input-trigger"
       input.setAttribute("command", "--probe-input")
       input.setAttribute("commandfor", "new-task")
@@ -127,12 +137,14 @@ test("a `--` command fires its handler once under the forced compat shim", async
       const runtime = (await import(url)) as {
         registerCommand: (name: string, handler: () => void) => void
       }
+
       let count = 0
       runtime.registerCommand("--probe-once", () => {
         count += 1
       })
 
       const button = document.createElement("button")
+
       button.id = "probe-once-trigger"
       button.setAttribute("command", "--probe-once")
       button.setAttribute("commandfor", "new-task")

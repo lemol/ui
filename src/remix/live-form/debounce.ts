@@ -17,6 +17,7 @@ export function debounce(ms: number, fn: () => void): Debounced {
 
   const cancel = (): void => {
     if (id !== undefined) clearTimeout(id)
+
     id = undefined
   }
 

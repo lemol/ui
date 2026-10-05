@@ -69,6 +69,7 @@ interface StatePanelProps {
 function StatePanel(handle: Handle<StatePanelProps>) {
   return () => {
     const { level, title, description, marker, action, tone, mix, children } = handle.props
+
     return (
       <div mix={[panelStyle, tone === "empty" ? emptyToneStyle : errorToneStyle, mix]}>
         {marker}
@@ -118,6 +119,7 @@ export interface EmptyStateProps {
 export function EmptyState(handle: Handle<EmptyStateProps>) {
   return () => {
     const { level = 2, title, description, eyebrow, action, mix, children } = handle.props
+
     return (
       <StatePanel
         action={action}
@@ -161,6 +163,7 @@ export interface ErrorStateProps {
 export function ErrorState(handle: Handle<ErrorStateProps>) {
   return () => {
     const { level = 2, title, description, status = "Error", action, mix, children } = handle.props
+
     return (
       <StatePanel
         action={action}

@@ -17,6 +17,7 @@ test("shows the toast and dismisses it itself, with no DOM polling from the page
 
     await page.evaluate(() => {
       const toastEl = document.createElement("div")
+
       toastEl.id = "probe-toast"
       toastEl.setAttribute("popover", "manual")
       toastEl.setAttribute("data-ui-toast-duration", "50")
@@ -24,6 +25,7 @@ test("shows the toast and dismisses it itself, with no DOM polling from the page
       document.body.append(toastEl)
 
       const button = document.createElement("button")
+
       button.id = "probe-toast-trigger"
       button.setAttribute("command", "--dismiss-toast")
       button.setAttribute("commandfor", "probe-toast")
@@ -31,6 +33,7 @@ test("shows the toast and dismisses it itself, with no DOM polling from the page
     })
 
     const isOpen = "() => document.getElementById('probe-toast')?.matches(':popover-open') === true"
+
     expect(await page.evaluate<boolean>(`(${isOpen})()`)).toBe(false)
 
     await page.locator("#probe-toast-trigger").click()
@@ -58,12 +61,14 @@ test("retriggering before the first timer fires resets it instead of racing it",
     // clicks here go through Playwright rather than `page.evaluate()`.
     await page.evaluate(() => {
       const toastEl = document.createElement("div")
+
       toastEl.id = "probe-toast-retrigger"
       toastEl.setAttribute("popover", "manual")
       toastEl.setAttribute("data-ui-toast-duration", "400")
       document.body.append(toastEl)
 
       const button = document.createElement("button")
+
       button.id = "probe-toast-retrigger-trigger"
       button.textContent = "Retrigger"
       button.setAttribute("command", "--dismiss-toast")
@@ -72,6 +77,7 @@ test("retriggering before the first timer fires resets it instead of racing it",
     })
 
     const trigger = page.locator("#probe-toast-retrigger-trigger")
+
     await trigger.click()
     await page.waitForTimeout(250)
     // Retriggered with 150ms left on the first timer. If both timers were
@@ -83,6 +89,7 @@ test("retriggering before the first timer fires resets it instead of racing it",
     // first timer left running would have closed it already, 100ms ago.
     const isOpen =
       "() => document.getElementById('probe-toast-retrigger')?.matches(':popover-open') === true"
+
     expect(await page.evaluate<boolean>(`(${isOpen})()`)).toBe(true)
   })
 })

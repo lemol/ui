@@ -27,6 +27,7 @@ describe("schema", () => {
 
   it("flattens to the sum of its groups", () => {
     const sum = tokenGroups.reduce((n, group) => n + schema[group].length, 0)
+
     expect(primitiveNames).toHaveLength(sum)
   })
 
@@ -58,8 +59,9 @@ describe("schema", () => {
 
 describe("groupOf", () => {
   it("round-trips every name to the group it came from", () => {
-    for (const group of tokenGroups)
+    for (const group of tokenGroups) {
       for (const name of schema[group]) expect(groupOf(name)).toBe(group)
+    }
   })
 
   it("throws on a name that is not in the schema", () => {
@@ -75,6 +77,7 @@ describe("the heading scale", () => {
   it("names only sizes the type group holds", () => {
     // A name the schema dropped would resolve to nothing: no error, no style.
     const sizes: readonly string[] = schema.type
+
     for (const name of Object.values(headingScale)) expect(sizes).toContain(name)
   })
 
@@ -89,6 +92,7 @@ describe("the heading scale", () => {
     // walks, so h1 is the largest without this file knowing any value.
     const order: readonly string[] = schema.type
     const positions = Object.values(headingScale).map((name) => order.indexOf(name))
+
     expect(positions).toEqual([...positions].sort((a, b) => b - a))
   })
 })

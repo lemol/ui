@@ -7,12 +7,14 @@ const base = Object.fromEntries(primitiveNames.map((name) => [name, "initial"]))
 describe("defineTheme", () => {
   it("leaves dark and compact undefined when they are omitted", () => {
     const theme = defineTheme({ base })
+
     expect(theme.dark).toBeUndefined()
     expect(theme.compact).toBeUndefined()
   })
 
   it("freezes every axis it returns", () => {
     const theme = defineTheme({ base, dark: { canvas: "#000" } })
+
     expect(Object.isFrozen(theme)).toBe(true)
     expect(Object.isFrozen(theme.base)).toBe(true)
     expect(Object.isFrozen(theme.dark)).toBe(true)
@@ -23,6 +25,7 @@ describe("extendTheme", () => {
   it("merges base and leaves the original untouched", () => {
     const theme = defineTheme({ base })
     const next = extendTheme(theme, { base: { canvas: "#FBFBFA" } })
+
     expect(next.base.canvas).toBe("#FBFBFA")
     expect(next.base.ink).toBe("initial")
     expect(theme.base.canvas).toBe("initial")
@@ -31,6 +34,7 @@ describe("extendTheme", () => {
   it("keeps an axis the overrides do not mention", () => {
     const theme = defineTheme({ base, dark: { canvas: "#191919" } })
     const next = extendTheme(theme, { compact: { "row-h": "32px" } })
+
     expect(next.dark?.canvas).toBe("#191919")
     expect(next.compact?.["row-h"]).toBe("32px")
   })
@@ -38,6 +42,7 @@ describe("extendTheme", () => {
   it("adds an axis the original theme did not have", () => {
     const theme = defineTheme({ base })
     const next = extendTheme(theme, { dark: { canvas: "#191919" } })
+
     expect(next.dark?.canvas).toBe("#191919")
     expect(theme.dark).toBeUndefined()
   })

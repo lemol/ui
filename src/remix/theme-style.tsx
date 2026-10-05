@@ -35,6 +35,7 @@ export interface ThemeStyleProps {
 export function ThemeStyle(handle: Handle<ThemeStyleProps>) {
   return () => {
     const { theme, componentTokens = ownTokens } = handle.props
+
     return <style innerHTML={unsafeHTML(emitTokensCss(theme, { componentTokens }))} />
   }
 }

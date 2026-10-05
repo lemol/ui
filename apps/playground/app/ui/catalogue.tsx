@@ -20,10 +20,15 @@ export interface CataloguePageProps {
 function KnobsFor(handle: Handle<{ name: DemoName; location: string }>) {
   return () => {
     const { name, location } = handle.props
+
     if (name === "button") return <ButtonKnobs location={location} />
+
     if (name === "badge") return <BadgeKnobs location={location} />
+
     if (name === "text") return <TextKnobs location={location} />
+
     if (name === "heading") return <HeadingKnobs location={location} />
+
     return null
   }
 }
@@ -51,6 +56,7 @@ export function UnknownComponentPage(handle: Handle<UnknownComponentPageProps>) 
       backHref = "/",
       backLabel = "Back to the catalogue",
     } = handle.props
+
     return (
       <PlaygroundShell location={location} nav={nav}>
         <ErrorState
@@ -75,6 +81,7 @@ export function CataloguePage(handle: Handle<CataloguePageProps>) {
     const { name, entry, location } = handle.props
     const { title, Demo } = entry
     const names = Object.keys(demos) as DemoName[]
+
     return (
       <PlaygroundShell location={location} nav="catalogue">
         <Stack gap={8}>

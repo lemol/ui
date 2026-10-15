@@ -220,29 +220,29 @@ than a runner; `bunx playwright install chromium` once per machine.
 
 ## Workspace composition
 
-`repos/ui` is composed by `@lemol/workspace`: declared in `workspace.yaml`, one
-`file:` override redirecting `@lemol/ui` to the local clone, and typechecked and
-tested before `todo-md` in `tools/verify-order.ts`.
+`repos/ui` is composed by `@lemol/workspace`: declared in `workspace.yaml`, a
+member of the root `workspaces` (with `repos/ui/apps/*` listed beside it, since
+Bun has no nested workspaces), and typechecked and tested before `todo-md` in
+`tools/verify-order.ts`. A sibling that lives only in that workspace — xonton's
+`design` and `ui-remix` — names it `"@lemol/ui": "workspace:*"`, and the root
+install links that name straight to this clone: the working tree, not a copy,
+and nothing to refresh after a commit. A sibling that must also install alone,
+such as `todo-md`, pins a tagged release by git specifier instead, the same
+way any outside consumer does.
 
-It is **not** a member of the root `workspaces`, unlike its siblings, and that
-is what makes `bun install` here authoritative. Bun resolves a workspace by
-walking up to the nearest ancestor whose `workspaces` patterns match the
-directory it runs in, so while the root globbed `repos/*`, an install here wrote
-`@lemol/workspace`'s lockfile and store rather than this repository's — and the
-playground then resolved `@lemol/ui` into a store its asset configuration knows
-nothing about. The root now lists its members one by one and `bootstrap` runs
-`bun install` inside this clone after its own. There is nothing to configure on
-this side: `bunfig.toml`'s `ignoreWorkspace` and `package.json`'s
-`installConfig` are Yarn and pnpm vocabulary that Bun 1.4 does not read, which
-is why neither is here.
+Bun resolves a workspace by walking up to the nearest ancestor whose
+`workspaces` patterns match the directory it runs in, so `bun install` here
+installs the whole workspace and writes its lockfile, not this repository's.
+`bun.lock` here serves a clone outside the workspace, which is still a valid
+way to use this repository since it takes nothing from its siblings.
 
 Inside this repository the catalogue imports the source relatively and takes
 no `@lemol/*` dependency at all. A `file:` dependency on the repository root
 would resolve through the package name — but Bun hardlinks a path dependency
 into the store rather than symlinking the checkout, so the playground would
 resolve a stale snapshot instead of the working tree, and every source file
-would carry a second hard link. (`workspace:*` is no alternative: Bun cannot
-name the workspace root as a member — `workspaces: ["."]` fails to resolve.)
-The exports map stays honest through `test/package.test.ts`, which pins its
-shape, and `test/git-consumer.test.ts`, which installs the tagged repository
-by git specifier and imports it by name for real.
+would carry a second hard link. (`workspace:*` is no alternative here: Bun
+cannot name the workspace root as a member — `workspaces: ["."]` fails to
+resolve.) The exports map stays honest through `test/package.test.ts`, which
+pins its shape, and `test/git-consumer.test.ts`, which installs the tagged
+repository by git specifier and imports it by name for real.

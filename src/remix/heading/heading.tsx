@@ -1,11 +1,11 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
 import { type HeadingLevel, headingScale } from "../../design/index.ts"
+import { css } from "../css.ts"
 
 /**
  * Every declaration reads a --ui-heading-* token. A literal size, weight or

@@ -1,10 +1,10 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
+import { css } from "../css.ts"
 
 /**
  * Tabs as route links, not in-page panels (interactivity.md, "Not in

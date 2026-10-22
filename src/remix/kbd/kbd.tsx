@@ -1,4 +1,5 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
+import { type Handle, type MixInput, type RemixNode } from "remix/component"
+import { css } from "../css.ts"
 
 /**
  * A key, as a `<kbd>`: the native element for keyboard input, so a screen

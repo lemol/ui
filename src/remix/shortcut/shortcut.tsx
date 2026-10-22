@@ -1,4 +1,5 @@
-import { css, type Handle, type MixInput } from "remix/component"
+import { type Handle, type MixInput } from "remix/component"
+import { css } from "../css.ts"
 import { Kbd } from "../kbd/kbd.tsx"
 
 /**

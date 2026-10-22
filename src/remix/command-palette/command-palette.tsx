@@ -1,4 +1,5 @@
-import { attrs, css, type Handle, type RemixNode } from "remix/component"
+import { attrs, type Handle, type RemixNode } from "remix/component"
+import { css } from "../css.ts"
 
 const inputStyle = css({
   width: "100%",

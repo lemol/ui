@@ -1,4 +1,5 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
+import { type Handle, type MixInput, type RemixNode } from "remix/component"
+import { css } from "../css.ts"
 
 export type CalloutTone = "neutral" | "success" | "warning" | "danger" | "info"
 

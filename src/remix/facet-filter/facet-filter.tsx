@@ -1,4 +1,5 @@
-import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
+import { type Handle, type MixInput, type RemixNode } from "remix/component"
+import { css } from "../css.ts"
 import { invoke } from "../invocation.ts"
 import { sheetMedia, sheetRules } from "../sheet/sheet.ts"
 

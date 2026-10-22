@@ -1,10 +1,10 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
+import { css } from "../css.ts"
 
 /**
  * Four semantic tones and a neutral. The semantic four are the reason this

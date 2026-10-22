@@ -1,11 +1,11 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
 import { type Align, alignStyles } from "../align.ts"
+import { css } from "../css.ts"
 import { gaps, type SpaceStep } from "../space.ts"
 
 /**

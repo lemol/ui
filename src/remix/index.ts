@@ -41,6 +41,7 @@ export {
   Disclosure,
   type DisclosureProps,
 } from "./disclosure/disclosure.tsx"
+export { componentStyles } from "./css.ts"
 export { documentRootId } from "./document-root.ts"
 export {
   FacetFilter,

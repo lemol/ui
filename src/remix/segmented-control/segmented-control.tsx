@@ -1,4 +1,5 @@
-import { css, type Handle, type MixInput } from "remix/component"
+import { type Handle, type MixInput } from "remix/component"
+import { css } from "../css.ts"
 
 /**
  * Visually hidden rather than removed: `display: none` would take the radio

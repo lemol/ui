@@ -1,10 +1,10 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
+import { css } from "../css.ts"
 
 export type TextSize = "sm" | "md" | "lg"
 export type TextTone = "default" | "muted" | "subtle"

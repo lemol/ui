@@ -1,4 +1,5 @@
-import { type CSSMixinDescriptor, css } from "remix/component"
+import { type CSSMixinDescriptor } from "remix/component"
+import { css } from "./css.ts"
 
 /**
  * Cross-axis alignment, shared by Stack and Row for the same reason the gap

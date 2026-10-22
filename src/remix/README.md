@@ -20,6 +20,17 @@ Sits on the `design` layer and `remix/component`, and on nothing else.
 the bundle pulls the component library in behind it. A client entry takes
 `overlay` from `@lemol/ui/remix/overlay` for the same reason.
 
+### A host's stylesheet
+
+A component's `css()` blocks render inline, one `<style>` per block, on every
+page that draws it. A host that serves its own stylesheet can carry them
+instead: `componentStyles()` returns every style the components declared at
+module scope, in declaration order, and rendering each through remix's `css`
+gives the very classes the components use, so the host can drop the inline
+copies from its pages. Components import the library's own `css`
+(`src/remix/css.ts`), which records on the server only and only while the
+library's modules evaluate; a style built during a render is never kept.
+
 ## Catalogue
 
 ### `Button` / `LinkButton`

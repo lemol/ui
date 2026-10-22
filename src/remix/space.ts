@@ -1,5 +1,6 @@
-import { type CSSMixinDescriptor, css } from "remix/component"
+import { type CSSMixinDescriptor } from "remix/component"
 import { schema } from "../design/index.ts"
+import { css } from "./css.ts"
 
 /**
  * The space scale as a prop type, derived from the schema rather than

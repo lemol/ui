@@ -1,5 +1,6 @@
-import { attrs, css, type Handle, type MixInput, type RemixNode } from "remix/component"
+import { attrs, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { Button, type ButtonProps } from "../button/button.tsx"
+import { css } from "../css.ts"
 import { invoke } from "../invocation.ts"
 import { DEFAULT_TOAST_DURATION_MS, TOAST_DURATION_ATTR } from "./constants.ts"
 

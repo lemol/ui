@@ -1,10 +1,10 @@
 import {
   type CSSMixinDescriptor,
-  css,
   type Handle,
   type MixInput,
   type RemixNode,
 } from "remix/component"
+import { css } from "../css.ts"
 import type { Invocation } from "../invocation.ts"
 
 export type ButtonTone = "primary" | "neutral" | "ghost" | "danger"

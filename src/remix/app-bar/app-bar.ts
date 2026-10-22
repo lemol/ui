@@ -31,7 +31,9 @@ const under = (selector: string, rules: Styles): Styles => ({ [selector]: rules 
  * `stuck` is a selector for an ancestor marked while the bar sticks, as a
  * host that measures its head marks one: the title gives up its second line
  * and the second row folds away, so the bar over the page is one line of
- * title and its trail. A host that marks nothing keeps both.
+ * title and its trail. A host that marks nothing keeps both. It must be an
+ * attribute or class selector (`[data-…]`, `.…`): remix/component reads a
+ * nested key that starts with anything else as a declaration, and drops it.
  */
 export const appBarParts = (stuck: string) => ({
   /** The bar: clear of a notch or a status bar drawn over the page, edge to edge. */

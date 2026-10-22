@@ -1,5 +1,5 @@
 import { css, type Handle, type MixInput } from "remix/component"
-import { fieldMessages } from "../form-control.ts"
+import { fieldMessages, givenProps } from "../form-control.ts"
 
 const rowStyle = css({
   display: "flex",
@@ -71,7 +71,6 @@ export function Radio(handle: Handle<RadioProps>) {
         <input
           aria-describedby={messages.describedBy}
           aria-invalid={messages.invalid}
-          checked={checked}
           disabled={disabled}
           id={stem}
           mix={[inputStyle, mix]}
@@ -79,6 +78,7 @@ export function Radio(handle: Handle<RadioProps>) {
           required={required}
           type="radio"
           value={value}
+          {...givenProps({ checked })}
         />
         <div mix={bodyStyle}>
           <label for={stem} mix={labelStyle(disabled === true)}>

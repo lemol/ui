@@ -17,8 +17,11 @@ import { componentTokens } from "./tokens.ts"
  *   structural — change it and the component stops working — but caps are
  *   taste, and a brand that sets things in sentence case has to be able to say
  *   `--ui-eyebrow-transform: none` rather than fork the component.
+ * - `bottom span-all` is where Popover opens against its trigger: a placement
+ *   keyword, not a design value, a token so a menu can open toward the
+ *   trigger's start edge without restating the property in a second block.
  */
-const allowedLiterals = new Set(["transparent", "1px", "2px", "uppercase"])
+const allowedLiterals = new Set(["transparent", "1px", "2px", "uppercase", "bottom span-all"])
 
 const primitives = new Set<string>(primitiveNames)
 const entries = Object.entries(componentTokens)
@@ -88,8 +91,10 @@ describe("the component token aggregate", () => {
       "ui-dialog",
       "ui-disclosure",
       "ui-eyebrow",
+      "ui-facet",
       "ui-field",
       "ui-heading",
+      "ui-kbd",
       "ui-menu",
       "ui-meter",
       "ui-pagination",
@@ -101,6 +106,7 @@ describe("the component token aggregate", () => {
       "ui-spinner",
       "ui-switch",
       "ui-table",
+      "ui-tabs",
       "ui-text",
       "ui-toast",
     ])

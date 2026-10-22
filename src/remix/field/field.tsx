@@ -1,4 +1,18 @@
 import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
+import { givenProps } from "../form-control.ts"
+
+/**
+ * `<selectedcontent>`, the element a customizable select clones its chosen
+ * option into. `remix/component`'s JSX does not know it yet; this names it
+ * with no attributes, which is all the platform reads from it.
+ */
+declare global {
+  namespace JSX {
+    interface IntrinsicElements {
+      selectedcontent: Record<string, never>
+    }
+  }
+}
 
 /**
  * Derived from the list, not the other way around: a kind added only to the
@@ -44,7 +58,11 @@ interface FieldCommon {
   /** Required. An unlabelled control is a broken control. */
   label: string
   /**
-   * Rendered above the control, so it is read before the user types.
+   * Rendered under the control, as a description, and named by its
+   * `aria-describedby`, so a screen reader still reads it the moment the
+   * control takes focus. Under rather than above so that fields set side by
+   * side keep their controls on one line whatever each one's hint says: a
+   * long hint above pushed its control below its neighbour's.
    *
    * `""` is treated the same as `undefined` — absent — rather than as a
    * message to render. `""` is the obvious way a form controller encodes "no
@@ -97,7 +115,19 @@ interface FieldCommon {
 /** Inputs and textareas take `readonly`; a `<select readonly>` is inert. */
 interface FieldEditable extends FieldCommon {
   readonly?: boolean | undefined
+  /**
+   * The value, controlled. In a hydrated component the runtime puts it back
+   * after every keystroke until a render passes a new one, so the component
+   * that passes it updates it on `input`. A form that never hydrates can pass
+   * either this or `defaultValue`.
+   */
   value?: string | undefined
+  /**
+   * The starting value, and the person's after that: for a field in a
+   * hydrated component whose form, not the component, holds what was typed.
+   * The server renders it as the same `value` attribute.
+   */
+  defaultValue?: string | undefined
   placeholder?: string | undefined
   minlength?: number | undefined
   maxlength?: number | undefined
@@ -108,6 +138,13 @@ export interface FieldInputProps extends FieldEditable {
   /** Defaults to `text`, which is also what a bare input defaults to. */
   type?: FieldType | undefined
   autocomplete?: string | undefined
+  /**
+   * The keyboard a phone offers, for a text field whose value is a number:
+   * `numeric` for a count, `decimal` for an amount. A `type="number"` input
+   * would bring spinners and refuse what it cannot parse before the server
+   * can say why.
+   */
+  inputmode?: "numeric" | "decimal" | undefined
   pattern?: string | undefined
   min?: string | number | undefined
   max?: string | number | undefined
@@ -121,6 +158,15 @@ export interface FieldTextareaProps extends FieldEditable {
 
 export interface FieldSelectProps extends FieldCommon {
   control: "select"
+  /**
+   * The closed select shows the chosen option's whole content — an icon or a
+   * mark beside its label — rather than its label alone, where the engine
+   * draws a customizable select (`appearance: base-select`). It renders the
+   * `<button><selectedcontent>` pair the platform clones the option into; an
+   * engine without customizable select drops both while parsing, so the
+   * select there is the plain one.
+   */
+  rich?: boolean | undefined
   /**
    * The `<option>`s. Required, because a select with none is an empty box.
    *
@@ -288,6 +334,87 @@ const selectFrame = css({
   display: "grid",
 })
 
+const pickerDuration = "var(--ui-field-picker-transition-duration)"
+const pickerTiming = `${pickerDuration} var(--ui-field-picker-transition-easing)`
+const pickerEnter = "0 calc(var(--ui-field-picker-enter-offset) * -1)"
+
+/**
+ * The customizable select, where the engine has it (Chrome 135, Safari 27):
+ * `appearance: base-select` on the select and on its `::picker(select)` turns
+ * the list into a styleable top-layer popover that is still the native
+ * control — the keyboard model, the screen reader's reading, form submission
+ * and validation are all the platform's. Elsewhere the `@supports` gate drops
+ * the lot and the select stays the plain one above, so there is no fallback to
+ * write.
+ *
+ * Kept inside `selectBox`'s own block rather than a block of its own, because
+ * it redeclares `appearance`, which that block declares: in a second block,
+ * sub-layer order would decide which one wins. That makes this the later
+ * sub-layer over `controlBase`, so the pointer and the prompt's ink wait for
+ * `:enabled`: unconditional, they beat `controlBase`'s disabled cursor and ink.
+ *
+ * The platform's own picker icon is hidden; the drawn chevron beside the
+ * control stays the one arrow in both engines. The checkmark moves to the
+ * option's end edge, after its label, as a menu marks its chosen row.
+ *
+ * The list enters and leaves as Popover's surface does (docs/motion.md), on
+ * duration tokens reduced motion zeroes. One `transition`, not Popover's two:
+ * every engine that draws this list parses `allow-discrete`, which is what the
+ * second declaration exists for. The closed state is written on
+ * `:not(:open)` rather than on the picker itself, so an engine that draws the
+ * list without knowing `:open` drops that rule and shows a list that does not
+ * move, where a hidden resting state would never show it at all.
+ */
+const pickerRules = {
+  "&, &::picker(select)": { appearance: "base-select" },
+  "&": { display: "flex", alignItems: "center" },
+  "&:enabled": { cursor: "pointer" },
+  "&::picker-icon": { display: "none" },
+  "&::picker(select)": {
+    borderStyle: "solid",
+    borderWidth: "var(--ui-field-border-width)",
+    borderColor: "var(--ui-field-picker-border)",
+    borderRadius: "var(--ui-field-picker-radius)",
+    background: "var(--ui-field-picker-bg)",
+    color: "var(--ui-field-picker-ink)",
+    boxShadow: "var(--ui-field-picker-shadow)",
+    padding: "var(--ui-field-picker-pad)",
+    marginBlock: "var(--ui-field-picker-gap)",
+    transition: `opacity ${pickerTiming}, translate ${pickerTiming}, overlay ${pickerDuration} allow-discrete, display ${pickerDuration} allow-discrete`,
+  },
+  "&:not(:open)::picker(select)": { opacity: 0, translate: pickerEnter },
+  "@starting-style": { "&:open::picker(select)": { opacity: 0, translate: pickerEnter } },
+  "& option": {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--ui-field-option-gap)",
+    paddingInline: "var(--ui-field-option-pad-x)",
+    paddingBlock: "var(--ui-field-option-pad-y)",
+    borderRadius: "var(--ui-field-option-radius)",
+    cursor: "pointer",
+  },
+  "& option:hover, & option:focus-visible": {
+    background: "var(--ui-field-option-bg-hover)",
+    outline: "none",
+  },
+  "& option:checked": { fontWeight: "var(--ui-field-option-checked-weight)" },
+  "& option::checkmark": {
+    order: "1",
+    marginInlineStart: "auto",
+    color: "var(--ui-field-option-check-ink)",
+  },
+  "& selectedcontent": {
+    display: "flex",
+    alignItems: "center",
+    gap: "var(--ui-field-option-gap)",
+  },
+  // The empty choice is a prompt, not a value: it reads as a placeholder.
+  "&:enabled:has(option[value='']:checked)": { color: "var(--ui-field-placeholder-ink)" },
+  // A required select's prompt is not a choice its list offers: the closed
+  // select still says "Choose one", and the list holds only what can be sent.
+  "&:required option[value='']": { display: "none" },
+}
+
 /**
  * `appearance: none` is what lets a select match an input, and it takes the
  * disclosure arrow with it — hence the chevron below.
@@ -298,15 +425,32 @@ const selectFrame = css({
  * — which a skin with a larger type step or a compact height reaches. With
  * none, the text centres in the fixed height the way an input's does.
  *
- * The end padding is the one calc() in the component, and both of its terms
- * are tokens. field.test.tsx decomposes a calc() rather than allowing it
- * wholesale, so a literal smuggled in here still fails.
+ * The end padding is a calc() whose two terms are both tokens. field.test.tsx
+ * decomposes a calc() rather than allowing it wholesale, so a literal
+ * smuggled in here still fails.
  */
 const selectBox = css({
   gridArea: "1 / 1",
   appearance: "none",
   height: "var(--ui-field-height)",
   paddingInlineEnd: "calc(var(--ui-field-pad-x) + var(--ui-field-chevron-space))",
+  "@supports (appearance: base-select)": pickerRules,
+})
+
+/**
+ * A `rich` select's button, which the platform sets where the closed select's
+ * label would be. It draws no box of its own — the select is the box — so it
+ * takes the select's font and ink and lays the cloned option out on one row.
+ */
+const selectButtonStyle = css({
+  display: "flex",
+  alignItems: "center",
+  minInlineSize: "0",
+  padding: "0",
+  borderStyle: "none",
+  background: "none",
+  font: "inherit",
+  color: "inherit",
 })
 
 /**
@@ -370,7 +514,7 @@ export function Field(handle: Handle<FieldProps>) {
               readOnly={props.readonly}
               required={required}
               rows={props.rows}
-              value={props.value}
+              {...givenProps({ value: props.value, defaultValue: props.defaultValue })}
             />
           )
         case "select":
@@ -385,6 +529,11 @@ export function Field(handle: Handle<FieldProps>) {
                 name={name}
                 required={required}
               >
+                {props.rich === true ? (
+                  <button mix={selectButtonStyle} type="button">
+                    <selectedcontent />
+                  </button>
+                ) : null}
                 {props.children}
               </select>
               <svg aria-hidden="true" fill="none" mix={chevronStyle} viewBox="0 0 12 12">
@@ -404,6 +553,7 @@ export function Field(handle: Handle<FieldProps>) {
               aria-describedby={describedBy}
               aria-invalid={invalid}
               autocomplete={props.autocomplete}
+              inputmode={props.inputmode}
               disabled={disabled}
               id={stem}
               max={props.max}
@@ -418,7 +568,7 @@ export function Field(handle: Handle<FieldProps>) {
               required={required}
               step={props.step}
               type={inputTypeAttribute(props.type)}
-              value={props.value}
+              {...givenProps({ value: props.value, defaultValue: props.defaultValue })}
             />
           )
       }
@@ -434,12 +584,12 @@ export function Field(handle: Handle<FieldProps>) {
             </span>
           ) : undefined}
         </label>
+        {control()}
         {hasHint ? (
           <p id={hintId} mix={hintStyle}>
             {hint}
           </p>
         ) : undefined}
-        {control()}
         {hasError ? (
           <p id={errorId} mix={errorStyle}>
             {error}

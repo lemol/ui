@@ -21,6 +21,19 @@ export interface FieldMessages {
 }
 
 /**
+ * Only the props that were given, for a control's `value`, `defaultValue` and
+ * `checked`. remix reads a host prop present as `undefined` as one removed,
+ * on every render, and clears its property: `value` to `""`, `checked` to
+ * false. In a hydrated component that wiped what the person typed or ticked
+ * each time the component rendered again, and a checkbox's `on` with it.
+ */
+export function givenProps<T extends Record<string, unknown>>(props: T): Partial<T> {
+  return Object.fromEntries(
+    Object.entries(props).filter(([, value]) => value !== undefined),
+  ) as Partial<T>
+}
+
+/**
  * `""` is treated the same as `undefined` — absent — for `hint` and `error`
  * alike, matching `Field`: a controller writing `hint={maybeHint ?? ""}` is
  * ordinary, and a bare falsy check would already have caught it.

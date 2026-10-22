@@ -57,7 +57,7 @@ const surfaceStyle = (anchorName: string) =>
     },
     "@supports (anchor-name: --a)": {
       positionAnchor: anchorName,
-      positionArea: "bottom span-all",
+      positionArea: "var(--ui-popover-position-area)",
       margin: "var(--ui-popover-anchor-gap) 0 0 0",
     },
   })

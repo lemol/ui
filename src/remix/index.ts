@@ -42,6 +42,11 @@ export {
   type DisclosureProps,
 } from "./disclosure/disclosure.tsx"
 export { documentRootId } from "./document-root.ts"
+export {
+  FacetFilter,
+  type FacetFilterProps,
+  type FacetOption,
+} from "./facet-filter/facet-filter.tsx"
 export { Eyebrow, type EyebrowProps } from "./eyebrow/eyebrow.tsx"
 export {
   Field,
@@ -58,6 +63,7 @@ export type { FieldMessages } from "./form-control.ts"
 export { fieldMessages } from "./form-control.ts"
 export { type ColumnCount, Grid, type GridProps } from "./grid/grid.tsx"
 export { Heading, type HeadingProps } from "./heading/heading.tsx"
+export { Kbd, type KbdProps } from "./kbd/kbd.tsx"
 export type { Invocation } from "./invocation.ts"
 export { LiveForm, type LiveFormProps, liveSubmit } from "./live-form/live-form.tsx"
 export {
@@ -115,6 +121,7 @@ export {
   TableRow,
   type TableRowProps,
 } from "./table/table.tsx"
+export { type TabItem, Tabs, type TabsProps, type TabsVariant } from "./tabs/tabs.tsx"
 export { Text, type TextProps, type TextSize, type TextTag, type TextTone } from "./text/text.tsx"
 export { ThemeStyle, type ThemeStyleProps } from "./theme-style.tsx"
 export {

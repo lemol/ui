@@ -49,7 +49,7 @@ export const valuesOf = (styles: string): string[] =>
  * `@layer` body (the class selector), depth 2 is the selector's own body, and
  * anything deeper is a nested rule like `&:disabled`.
  */
-const topLevelPropertiesOf = (block: string): string[] => {
+export const topLevelPropertiesOf = (block: string): string[] => {
   let depth = 0
   let flat = ""
 

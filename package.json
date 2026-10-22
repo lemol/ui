@@ -11,6 +11,7 @@
     "./design": "./src/design/index.ts",
     "./design/css": "./src/design/css/index.ts",
     "./remix": "./src/remix/index.ts",
+    "./remix/overlay": "./src/remix/dialog/overlay.tsx",
     "./remix/compat": "./src/remix/compat.ts",
     "./remix/runtime": "./src/remix/runtime.ts",
     "./remix/demos": "./src/remix/demos.ts",

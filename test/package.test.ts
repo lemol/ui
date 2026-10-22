@@ -78,6 +78,18 @@ describe("@lemol/ui", () => {
   })
 })
 
+// A client entry loads every module it imports, and the asset server compiles
+// a module graph rather than tree-shaking it, so a dialog's trigger that took
+// `overlay` from the barrel put every component in the page's module graph.
+test("publishes the overlay on a subpath of its own, clear of the barrel", async () => {
+  const exports = (await manifest()).exports ?? {}
+
+  expect(exports["./remix/overlay"]).toBe("./src/remix/dialog/overlay.tsx")
+  const overlay = await Bun.file(`${root}src/remix/dialog/overlay.tsx`).text()
+
+  expect(overlay).not.toMatch(/from "\.\.\/index\.ts"/)
+})
+
 // The subpath exists so that taking the schema does not mean taking the
 // stylesheet with it, which one import in the barrel would quietly undo.
 test("keeps the design barrel clear of the css subpath", async () => {

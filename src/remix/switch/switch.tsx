@@ -1,5 +1,5 @@
 import { css, type Handle, type MixInput } from "remix/component"
-import { fieldMessages } from "../form-control.ts"
+import { fieldMessages, givenProps } from "../form-control.ts"
 
 const rowStyle = css({
   display: "flex",
@@ -106,7 +106,6 @@ export function Switch(handle: Handle<SwitchProps>) {
           aria-checked={checked === true}
           aria-describedby={messages.describedBy}
           aria-invalid={messages.invalid}
-          checked={checked}
           disabled={disabled}
           id={stem}
           mix={[trackStyle, mix]}
@@ -114,7 +113,7 @@ export function Switch(handle: Handle<SwitchProps>) {
           required={required}
           role="switch"
           type="checkbox"
-          value={value}
+          {...givenProps({ checked, value })}
         />
         <div mix={bodyStyle}>
           <label for={stem} mix={labelStyle(disabled === true)}>

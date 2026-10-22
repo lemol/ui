@@ -10,9 +10,11 @@ import { DensityToggleDemo } from "./density-toggle/density-toggle.demo.tsx"
 import { DialogDemo } from "./dialog/dialog.demo.tsx"
 import { DisclosureDemo } from "./disclosure/disclosure.demo.tsx"
 import { EyebrowDemo } from "./eyebrow/eyebrow.demo.tsx"
+import { FacetFilterDemo } from "./facet-filter/facet-filter.demo.tsx"
 import { FieldDemo } from "./field/field.demo.tsx"
 import { GridDemo } from "./grid/grid.demo.tsx"
 import { HeadingDemo } from "./heading/heading.demo.tsx"
+import { KbdDemo } from "./kbd/kbd.demo.tsx"
 import { LiveFormDemo } from "./live-form/live-form.demo.tsx"
 import { MenuDemo } from "./menu/menu.demo.tsx"
 import { MeterDemo } from "./meter/meter.demo.tsx"
@@ -27,6 +29,7 @@ import { SpinnerDemo } from "./spinner/spinner.demo.tsx"
 import { StackDemo } from "./stack/stack.demo.tsx"
 import { SwitchDemo } from "./switch/switch.demo.tsx"
 import { TableDemo } from "./table/table.demo.tsx"
+import { TabsDemo } from "./tabs/tabs.demo.tsx"
 import { TextDemo } from "./text/text.demo.tsx"
 import { ToasterDemo } from "./toaster/toaster.demo.tsx"
 
@@ -48,9 +51,11 @@ export const demos = {
   dialog: { title: "Dialog", Demo: DialogDemo },
   disclosure: { title: "Disclosure", Demo: DisclosureDemo },
   eyebrow: { title: "Eyebrow", Demo: EyebrowDemo },
+  "facet-filter": { title: "FacetFilter", Demo: FacetFilterDemo },
   field: { title: "Field", Demo: FieldDemo },
   grid: { title: "Grid", Demo: GridDemo },
   heading: { title: "Heading", Demo: HeadingDemo },
+  kbd: { title: "Kbd", Demo: KbdDemo },
   liveForm: { title: "LiveForm", Demo: LiveFormDemo },
   menu: { title: "Menu", Demo: MenuDemo },
   meter: { title: "Meter", Demo: MeterDemo },
@@ -65,6 +70,7 @@ export const demos = {
   stack: { title: "Stack", Demo: StackDemo },
   switch: { title: "Switch", Demo: SwitchDemo },
   table: { title: "Table", Demo: TableDemo },
+  tabs: { title: "Tabs", Demo: TabsDemo },
   text: { title: "Text", Demo: TextDemo },
   toaster: { title: "Toaster", Demo: ToasterDemo },
 } as const

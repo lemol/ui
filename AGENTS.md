@@ -31,7 +31,7 @@ src/
   design/      @lemol/ui/design      token schema, themes, v()
                @lemol/ui/design/css  the stylesheet emitter and element defaults
   remix/       @lemol/ui/remix       components + their own token contracts
-               …/compat …/runtime …/demos
+               …/overlay …/compat …/runtime …/demos
   mini/        @lemol/ui/mini        one concrete design: theme + app shell
 apps/
   playground/  catalogue, page recipes, theme and no-JS switches

@@ -128,6 +128,7 @@ lower floor:
 | Popover API | Chrome 114, Safari 17, Firefox 125 | Relied on directly. **This sets the floor.** |
 | Invoker Commands | Baseline Dec 2025 (Chrome 135+, Safari 26, Firefox late 2025) | Native, with `@lemol/ui/remix/compat` backfilling older engines in ~70 lines. Identical markup either way. |
 | CSS anchor positioning | Baseline Jan 2026 (Chrome 125+, Safari 26, Firefox 147+) | Behind `@supports (anchor-name: --a)`. |
+| Customizable select (`appearance: base-select`) | Chrome 135+, Safari 27 | Behind `@supports (appearance: base-select)` in `Field`'s select; elsewhere the plain styled select. |
 
 **Why the floor is the Popover API.** Below it you must reimplement top layer
 and light dismiss, which is where the cost explodes. Above it, a shim is

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "bun:test"
-import { fieldMessages } from "./form-control.ts"
+import { fieldMessages, givenProps } from "./form-control.ts"
 
 describe("fieldMessages", () => {
   it("names both ids from the stem, regardless of whether they render", () => {
@@ -43,5 +43,15 @@ describe("fieldMessages", () => {
     const messages = fieldMessages("newsletter", "Weekly digest", "Required")
 
     expect(messages.describedBy).toBe("newsletter-hint newsletter-error")
+  })
+})
+
+describe("givenProps", () => {
+  it("keeps the props that were given and drops the undefined ones, keys and all", () => {
+    const props = givenProps({ checked: false, value: undefined, defaultValue: "" })
+
+    // A key present as undefined is what remix clears on every re-render.
+    expect(props).toEqual({ checked: false, defaultValue: "" })
+    expect("value" in props).toBe(false)
   })
 })

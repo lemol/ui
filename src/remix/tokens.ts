@@ -7,8 +7,10 @@ import { commandPaletteTokens } from "./command-palette/tokens.ts"
 import { dialogTokens } from "./dialog/tokens.ts"
 import { disclosureTokens } from "./disclosure/tokens.ts"
 import { eyebrowTokens } from "./eyebrow/tokens.ts"
+import { facetTokens } from "./facet-filter/tokens.ts"
 import { fieldTokens } from "./field/tokens.ts"
 import { headingTokens } from "./heading/tokens.ts"
+import { kbdTokens } from "./kbd/tokens.ts"
 import { menuTokens } from "./menu/tokens.ts"
 import { meterTokens } from "./meter/tokens.ts"
 import { paginationTokens } from "./pagination/tokens.ts"
@@ -19,6 +21,7 @@ import { skeletonTokens } from "./skeleton/tokens.ts"
 import { spinnerTokens } from "./spinner/tokens.ts"
 import { switchTokens } from "./switch/tokens.ts"
 import { tableTokens } from "./table/tokens.ts"
+import { tabsTokens } from "./tabs/tokens.ts"
 import { textTokens } from "./text/tokens.ts"
 import { toastTokens } from "./toaster/tokens.ts"
 
@@ -39,8 +42,10 @@ export const componentTokens = {
   ...dialogTokens,
   ...disclosureTokens,
   ...eyebrowTokens,
+  ...facetTokens,
   ...fieldTokens,
   ...headingTokens,
+  ...kbdTokens,
   ...menuTokens,
   ...meterTokens,
   ...paginationTokens,
@@ -51,6 +56,7 @@ export const componentTokens = {
   ...spinnerTokens,
   ...switchTokens,
   ...tableTokens,
+  ...tabsTokens,
   ...textTokens,
   ...toastTokens,
 } satisfies Record<string, string>

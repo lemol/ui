@@ -21,7 +21,8 @@ checkout has no `node_modules` to resolve that through.
 | --- | --- |
 | `@lemol/ui/design` | The primitive token schema, `defineTheme` / `extendTheme`, `v()`. |
 | `@lemol/ui/design/css` | The stylesheet emitter, cascade-layer setup, element defaults, boot script. |
-| `@lemol/ui/remix` | The components, their token records, `ThemeStyle`. |
+| `@lemol/ui/remix` | The components, their token records, `ThemeStyle`. A client entry that imports it loads every component. |
+| `@lemol/ui/remix/overlay` | `overlay()` alone, for a client entry: it loads `Button`, `Dialog` and what they import, not the barrel. |
 | `@lemol/ui/remix/compat` | The Invoker Commands backfill. |
 | `@lemol/ui/remix/runtime` | The single capture-phase `command` listener. |
 | `@lemol/ui/remix/demos` | The demo for each component, for the playground. |

@@ -10,13 +10,15 @@ Sits on the `design` layer and `remix/component`, and on nothing else.
 
 | Import | Holds | Ships to the browser |
 | --- | --- | --- |
-| `@lemol/ui/remix` | The components, their token records, `ThemeStyle`. | Only what a page uses. |
+| `@lemol/ui/remix` | The components, their token records, `ThemeStyle`. | Only when a client entry imports it, and then everything it imports: every component. |
+| `@lemol/ui/remix/overlay` | `overlay()` alone, for a client entry. | Yes: `Button`, `Dialog` and what they import. |
 | `@lemol/ui/remix/runtime` | The single capture-phase `command` listener. | Yes. |
 | `@lemol/ui/remix/compat` | The Invoker Commands backfill. | Yes. |
 | `@lemol/ui/remix/demos` | The demo for each component, for the playground. | No. |
 
 **Import the runtime from its own subpath, never from the barrel** — otherwise
-the bundle pulls the component library in behind it.
+the bundle pulls the component library in behind it. A client entry takes
+`overlay` from `@lemol/ui/remix/overlay` for the same reason.
 
 ## Catalogue
 
@@ -151,6 +153,12 @@ them is a bordered box of `--control-h` height, so every token here would style
 them wrongly. There is no `size` axis either: forms are uniform in a way
 toolbars are not, and density already retunes the height.
 
+**The hint sits under the control**, as a description, and `aria-describedby`
+names it, so a screen reader still reads it when the control takes focus.
+Under rather than above, so fields set side by side keep their controls on one
+line whatever each hint says: a long hint above pushed its control below its
+neighbour's.
+
 **Ids derive from the required `name`** — `email` for the control,
 `email-hint` and `email-error` for the messages — and `aria-describedby` names
 only the messages that rendered, because pointing it at an absent id is a
@@ -171,16 +179,89 @@ drops a textarea's children. **A `<select>` takes no `value` at all** — HTML
 gives it no such content attribute, so the chosen `<option>` carries
 `selected`. It takes no `readonly` either, for the same reason.
 
+**`value` is controlled; `defaultValue` is not.** In a hydrated component the
+runtime puts `value` back after every keystroke until a render passes a new
+one. A field whose form holds what was typed, read back from the DOM rather
+than from the component's state, takes `defaultValue` instead. Both render the
+same `value` attribute on the server, so a form that never hydrates can take
+either.
+
 `appearance: none` on the select is what lets it match an input, and the
 chevron that replaces the native arrow is an inline `<svg>` sharing a grid cell
 with the control. Its colour is `--ui-field-chevron-ink`, which a
 `background-image` data URI could not manage: `var()` does not resolve inside
 `url()`.
 
-Twenty-seven tokens in `field/tokens.ts`. Field styles no focus ring, as
+**Where the engine has a customizable select** (Chrome 135, Safari 27), the
+list is drawn too: `appearance: base-select` on the select and its
+`::picker(select)`, behind `@supports`, turns the options into a styleable
+top-layer popover — `--ui-field-picker-*` for its surface, `--ui-field-option-*`
+for its rows, the checkmark moved to a row's end — while the keyboard model,
+the screen reader's reading, submission and validation stay the platform's.
+Elsewhere the gate drops it all and the select is the plain one above. An
+`<option value="">` reads as a placeholder. Options may carry an icon beside
+their label; `rich` adds the `<button><selectedcontent>` pair so the closed
+select shows the chosen option's icon too, and an engine without customizable
+select drops that pair while parsing.
+
+The list enters and leaves as `Popover`'s surface does, on its own
+`--ui-field-picker-transition-*` tokens. Its closed state is written on
+`:not(:open)`, so an engine that draws the list without knowing `:open` shows
+a list that does not move rather than one that never appears. The picker's
+pointer and the prompt's ink wait for `:enabled`: they sit in the later
+sub-layer, and unconditional they would beat the disabled cursor and ink.
+
+Forty-four tokens in `field/tokens.ts`. Field styles no focus ring, as
 `Button` does not: the reset owns it, and it applies because no component
 competes with it. **`mix` reaches the wrapper, not the control** — a property
 of the control goes through its token.
+
+### `FacetFilter`
+
+One facet of a filtered collection, as a data table's toolbar draws it: a
+dashed button naming what it narrows by, which shows the chosen value once
+there is one, and opens the choices in a native popover through
+`command="toggle-popover"`. Each choice is a **link** to the page with that
+value set, written by the server — choosing is a navigation the browser already
+makes, and the runtime can make it in place — so there is no client state and
+nothing to submit. A facet a list cannot enumerate passes a form of its own as
+children. `name` is the id stem for the list and its anchor, used verbatim as
+`overlay()` uses its name, and both halves of the `commandfor` pair are bound
+from it.
+
+Built on `invoke()` rather than `popover()`'s trigger, because the dashed edge
+is a border style `Button` declares, which `mix` cannot reliably override. The
+list is anchored under the trigger's start edge and carries Popover's entry and
+exit. Forty-four tokens in `facet-filter/tokens.ts`.
+
+The choices read as a menu: `role="menu"`, each row `menuitemradio`, or
+`menuitemcheckbox` once more than one value is chosen, since the trigger then
+shows several. The keyboard model is `Tab` through the links, as `Menu`'s is:
+no arrow keys and no typeahead, the trade-off a native popover of links makes
+with no script. A facet with no options holds a form, so its list is a
+`dialog` named by the facet's label, which is what its trigger's
+`aria-haspopup` says it opens.
+
+### `Tabs`
+
+Tabs as route links (interactivity.md, "Not in scope"): each tab an `<a>` to
+its own URL, the current one `aria-current="page"`, so a tab works before
+hydration and survives a reload. A tab with nothing to show yet is a dim
+`<span>` in its place, never a disabled link. Two looks, `line` (an indicator
+on a rule, under a page title) and `pill` (a raised tab in a recessed track,
+for a compact switch), each property-disjoint from the shared block. The strip
+scrolls sideways rather than wrapping, and a scroller clips whatever paints
+past its edge, so a tab draws the reset's focus ring inside its own edge,
+inset by `--ui-tabs-ring-inset` (the ring's width), and the `line` rule is an
+inset shadow the tabs paint over rather than a border no tab could reach.
+Twenty-three tokens in `tabs/tokens.ts`.
+
+### `Kbd`
+
+A key cap, as a native `<kbd>`: `inline-flex` so it sits in a sentence or a
+row of hints without breaking the line, with a heavier lower edge a skin can
+retune. One key per cap; a chord is caps side by side. Eleven tokens in
+`kbd/tokens.ts`.
 
 ### `Badge`
 
@@ -218,6 +299,12 @@ properties into `::backdrop`.
 
 Twenty-two tokens in `dialog/tokens.ts`.
 
+`overlay` is also published alone, as `@lemol/ui/remix/overlay`, for a client
+entry. The browser loads every module a client entry imports and nothing
+tree-shakes the source, so a trigger that took `overlay` from the barrel put
+every component in the page's module graph. From the subpath it takes `Button`,
+`Dialog` and what they import.
+
 ### `Popover` and `popover()`
 
 A native `[popover]` opened by `command="toggle-popover"`, with no client code
@@ -234,7 +321,9 @@ Entry and exit follow Dialog's pattern exactly: the `transition` shorthand
 twice, `@starting-style` targeting `&:popover-open`, `display` declared only
 inside that same state.
 
-Thirteen tokens in `popover/tokens.ts`; the trigger is a `Button` and reads
+Fourteen tokens in `popover/tokens.ts`, `--ui-popover-position-area` among them
+for a surface that should open toward its trigger's start or end edge; the
+trigger is a `Button` and reads
 `--ui-btn-*`, not a parallel set.
 
 ### `Menu` and `menu()`
@@ -604,8 +693,9 @@ eighteen, `SegmentedControl` fifteen, `Callout` twenty-four, `Meter` two
 (shared by `Progress`), `CommandPalette` twelve, `Breadcrumbs` eight,
 `Pagination` ten, `Spinner` six, `Skeleton` five, and `LiveForm`,
 `CopyButton`, `DensityToggle` and `SchemeToggle` none — each is behaviour
-over an existing shell, not a styled one of their own. `demos.ts` registers
-thirty-one demos. `compat.ts` backfills Invoker Commands and `runtime.ts`
+over an existing shell, not a styled one of their own. `FacetFilter`, `Tabs`
+and `Kbd` followed, with forty-four, twenty-three and eleven, and `Field` grew to
+forty-four with the customizable select. `demos.ts` registers thirty-four demos. `compat.ts` backfills Invoker Commands and `runtime.ts`
 holds the command listener and
 the `input` bridge, registering
 `--dismiss-toast`, `--palette`, `--live-submit`, `--copy`,

@@ -1,10 +1,39 @@
 import { describe, expect, it } from "bun:test"
-import { css } from "remix/component"
+import { css, type Handle } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
-import { blocksOn, markupOf, sharedProperties, stylesOf, valuesOf } from "../../../test/styles.ts"
+import {
+  blocksOn,
+  markupOf,
+  sharedProperties,
+  stylesOf,
+  topLevelPropertiesOf,
+  valuesOf,
+} from "../../../test/styles.ts"
 import { FieldDemo } from "./field.demo.tsx"
-import { Field, fieldControls, fieldTypes } from "./field.tsx"
+import { Field, type FieldProps, fieldControls, fieldTypes } from "./field.tsx"
 import { fieldTokens } from "./tokens.ts"
+
+/** The first host element of `type` in a render's element tree: props the markup cannot show. */
+const hostElement = (
+  node: unknown,
+  type: string,
+): { readonly props: Record<string, unknown> } | undefined => {
+  if (Array.isArray(node)) {
+    for (const child of node) {
+      const found = hostElement(child, type)
+
+      if (found !== undefined) return found
+    }
+
+    return undefined
+  }
+
+  if (typeof node !== "object" || node === null || !("props" in node)) return undefined
+
+  const element = node as { readonly type: unknown; readonly props: Record<string, unknown> }
+
+  return element.type === type ? element : hostElement(element.props.children, type)
+}
 
 /**
  * Values a declaration may carry instead of a token. Structural only: nothing
@@ -22,6 +51,14 @@ const keywords = new Set([
   "none",
   "vertical",
   "not-allowed",
+  // The customizable select: the appearance value that opts in, the pointer
+  // its rows take, the order and margin that put the checkmark last, and the
+  // opacity its list closes to.
+  "base-select",
+  "pointer",
+  "1",
+  "auto",
+  "0",
 ])
 
 /** Every var() a value names, so a calc() of two tokens is read as two. */
@@ -32,7 +69,9 @@ const referencesOf = (value: string): string[] =>
  * The values that are neither a listed keyword nor built from this component's
  * own tokens. A calc() is decomposed rather than waved through, so
  * `calc(var(--ui-field-pad-x) + 4px)` is still an offender — which matters,
- * because the select's end padding is the one calc() in the component.
+ * because the select's end padding and the picker's entry offset are calc()s.
+ * What may be left of one is its operators, a negation and a bare zero; of a
+ * transition, the properties it names and `allow-discrete`.
  */
 const offendersIn = (styles: string): string[] =>
   valuesOf(styles).filter((value) => {
@@ -44,10 +83,23 @@ const offendersIn = (styles: string): string[] =>
 
     if (!references.every((name) => name.startsWith("ui-field-"))) return true
 
-    const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/calc|[()+\-*/\s]/g, "")
+    const rest = value
+      .replace(/var\(--[\w-]+\)/g, "")
+      .replace(/\b(opacity|translate|overlay|display|allow-discrete)\b/g, "")
+      .replace(/\* -1\b|\b0\b/g, "")
+      .replace(/calc|[()+\-*/\s,]/g, "")
 
     return rest !== ""
   })
+
+/** The declarations of the rule whose selector is exactly `selector`, innermost rules only. */
+const ruleIn = (styles: string, selector: string): string | undefined =>
+  [...styles.matchAll(/([^{};]+)\{([^{}]*)\}/g)].find((match) => match[1]?.trim() === selector)?.[2]
+
+/** The select's own block that holds the customizable select, behind its gate. */
+const pickerBlockOf = (html: string): string =>
+  blocksOn(html, "select").find((block) => block.includes("@supports (appearance: base-select)")) ??
+  ""
 
 /** The ids `aria-describedby` points at, in the order it lists them. */
 const describedIds = (html: string): string[] =>
@@ -254,6 +306,14 @@ describe("Field", () => {
     expect(markupOf(text)).toContain(" readonly")
   })
 
+  it("asks a phone for the keyboard a number takes", async () => {
+    const html = markupOf(
+      await renderToHtml(<Field inputmode="decimal" label="Budget" name="budget" />),
+    )
+
+    expect(html).toContain('inputmode="decimal"')
+  })
+
   it("renders the disabled attribute", async () => {
     const html = markupOf(await renderToHtml(<Field disabled label="Email" name="email" />))
 
@@ -448,6 +508,42 @@ describe("Field, as a textarea", () => {
     expect(html).toContain("typed earlier")
   })
 
+  it("leaves value and defaultValue off its control unless given", () => {
+    // remix clears a host prop present as undefined on every re-render, so a
+    // hydrated field holding the key with no value lost what was typed.
+    const tree = Field({ props: { label: "Email", name: "email" } } as Handle<FieldProps>)()
+    const input = hostElement(tree, "input")
+
+    expect(input === undefined ? [] : Object.keys(input.props)).not.toContain("value")
+    expect(input === undefined ? [] : Object.keys(input.props)).not.toContain("defaultValue")
+    expect(input).toBeDefined()
+  })
+
+  it("keeps a required select's prompt out of its list, where the engine draws the list", async () => {
+    const html = await renderToHtml(
+      <Field control="select" label="Project" name="project" required>
+        <option value="">Choose one</option>
+        <option value="shop">shop</option>
+      </Field>,
+    )
+
+    const styles = stylesOf(html)
+
+    expect(styles).toMatch(
+      /@supports \(appearance: base-select\)[\s\S]*&:required option\[value=''\]\s*\{\s*display: none;/,
+    )
+  })
+
+  it("renders a starting value as the same attribute, for a field the person then owns", async () => {
+    const input = await renderToHtml(<Field defaultValue="a@b.co" label="Email" name="email" />)
+    const notes = await renderToHtml(
+      <Field control="textarea" defaultValue="typed earlier" label="Notes" name="notes" />,
+    )
+
+    expect(input).toContain('value="a@b.co"')
+    expect(notes).toContain("typed earlier</textarea>")
+  })
+
   it("takes rows and the length constraints", async () => {
     const html = await renderToHtml(
       <Field
@@ -616,7 +712,11 @@ describe("Field, as a select", () => {
       </Field>,
     )
 
-    expect(blocksOn(select, "select").some((block) => block.includes("padding-block"))).toBe(false)
+    // Its own box only: the customizable select's option rows nest their
+    // padding inside the same block, and those rows are not the select.
+    const own = blocksOn(select, "select").flatMap((block) => topLevelPropertiesOf(block))
+
+    expect(own.some((property) => property.startsWith("padding-block"))).toBe(false)
     const input = await renderToHtml(<Field label="Email" name="email" />)
 
     expect(blocksOn(input, "input").some((block) => block.includes("padding-block-start"))).toBe(
@@ -712,6 +812,100 @@ describe("Field, as a select", () => {
     )
 
     expect(offendersIn(stylesOf(html))).toEqual([])
+  })
+
+  it("puts the chosen option's whole content in the closed select only when rich", async () => {
+    // A customizable select clones the chosen option into <selectedcontent>
+    // inside a <button> that leads the select; a plain one shows the label.
+    const plain = await renderToHtml(
+      <Field control="select" label="Plan" name="plan">
+        {plans}
+      </Field>,
+    )
+
+    const rich = await renderToHtml(
+      <Field control="select" label="Plan" name="plan" rich>
+        {plans}
+      </Field>,
+    )
+
+    expect(plain).not.toContain("<selectedcontent")
+    expect(rich).toMatch(/<select[^>]*><button[^>]*><selectedcontent><\/selectedcontent><\/button>/)
+    expect(
+      offendersIn(stylesOf(rich)).filter((value) => !["0", "inherit"].includes(value)),
+    ).toEqual([])
+  })
+
+  it("keeps the native control under a customizable select, gated on support", async () => {
+    // The picker is the platform's: appearance: base-select on the select
+    // and its ::picker(select), behind @supports so an engine without it
+    // keeps the plain select.
+    const styles = stylesOf(
+      await renderToHtml(
+        <Field control="select" label="Plan" name="plan">
+          {plans}
+        </Field>,
+      ),
+    )
+
+    expect(styles).toContain("@supports (appearance: base-select)")
+    expect(styles).toContain("::picker(select)")
+    expect(styles).toContain("appearance: base-select")
+    expect(styles).toContain("::checkmark")
+  })
+
+  it("leaves a disabled select to controlBase's cursor and ink, where the engine draws the list", async () => {
+    // The picker's rules sit in selectBox's block, the later sub-layer, so an
+    // unconditional pointer or prompt ink there would beat controlBase's
+    // `&:disabled`. Both wait for `:enabled` instead.
+    const picker = pickerBlockOf(
+      await renderToHtml(
+        <Field control="select" label="Project" name="project">
+          <option value="">Choose one</option>
+          <option value="shop">shop</option>
+        </Field>,
+      ),
+    )
+
+    expect(ruleIn(picker, "&")).toBeDefined()
+    expect(ruleIn(picker, "&")).not.toContain("cursor")
+    expect(ruleIn(picker, "&:enabled")).toContain("cursor: pointer;")
+    expect(ruleIn(picker, "&:has(option[value='']:checked)")).toBeUndefined()
+    expect(ruleIn(picker, "&:enabled:has(option[value='']:checked)")).toContain(
+      "color: var(--ui-field-placeholder-ink);",
+    )
+  })
+
+  it("moves its list in and out as Popover's surface does, on tokens reduced motion zeroes", async () => {
+    // An overlay ships its entry and exit (docs/motion.md): the transition on
+    // the picker, held in the top layer and displayed through its exit, and
+    // a starting style for the state being entered.
+    const picker = pickerBlockOf(
+      await renderToHtml(
+        <Field control="select" label="Plan" name="plan">
+          {plans}
+        </Field>,
+      ),
+    )
+
+    const duration = "var(--ui-field-picker-transition-duration)"
+    const timing = `${duration} var(--ui-field-picker-transition-easing)`
+    const starting = picker.indexOf("@starting-style")
+    const resting =
+      /opacity: 0;\s*translate: 0 calc\(var\(--ui-field-picker-enter-offset\) \* -1\);/
+
+    expect(ruleIn(picker, "&::picker(select)")).toContain(
+      `transition: opacity ${timing}, translate ${timing}, overlay ${duration} allow-discrete, display ${duration} allow-discrete;`,
+    )
+    // Closed on :not(:open), so an engine that drew the list without knowing
+    // :open would drop the rule and show it, rather than never show it.
+    expect(ruleIn(picker, "&::picker(select)")).not.toMatch(/\bopacity:/)
+    expect(ruleIn(picker, "&:not(:open)::picker(select)")).toMatch(resting)
+    expect(starting).toBeGreaterThan(-1)
+    expect(ruleIn(picker.slice(starting), "&:open::picker(select)")).toMatch(resting)
+    // The reset zeroes every --dur-* token under prefers-reduced-motion, so a
+    // duration read from one is a list that arrives still.
+    expect(fieldTokens["ui-field-picker-transition-duration"]).toStartWith("var(--dur-")
   })
 })
 

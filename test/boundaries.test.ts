@@ -18,6 +18,7 @@ const allowed: Record<string, string[]> = {
   design: [],
   remix: ["remix/component"],
   mini: ["remix/component"],
+  pwa: [],
 }
 
 // Which layers each one may reach, and in which direction. Collapsing three
@@ -28,6 +29,7 @@ const reachable: Record<string, string[]> = {
   design: [],
   remix: ["design"],
   mini: ["design", "remix"],
+  pwa: [],
 }
 
 // The imports the spec names, denied even if an allow-list above grows to cover

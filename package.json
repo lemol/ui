@@ -15,6 +15,7 @@
     "./remix/compat": "./src/remix/compat.ts",
     "./remix/runtime": "./src/remix/runtime.ts",
     "./remix/demos": "./src/remix/demos.ts",
+    "./pwa": "./src/pwa/index.ts",
     "./mini": "./src/mini/index.ts",
     "./mini/document": "./src/mini/document.tsx"
   },

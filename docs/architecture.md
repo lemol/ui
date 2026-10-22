@@ -1,6 +1,6 @@
 # Architecture
 
-One package ships, in three layers, plus a playground. The boundaries are drawn
+One package ships, in four layers, plus a playground. The boundaries are drawn
 so that a future renderer can be added without refactoring the ones that exist.
 
 ## The shipping shape
@@ -28,8 +28,9 @@ checkout has no `node_modules` to resolve that through.
 | `@lemol/ui/remix/demos` | The demo for each component, for the playground. |
 | `@lemol/ui/mini` | One concrete design: a theme, `AppShell`, `Nav` and the state components. |
 | `@lemol/ui/mini/document` | `Document` — the `<html>` wiring, which only a server renders. |
+| `@lemol/ui/pwa` | What makes an app installable, as strings and bytes a host serves: the web manifest, PNG icons, the service worker and its offline page. |
 
-There is no `.` export. A root barrel would merge the three layers into one
+There is no `.` export. A root barrel would merge the layers into one
 name and hide which one a component came from — the same reason `mini` does not
 re-export `remix`. `test/package.test.ts` pins that, and
 `test/git-consumer.test.ts` installs the tagged repository into a scratch
@@ -43,6 +44,7 @@ when the shipping shape breaks.
 | `design` | Token schema, theme composition, `v()`, and — on the opt-in `/css` subpath — the stylesheet emitter, cascade-layer setup, element defaults, boot script. | Nothing about components, and nothing about a renderer. |
 | `remix` | Remix 3 components, the `--ui-*` contract each declares, `ThemeStyle`, the compat shim, the runtime. | `design`, `remix/component`. |
 | `mini` | One concrete design: a theme plus the app shell. | Both of the above. |
+| `pwa` | The installable app's files as plain functions: `webManifest`, `serviceWorker`, `offlinePage`, `encodePng`. | Nothing: no renderer, no runtime. A host serves the strings and bytes; a server passes its own deflate to `encodePng`, which otherwise stores the pixels uncompressed. |
 
 ```
                       mini
@@ -91,6 +93,12 @@ src/
     states.tsx            EmptyState and ErrorState
     document.tsx          Document — its own subpath, and the only file here
                           that reaches for remix/component/server
+  pwa/
+    index.ts              the layer's entry point
+    manifest.ts           webManifest
+    worker.ts             serviceWorker and the kept-asset pattern
+    offline.ts            offlinePage
+    png.ts                encodePng, with a stored deflate of its own
 apps/
   playground/             catalogue, page recipes, theme and no-JS switches
 ```

@@ -106,6 +106,7 @@ describe("the component token aggregate", () => {
       "ui-skeleton",
       "ui-spinner",
       "ui-switch",
+      "ui-tabbar",
       "ui-table",
       "ui-tabs",
       "ui-text",

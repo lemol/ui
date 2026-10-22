@@ -21,6 +21,7 @@ import { sheetTokens } from "./sheet/tokens.ts"
 import { skeletonTokens } from "./skeleton/tokens.ts"
 import { spinnerTokens } from "./spinner/tokens.ts"
 import { switchTokens } from "./switch/tokens.ts"
+import { tabBarTokens } from "./tab-bar/tokens.ts"
 import { tableTokens } from "./table/tokens.ts"
 import { tabsTokens } from "./tabs/tokens.ts"
 import { textTokens } from "./text/tokens.ts"
@@ -57,6 +58,7 @@ export const componentTokens = {
   ...skeletonTokens,
   ...spinnerTokens,
   ...switchTokens,
+  ...tabBarTokens,
   ...tableTokens,
   ...tabsTokens,
   ...textTokens,

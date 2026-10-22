@@ -29,6 +29,7 @@ import { SkeletonDemo } from "./skeleton/skeleton.demo.tsx"
 import { SpinnerDemo } from "./spinner/spinner.demo.tsx"
 import { StackDemo } from "./stack/stack.demo.tsx"
 import { SwitchDemo } from "./switch/switch.demo.tsx"
+import { TabBarDemo } from "./tab-bar/tab-bar.demo.tsx"
 import { TableDemo } from "./table/table.demo.tsx"
 import { TabsDemo } from "./tabs/tabs.demo.tsx"
 import { TextDemo } from "./text/text.demo.tsx"
@@ -72,6 +73,7 @@ export const demos = {
   stack: { title: "Stack", Demo: StackDemo },
   switch: { title: "Switch", Demo: SwitchDemo },
   table: { title: "Table", Demo: TableDemo },
+  tabBar: { title: "TabBar", Demo: TabBarDemo },
   tabs: { title: "Tabs", Demo: TabsDemo },
   text: { title: "Text", Demo: TextDemo },
   toaster: { title: "Toaster", Demo: ToasterDemo },

@@ -124,6 +124,13 @@ export {
   TableRow,
   type TableRowProps,
 } from "./table/table.tsx"
+export {
+  TabBar,
+  type TabBarBadge,
+  tabBarBreakpoint,
+  type TabBarItem,
+  type TabBarProps,
+} from "./tab-bar/tab-bar.tsx"
 export { type TabItem, Tabs, type TabsProps, type TabsVariant } from "./tabs/tabs.tsx"
 export { Text, type TextProps, type TextSize, type TextTag, type TextTone } from "./text/text.tsx"
 export { ThemeStyle, type ThemeStyleProps } from "./theme-style.tsx"

@@ -253,6 +253,23 @@ with no script. A facet with no options holds a form, so its list is a
 `dialog` named by the facet's label, which is what its trigger's
 `aria-haspopup` says it opens.
 
+### `TabBar`
+
+A phone's bottom navigation: the app's few destinations, each its mark over
+its name in an equal cell, the current one (`current`) on a pill, and an item
+that opens a sheet for the rest (`popoverTarget`, *More*). Links and one
+popover button, so it works with no script. A `badge` puts a count at the
+mark's top end (`attention` spends the accent, a zero draws nothing, past 99
+it reads `99+`) and a `dot` says something waits behind an item; both are
+read after the name. It draws below `tabBarBreakpoint` (48rem) only, the
+landmark leaving a wide screen whole for a sidebar's navigation.
+
+It draws the bar and nothing around it: where it stands (a sticky foot,
+padded above the home indicator with `env(safe-area-inset-bottom)`) is the
+frame's. A destination's own hue is `--ui-tabbar-mark-ink-current` set on
+its item, and a host that marks the pressed item `data-pending` while it
+navigates, and an ancestor `data-navigating`, moves the pill at once.
+
 ### `Tabs`
 
 Tabs as route links (interactivity.md, "Not in scope"): each tab an `<a>` to

@@ -31,6 +31,12 @@ const keywords = new Set([
   "bottom span-right",
   "flip-block, flip-inline",
   "background, border-color",
+  // The sheet's geometry on a narrow screen (`sheet.ts`): placement, not a look.
+  "fixed",
+  "auto 0",
+  "100%",
+  "contain",
+  "0 100%",
 ])
 
 /**
@@ -46,10 +52,13 @@ const offendersIn = (styles: string): string[] =>
 
     if (names.length === 0) return true
 
-    if (!names.every((name) => name.startsWith("ui-facet-"))) return true
+    if (!names.every((name) => name.startsWith("ui-facet-") || name.startsWith("ui-sheet-"))) {
+      return true
+    }
 
     const rest = value
       .replace(/var\(--[\w-]+\)/g, "")
+      .replace(/env\(safe-area-inset-bottom\)|dvh/g, "")
       .replace(/\b(opacity|translate|overlay|display|allow-discrete|calc)\b/g, "")
       .replace(/[()+\-*/\s,01]/g, "")
 
@@ -62,7 +71,7 @@ describe("FacetFilter", () => {
 
     expect(html).toContain('command="toggle-popover"')
     expect(html).toContain('commandfor="status"')
-    expect(html).toMatch(/<div id="status"[^>]*popover="auto"/)
+    expect(html).toMatch(/<div data-sheet="" id="status"[^>]*popover="auto"/)
   })
 
   it("anchors each list to its trigger by name, the toolbar sharing one surface block", async () => {
@@ -73,9 +82,9 @@ describe("FacetFilter", () => {
       </>,
     )
 
-    const surfaces = [...html.matchAll(/<div id="(status|state)"[^>]*class="([^"]+)"/g)].map(
-      (match) => match[2],
-    )
+    const surfaces = [
+      ...html.matchAll(/<div data-sheet="" id="(status|state)"[^>]*class="([^"]+)"/g),
+    ].map((match) => match[2])
 
     expect(html).toContain('style="anchor-name: --ui-facet-anchor-status"')
     expect(html).toContain('style="position-anchor: --ui-facet-anchor-state"')
@@ -155,7 +164,9 @@ describe("FacetFilter", () => {
     // A form, not a menu: the trigger says what it opens, and what it opens
     // is the dialog it promised, named for the facet.
     expect(html).toContain('aria-haspopup="dialog"')
-    expect(html).toMatch(/<div aria-label="Tag" id="tag"[^>]*popover="auto" role="dialog"/)
+    expect(html).toMatch(
+      /<div aria-label="Tag" data-sheet="" id="tag"[^>]*popover="auto" role="dialog"/,
+    )
   })
 
   it("leaves a list of options unnamed and roleless, the menu inside it being what it is", async () => {
@@ -163,8 +174,8 @@ describe("FacetFilter", () => {
       await renderToHtml(<FacetFilter label="Status" name="status" options={options} />),
     )
 
-    expect(html).toMatch(/<div id="status"[^>]*popover="auto"[^>]*>/)
-    expect(html.match(/<div id="status"[^>]*>/)?.[0]).not.toMatch(/role=|aria-label=/)
+    expect(html).toMatch(/<div data-sheet="" id="status"[^>]*popover="auto"[^>]*>/)
+    expect(html.match(/<div data-sheet="" id="status"[^>]*>/)?.[0]).not.toMatch(/role=|aria-label=/)
   })
 
   it("reads only its own tokens and structural keywords", async () => {

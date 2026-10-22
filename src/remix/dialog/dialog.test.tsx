@@ -30,7 +30,17 @@ const keywords = new Set([
   // transition", only for how long and with what easing, which the close
   // button already reads from --ui-dialog-transition-duration/-easing.
   "background, color",
+  // The sheet's geometry (`sheet.ts`): docked to the bottom edge, the
+  // screen's width, sliding its own height. Placement, not a look.
+  "fixed",
+  "auto 0",
+  "contain",
+  "0 100%",
 ])
+
+/** The overlays' shared sheet tokens are as much the panel's as its own. */
+const owned = (name: string): boolean =>
+  name.startsWith("ui-dialog-") || name.startsWith("ui-sheet-")
 
 /** Every var() a value names, so a calc() of two tokens reads as two. */
 const referencesOf = (value: string): string[] =>
@@ -53,9 +63,12 @@ const offendersIn = (styles: string): string[] =>
 
       if (references.length === 0) return true
 
-      if (!references.every((name) => name.startsWith("ui-dialog-"))) return true
+      if (!references.every(owned)) return true
 
-      const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/min|calc|[()+\-*/,\s%\d]/g, "")
+      const rest = value
+        .replace(/var\(--[\w-]+\)/g, "")
+        .replace(/env\(safe-area-inset-bottom\)|dvh/g, "")
+        .replace(/min|calc|[()+\-*/,\s%\d]/g, "")
 
       return rest !== ""
     })

@@ -77,6 +77,15 @@ leaves the top layer immediately, so **exit animations degrade in Safari while
 entry animations work**. Entry is the half users notice, so we take the split
 rather than hand-writing a JavaScript close sequence to paper over it.
 
+**A sheet slides, and only slides.** On a narrow screen an overlay becomes a
+sheet (`src/remix/sheet/sheet.ts`), which travels its own height from below
+over `--ui-sheet-transition-duration` (the base step, not the fast one: the
+same 120ms over a whole sheet's height reads as a jump) on the spring easing.
+It is opaque from its first frame, as a phone draws one; the entry's fade is
+the scrim's. The rules restate `translate` for the closed state, the open state
+and `@starting-style`, and come last in the component's block so they win the
+desktop entry by source order.
+
 **Degradation is silent by design.** An engine that does not know
 `@starting-style` ignores the block — the element appears with no entry
 animation and nothing breaks. No polyfill. This is also why `@starting-style`

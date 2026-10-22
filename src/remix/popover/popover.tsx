@@ -1,6 +1,7 @@
 import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { Button, type ButtonProps } from "../button/button.tsx"
 import { invoke } from "../invocation.ts"
+import { sheetMedia, sheetRules } from "../sheet/sheet.ts"
 
 const duration = "var(--ui-popover-transition-duration)"
 const timing = `${duration} var(--ui-popover-transition-easing)`
@@ -27,8 +28,12 @@ const offset = "0 calc(var(--ui-popover-enter-offset) * -1)"
  * (`position: fixed; inset: 0; margin: auto`), which is already the
  * "centered popover" degradation the M2 plan calls for, so there is nothing
  * else to write for that path.
+ *
+ * A sheet's rules come last, after the anchor's, so under `sheetBreakpoint`
+ * they win the placement by source order: docked to the bottom edge instead
+ * of hanging off the trigger.
  */
-const surfaceStyle = (anchorName: string) =>
+const surfaceStyle = (anchorName: string, sheet: boolean) =>
   css({
     maxInlineSize:
       "min(var(--ui-popover-max-inline-size), calc(100% - var(--ui-popover-anchor-gap) * 2))",
@@ -60,6 +65,7 @@ const surfaceStyle = (anchorName: string) =>
       positionArea: "var(--ui-popover-position-area)",
       margin: "var(--ui-popover-anchor-gap) 0 0 0",
     },
+    ...(sheet ? { [sheetMedia]: sheetRules("&:popover-open", "var(--ui-popover-pad)") } : {}),
   })
 
 /** Sets the anchor the surface positions against. Inert without anchor support. */
@@ -73,6 +79,16 @@ export type PopoverTriggerProps = Omit<ButtonProps, "invoke">
 export interface PopoverSurfaceProps {
   mix?: MixInput<HTMLElement> | undefined
   children?: RemixNode | undefined
+}
+
+export interface PopoverOptions {
+  /**
+   * Becomes a sheet on a narrow screen: docked to the bottom edge, the
+   * screen's width, rather than hanging off its trigger. For a list a thumb
+   * chooses from — a menu, a set of choices — not for a note that reads
+   * best beside what it is about.
+   */
+  readonly sheet?: boolean | undefined
 }
 
 export interface Popover {
@@ -97,8 +113,9 @@ export interface Popover {
  * no sanitising, so two popovers sharing a name is a duplicate-id bug rather
  * than a silently rewritten one.
  */
-export function popover(name: string): Popover {
+export function popover(name: string, options: PopoverOptions = {}): Popover {
   const toggle = invoke("toggle-popover", name)
+  const sheet = options.sheet === true
   const anchorName = `--ui-popover-anchor-${name}`
 
   function Trigger(handle: Handle<PopoverTriggerProps>) {
@@ -112,7 +129,12 @@ export function popover(name: string): Popover {
       const { mix, children } = handle.props
 
       return (
-        <div id={name} mix={[surfaceStyle(anchorName), mix]} popover="auto">
+        <div
+          data-sheet={sheet ? "" : undefined}
+          id={name}
+          mix={[surfaceStyle(anchorName, sheet), mix]}
+          popover="auto"
+        >
           {children}
         </div>
       )

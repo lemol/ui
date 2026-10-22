@@ -17,6 +17,7 @@ import { paginationTokens } from "./pagination/tokens.ts"
 import { popoverTokens } from "./popover/tokens.ts"
 import { radioTokens } from "./radio/tokens.ts"
 import { segmentedControlTokens } from "./segmented-control/tokens.ts"
+import { sheetTokens } from "./sheet/tokens.ts"
 import { skeletonTokens } from "./skeleton/tokens.ts"
 import { spinnerTokens } from "./spinner/tokens.ts"
 import { switchTokens } from "./switch/tokens.ts"
@@ -52,6 +53,7 @@ export const componentTokens = {
   ...popoverTokens,
   ...radioTokens,
   ...segmentedControlTokens,
+  ...sheetTokens,
   ...skeletonTokens,
   ...spinnerTokens,
   ...switchTokens,

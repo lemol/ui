@@ -92,7 +92,8 @@ export interface Menu {
  * ```
  */
 export function menu(name: string): Menu {
-  const base = popover(name)
+  // A menu is a list a thumb chooses from: a sheet on a narrow screen.
+  const base = popover(name, { sheet: true })
 
   function List(handle: Handle<MenuListProps>) {
     return () => {

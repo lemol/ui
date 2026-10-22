@@ -102,6 +102,7 @@ describe("the component token aggregate", () => {
       "ui-popover",
       "ui-radio",
       "ui-segmented",
+      "ui-sheet",
       "ui-skeleton",
       "ui-spinner",
       "ui-switch",

@@ -299,6 +299,8 @@ properties into `::backdrop`.
 
 Twenty-two tokens in `dialog/tokens.ts`.
 
+Under `sheetBreakpoint` (40rem) the panel is a sheet: see *Sheets* below.
+
 `overlay` is also published alone, as `@lemol/ui/remix/overlay`, for a client
 entry. The browser loads every module a client entry imports and nothing
 tree-shakes the source, so a trigger that took `overlay` from the barrel put
@@ -326,6 +328,10 @@ for a surface that should open toward its trigger's start or end edge; the
 trigger is a `Button` and reads
 `--ui-btn-*`, not a parallel set.
 
+`popover(name, { sheet: true })` mints a surface that becomes a sheet on a
+narrow screen, for a list a thumb chooses from; without it a popover stays
+beside its trigger at every width, as a note about something should.
+
 ### `Menu` and `menu()`
 
 A `Popover` with `role="menu"` and rows of `role="menuitem"` — checked against
@@ -340,6 +346,32 @@ the runtime absent; there is no roving-tabindex or typeahead enhancement.
 `MenuSeparator` is an `<hr>` — its role is implicit, so none is written.
 
 Eleven tokens in `menu/tokens.ts`; the surface itself reads `--ui-popover-*`.
+A menu is minted `{ sheet: true }`: on a narrow screen it is an action sheet.
+
+### Sheets
+
+On a screen narrower than `sheetBreakpoint` (40rem, exported), an overlay a
+thumb works through — `Dialog`, `Menu`, a `popover(name, { sheet: true })`,
+`FacetFilter`'s list — is a sheet: docked to the bottom edge at the screen's
+width, its top corners rounded, its foot clear of the home indicator
+(`env(safe-area-inset-bottom)`), sliding its own height in over the base
+duration rather than fading under its trigger. The page above it stays in
+sight behind the scrim, and a tap there, Escape, or a phone's back gesture
+closes it, all the platform's own light dismiss. Each surface carries
+`data-sheet`, so an app can close what is open when it navigates.
+
+`sheet/sheet.ts` holds the rules, spread into each component's own block after
+its anchor positioning so they win by source order; five tokens in
+`sheet/tokens.ts`, shared by every sheet.
+
+### `Shortcut`
+
+A keyboard shortcut's hint: `keys={["⌘", "↵"]}` draws one `Kbd` cap per key,
+and the whole hint is gone where the primary pointer cannot hover — a touch
+screen, with no keyboard to press it on. It is `aria-hidden`: name the
+shortcut on the control it triggers with `aria-keyshortcuts`, which a screen
+reader announces with the control. No tokens of its own; the caps read
+`--ui-kbd-*`.
 
 ### `Disclosure` and `Accordion`
 

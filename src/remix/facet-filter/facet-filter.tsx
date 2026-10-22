@@ -1,5 +1,6 @@
 import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { invoke } from "../invocation.ts"
+import { sheetMedia, sheetRules } from "../sheet/sheet.ts"
 
 /**
  * One facet of a filtered collection, as a data table's toolbar draws it: a
@@ -115,6 +116,8 @@ const surfaceStyle = css({
     positionTryFallbacks: "flip-block, flip-inline",
     margin: "var(--ui-facet-surface-offset) 0 0 0",
   },
+  // The choices are a list a thumb picks from: a sheet on a narrow screen.
+  [sheetMedia]: sheetRules("&:popover-open", "var(--ui-facet-surface-pad)"),
 })
 
 const optionStyle = css({
@@ -295,6 +298,7 @@ export function FacetFilter(handle: Handle<FacetFilterProps>) {
         </button>
         <div
           aria-label={form ? label : undefined}
+          data-sheet=""
           id={name}
           mix={surfaceStyle}
           popover="auto"

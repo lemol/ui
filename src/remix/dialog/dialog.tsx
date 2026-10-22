@@ -1,6 +1,7 @@
 import { css, type Handle, type MixInput, type RemixNode } from "remix/component"
 import { Heading } from "../heading/heading.tsx"
 import type { Invocation } from "../invocation.ts"
+import { sheetMedia, sheetRules } from "../sheet/sheet.ts"
 
 const duration = "var(--ui-dialog-transition-duration)"
 const timing = `${duration} var(--ui-dialog-transition-easing)`
@@ -33,6 +34,10 @@ const offset = "0 calc(var(--ui-dialog-enter-offset) * -1)"
  * `overlay` is not Baseline and is absent in Safari, so the exit animation
  * degrades there while the entry animation works. That is accepted rather than
  * replaced with a JavaScript close sequence.
+ *
+ * Under `sheetBreakpoint` the panel is a sheet: docked to the bottom edge,
+ * the screen's width, sliding up (`sheet.ts`). Last in the block, so it wins
+ * the panel's own size and entry by source order.
  */
 const panelStyle = css({
   maxInlineSize: "min(var(--ui-dialog-max-inline-size), calc(100% - var(--ui-dialog-inset) * 2))",
@@ -71,6 +76,7 @@ const panelStyle = css({
     "&[open]": { opacity: 0, translate: offset },
     "&[open]::backdrop": { opacity: 0 },
   },
+  [sheetMedia]: sheetRules("&[open]", "var(--ui-dialog-pad)"),
 })
 
 const headerStyle = css({
@@ -146,7 +152,7 @@ export function DialogPanel(handle: Handle<DialogPanelProps>) {
     const titleId = `${id}-title`
 
     return (
-      <dialog aria-labelledby={titleId} id={id} mix={[panelStyle, mix]}>
+      <dialog aria-labelledby={titleId} data-sheet="" id={id} mix={[panelStyle, mix]}>
         <header mix={headerStyle}>
           <Heading id={titleId} level={2}>
             {title}

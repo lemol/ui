@@ -91,12 +91,14 @@ export {
 } from "./popover/popover.tsx"
 export { Radio, type RadioProps } from "./radio/radio.tsx"
 export { type Justify, Row, type RowProps } from "./row/row.tsx"
+export { sheetBreakpoint } from "./sheet/sheet.ts"
 export { SchemeToggle, type SchemeToggleProps } from "./scheme-toggle/scheme-toggle.tsx"
 export {
   SegmentedControl,
   type SegmentedControlOption,
   type SegmentedControlProps,
 } from "./segmented-control/segmented-control.tsx"
+export { Shortcut, type ShortcutProps } from "./shortcut/shortcut.tsx"
 export { Skeleton, type SkeletonProps } from "./skeleton/skeleton.tsx"
 export type { SpaceStep } from "./space.ts"
 export { Spinner, type SpinnerProps } from "./spinner/spinner.tsx"

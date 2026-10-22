@@ -24,6 +24,7 @@ import { RadioDemo } from "./radio/radio.demo.tsx"
 import { RowDemo } from "./row/row.demo.tsx"
 import { SchemeToggleDemo } from "./scheme-toggle/scheme-toggle.demo.tsx"
 import { SegmentedControlDemo } from "./segmented-control/segmented-control.demo.tsx"
+import { ShortcutDemo } from "./shortcut/shortcut.demo.tsx"
 import { SkeletonDemo } from "./skeleton/skeleton.demo.tsx"
 import { SpinnerDemo } from "./spinner/spinner.demo.tsx"
 import { StackDemo } from "./stack/stack.demo.tsx"
@@ -65,6 +66,7 @@ export const demos = {
   row: { title: "Row", Demo: RowDemo },
   schemeToggle: { title: "SchemeToggle", Demo: SchemeToggleDemo },
   segmentedControl: { title: "SegmentedControl", Demo: SegmentedControlDemo },
+  shortcut: { title: "Shortcut", Demo: ShortcutDemo },
   skeleton: { title: "Skeleton", Demo: SkeletonDemo },
   spinner: { title: "Spinner", Demo: SpinnerDemo },
   stack: { title: "Stack", Demo: StackDemo },

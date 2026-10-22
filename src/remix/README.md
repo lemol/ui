@@ -434,7 +434,20 @@ Density reads `--row-pad-y` through `ui-table-cell-pad-y` rather than an
 explicit row height, which table layout does not reliably respect across
 engines.
 
-Twelve tokens in `table/tokens.ts`.
+`list` draws the table as a phone's list below `tableListBreakpoint`
+(48rem): no column heads (still read), each row its mark, its body and what
+trails it, by each `TableCell`'s `place` (`lead`, `body`, the default,
+`trail`, dim and small at the row's end, or `hide`), and the whole row the
+target of the link marked `data-table-link`, which stretches over it while
+the row's other controls stay pressable. Rows, not columns: a column a phone
+cannot fit is one it cannot read either. A browser drops a table's roles
+with its table layout, so a list writes them out. A host that draws its own
+table markup spreads `tableListRules` into its table's one `css()` block
+under `tableListMedia` (or its own frame's width): the table marked
+`data-table-list`, its cells `data-table-place`, and a group's head row the
+one whose cell is `scope="rowgroup"`.
+
+Eighteen tokens in `table/tokens.ts`.
 
 ### `Toaster` and `toast()`
 

@@ -125,6 +125,12 @@ export {
   type TableRowProps,
 } from "./table/table.tsx"
 export {
+  type TableCellPlace,
+  tableListBreakpoint,
+  tableListMedia,
+  tableListRules,
+} from "./table/list.ts"
+export {
   TabBar,
   type TabBarBadge,
   tabBarBreakpoint,

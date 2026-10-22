@@ -59,6 +59,29 @@ export function TableDemo() {
           ))}
         </TableBody>
       </Table>
+      <p mix={label}>table as a list: below 48rem, each row a phone's, the whole row its link</p>
+      <Table list>
+        <TableHead>
+          <TableRow>
+            <TableHeaderCell>Role</TableHeaderCell>
+            <TableHeaderCell>Name</TableHeaderCell>
+            <TableHeaderCell>Email</TableHeaderCell>
+          </TableRow>
+        </TableHead>
+        <TableBody>
+          {rows.map((row) => (
+            <TableRow key={row.email}>
+              <TableCell place="trail">{row.role}</TableCell>
+              <TableCell>
+                <a data-table-link="" href={`#${row.name.toLowerCase()}`}>
+                  {row.name}
+                </a>
+              </TableCell>
+              <TableCell>{row.email}</TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </>
   )
 }

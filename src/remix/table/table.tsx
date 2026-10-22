@@ -1,10 +1,12 @@
 import { type Handle, type MixInput, type RemixNode } from "remix/component"
 import { css } from "../css.ts"
+import { type TableCellPlace, tableListMedia, tableListParts } from "./list.ts"
 
 const tableStyle = css({
   width: "100%",
   borderCollapse: "collapse",
   fontSize: "var(--ui-table-font-size)",
+  [tableListMedia]: tableListParts.table,
 })
 
 const headCellStyle = css({
@@ -21,6 +23,7 @@ const headCellStyle = css({
 
 const rowStyle = css({
   "&:hover": { background: "var(--ui-table-row-bg-hover)" },
+  [tableListMedia]: tableListParts.row,
 })
 
 const cellStyle = css({
@@ -30,6 +33,7 @@ const cellStyle = css({
   borderBlockEndStyle: "solid",
   borderBlockEndWidth: "var(--ui-table-border-width)",
   borderBlockEndColor: "var(--ui-table-border)",
+  [tableListMedia]: tableListParts.cell,
 })
 
 const sortLinkStyle = css({
@@ -47,15 +51,44 @@ const sortIndicatorStyle = css({
 })
 
 export interface TableProps {
+  /**
+   * Below `tableListBreakpoint`, draw as a phone's list: no column heads
+   * (still read), each row its `lead`, its body and what trails it (a
+   * cell's `place`), the whole row the target of the link marked
+   * `data-table-link`. The table's roles are written out, which a browser
+   * drops with the table's own layout.
+   */
+  list?: boolean | undefined
   mix?: MixInput<HTMLTableElement> | undefined
   children?: RemixNode | undefined
 }
 
-export function Table(handle: Handle<TableProps>) {
-  return () => {
-    const { mix, children } = handle.props
+interface TableContext {
+  readonly list: boolean
+}
 
-    return <table mix={[tableStyle, mix]}>{children}</table>
+/** A role for an element of a list, whose layout no longer gives it one. */
+const roleIn = <Props,>(
+  handle: Handle<Props>,
+  role: "rowgroup" | "row" | "columnheader" | "cell",
+): typeof role | undefined =>
+  (handle.context.get(Table) as TableContext | undefined)?.list === true ? role : undefined
+
+export function Table(handle: Handle<TableProps, TableContext>) {
+  return () => {
+    const { list, mix, children } = handle.props
+
+    handle.context.set({ list: list === true })
+
+    return (
+      <table
+        data-table-list={list === true ? "" : undefined}
+        mix={[tableStyle, mix]}
+        role={list === true ? "table" : undefined}
+      >
+        {children}
+      </table>
+    )
   }
 }
 
@@ -64,7 +97,7 @@ export interface TableHeadProps {
 }
 
 export function TableHead(handle: Handle<TableHeadProps>) {
-  return () => <thead>{handle.props.children}</thead>
+  return () => <thead role={roleIn(handle, "rowgroup")}>{handle.props.children}</thead>
 }
 
 export interface TableBodyProps {
@@ -72,7 +105,7 @@ export interface TableBodyProps {
 }
 
 export function TableBody(handle: Handle<TableBodyProps>) {
-  return () => <tbody>{handle.props.children}</tbody>
+  return () => <tbody role={roleIn(handle, "rowgroup")}>{handle.props.children}</tbody>
 }
 
 export interface TableRowProps {
@@ -84,7 +117,11 @@ export function TableRow(handle: Handle<TableRowProps>) {
   return () => {
     const { mix, children } = handle.props
 
-    return <tr mix={[rowStyle, mix]}>{children}</tr>
+    return (
+      <tr mix={[rowStyle, mix]} role={roleIn(handle, "row")}>
+        {children}
+      </tr>
+    )
   }
 }
 
@@ -99,7 +136,7 @@ export function TableHeaderCell(handle: Handle<TableHeaderCellProps>) {
     const { mix, children } = handle.props
 
     return (
-      <th mix={[headCellStyle, mix]} scope="col">
+      <th mix={[headCellStyle, mix]} role={roleIn(handle, "columnheader")} scope="col">
         {children}
       </th>
     )
@@ -107,15 +144,21 @@ export function TableHeaderCell(handle: Handle<TableHeaderCellProps>) {
 }
 
 export interface TableCellProps {
+  /** Where the cell goes in a list's row (`Table`'s `list`); unset, its body. */
+  place?: TableCellPlace | undefined
   mix?: MixInput<HTMLTableCellElement> | undefined
   children?: RemixNode | undefined
 }
 
 export function TableCell(handle: Handle<TableCellProps>) {
   return () => {
-    const { mix, children } = handle.props
+    const { place, mix, children } = handle.props
 
-    return <td mix={[cellStyle, mix]}>{children}</td>
+    return (
+      <td data-table-place={place} mix={[cellStyle, mix]} role={roleIn(handle, "cell")}>
+        {children}
+      </td>
+    )
   }
 }
 
@@ -172,7 +215,12 @@ export function SortableColumnHeader(handle: Handle<SortableColumnHeaderProps>) 
       direction === undefined ? undefined : direction === "asc" ? "ascending" : "descending"
 
     return (
-      <th aria-sort={ariaSort} mix={[headCellStyle, mix]} scope="col">
+      <th
+        aria-sort={ariaSort}
+        mix={[headCellStyle, mix]}
+        role={roleIn(handle, "columnheader")}
+        scope="col"
+      >
         <a href={sortHrefFor(location, field)} mix={sortLinkStyle}>
           {children}
           {direction !== undefined && (

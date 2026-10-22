@@ -17,6 +17,7 @@ const threeAxes = defineTheme({
   base: fullBase(),
   dark: { canvas: "dark-canvas" },
   compact: { "row-h": "compact-row" },
+  touch: { "control-h": "touch-control" },
 })
 
 const sheet = emitTokensCss(threeAxes)
@@ -35,7 +36,8 @@ describe("the sheet", () => {
     expect(at("@media (prefers-color-scheme: dark)")).toBeGreaterThan(at(":root {"))
     expect(at(':root[data-scheme="dark"]')).toBeGreaterThan(at("@media (prefers-color-scheme"))
     expect(at(':root[data-density="compact"]')).toBeGreaterThan(at(':root[data-scheme="dark"]'))
-    expect(at("@layer base {")).toBeGreaterThan(at(':root[data-density="compact"]'))
+    expect(at("@media (pointer: coarse)")).toBeGreaterThan(at(':root[data-density="compact"]'))
+    expect(at("@layer base {")).toBeGreaterThan(at("@media (pointer: coarse)"))
     expect(at("[hidden] {")).toBeGreaterThan(at("@layer base {"))
     expect(at("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(at("[hidden] {"))
   })
@@ -45,6 +47,14 @@ describe("the sheet", () => {
       '@media (prefers-color-scheme: dark) {\n  :root:not([data-scheme="light"]) {\n',
     )
     expect(sheet).toContain(':root[data-scheme="dark"] {\n  --canvas: dark-canvas;\n}')
+  })
+
+  it("lets a coarse pointer beat the compact density", () => {
+    // `:root[data-density]` ties `:root[data-density="compact"]` and comes
+    // later, so a finger keeps its target size on a compact page.
+    expect(sheet).toContain(
+      "@media (pointer: coarse) {\n  :root, :root[data-density] {\n    --control-h: touch-control;\n  }\n}",
+    )
   })
 
   it("declares primitives in schema order", () => {

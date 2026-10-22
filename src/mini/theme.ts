@@ -198,6 +198,17 @@ const compactPrimitives: Partial<PrimitiveTokens> = {
 }
 
 /**
+ * A finger's targets: the platform's 44px minimum for a control, and a row a
+ * thumb can pick out of a list. Applied wherever the primary pointer is
+ * coarse, after `compact`, which it beats.
+ */
+const touchPrimitives: Partial<PrimitiveTokens> = {
+  "control-h": "44px",
+  "control-h-sm": "40px",
+  "row-h": "48px",
+}
+
+/**
  * One concrete design on @lemol/ui/remix.
  *
  * The type argument is the cross-package wiring, and `mini` is where it can
@@ -222,4 +233,9 @@ export const miniTheme = defineTheme<ComponentTokenName>({
   },
   dark: darkPrimitives,
   compact: compactPrimitives,
+  touch: {
+    ...touchPrimitives,
+    // Under 16px iOS Safari zooms the page into a field it focuses.
+    "ui-field-font-size": "1rem",
+  },
 })

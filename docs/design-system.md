@@ -144,7 +144,7 @@ typed against the union of every primitive name, so prefer it over writing
 
 ## Themes and variants
 
-The engine knows exactly two variant axes.
+The engine knows exactly three variant axes: scheme, density, and touch.
 
 ```ts
 export const miniTheme = defineTheme({
@@ -158,6 +158,7 @@ export const miniTheme = defineTheme({
     canvas: "#191919", surface: "#242424", ink: "#F4F4F0", hairline: "#3A3A3A",
   },
   compact: { "control-h": "28px", "row-h": "32px" },
+  touch: { "control-h": "44px", "control-h-sm": "40px", "ui-field-font-size": "1rem" },
 })
 ```
 
@@ -173,6 +174,9 @@ Which emits:
 }
 :root[data-scheme="dark"]     { --canvas: #191919; … }
 :root[data-density="compact"] { --control-h: 28px; … }
+@media (pointer: coarse) {
+  :root, :root[data-density] { --control-h: 44px; … }
+}
 ```
 
 - **Scheme.** `dark` is optional. A theme omitting it is single-scheme. The
@@ -181,13 +185,20 @@ Which emits:
 - **Density.** A four-token swap — `--control-h`, `--control-h-sm`, `--row-h`,
   `--row-pad-y`. Every control and table row reads those, so one attribute
   retunes the whole app without a single component knowing density exists.
+- **Touch.** The one axis no attribute chooses: it applies wherever the
+  primary pointer is coarse, so a control grows to the size a finger needs
+  without a phone and a desktop sharing one compromise. Its selector,
+  `:root, :root[data-density]`, ties compact's specificity and comes after it,
+  so a target a finger cannot hit is never the price of a dense page. It is
+  also where a field's text goes to 16px (`ui-field-font-size: 1rem`), under
+  which iOS Safari zooms the page into the field it focuses.
 - **`scheme-mode`** is the value `color-scheme` takes; the reset reads it as
   `color-scheme: var(--scheme-mode)`. A theme with a `dark` axis must set it in
   both, or the page pairs dark colours with light form controls and scrollbars.
   The emitter cannot infer it — a dark-only theme has no `dark` axis to infer
   from — which is why it is a token rather than a rule.
 
-A third axis (contrast, brand) waits until something needs one. A general
+A fourth axis (contrast, brand) waits until something needs one. A general
 named-modes mechanism was rejected: it would require designing a
 selector-precedence story for combinations that do not yet exist.
 

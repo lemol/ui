@@ -5,11 +5,12 @@ import { type PrimitiveTokens, primitiveNames } from "./tokens.ts"
 const base = Object.fromEntries(primitiveNames.map((name) => [name, "initial"])) as PrimitiveTokens
 
 describe("defineTheme", () => {
-  it("leaves dark and compact undefined when they are omitted", () => {
+  it("leaves dark, compact and touch undefined when they are omitted", () => {
     const theme = defineTheme({ base })
 
     expect(theme.dark).toBeUndefined()
     expect(theme.compact).toBeUndefined()
+    expect(theme.touch).toBeUndefined()
   })
 
   it("freezes every axis it returns", () => {
@@ -37,6 +38,15 @@ describe("extendTheme", () => {
 
     expect(next.dark?.canvas).toBe("#191919")
     expect(next.compact?.["row-h"]).toBe("32px")
+  })
+
+  it("merges the touch axis like any other", () => {
+    const theme = defineTheme({ base, touch: { "control-h": "44px" } })
+    const next = extendTheme(theme, { touch: { "row-h": "48px" } })
+
+    expect(next.touch?.["control-h"]).toBe("44px")
+    expect(next.touch?.["row-h"]).toBe("48px")
+    expect(Object.isFrozen(next.touch)).toBe(true)
   })
 
   it("adds an axis the original theme did not have", () => {

@@ -91,7 +91,13 @@ function problemsIn(where: string, entries: Entries): string[] {
  * catches both a misspelled primitive and a component token written with its
  * leading dashes.
  */
-function validate(componentTokens: Entries, base: Entries, dark: Entries, compact: Entries): void {
+function validate(
+  componentTokens: Entries,
+  base: Entries,
+  dark: Entries,
+  compact: Entries,
+  touch: Entries,
+): void {
   const declared = new Set(base.map(([name]) => name))
   const missing = primitiveNames.filter((name) => !declared.has(name))
   const problems = [
@@ -102,6 +108,7 @@ function validate(componentTokens: Entries, base: Entries, dark: Entries, compac
     ...problemsIn("theme.base", base),
     ...problemsIn("theme.dark", dark),
     ...problemsIn("theme.compact", compact),
+    ...problemsIn("theme.touch", touch),
   ]
 
   if (problems.length > 0) {
@@ -111,7 +118,7 @@ function validate(componentTokens: Entries, base: Entries, dark: Entries, compac
 
 /**
  * The whole stylesheet as text: the layer statement, the token blocks for each
- * variant axis the theme has, the element defaults, the one unlayered rule, and
+ * variant axis the theme has (scheme, density, then touch), the element defaults, the one unlayered rule, and
  * the reduced-motion reset.
  *
  * It returns a string and never a component, which is what keeps this package
@@ -129,8 +136,9 @@ export function emitTokensCss<C extends string = never>(
   const base = entriesOf(theme.base)
   const dark = entriesOf(theme.dark ?? {})
   const compact = entriesOf(theme.compact ?? {})
+  const touch = entriesOf(theme.touch ?? {})
 
-  validate(componentTokens, base, dark, compact)
+  validate(componentTokens, base, dark, compact, touch)
 
   const parts = [layerStatement, rootRule(componentTokens, base)]
 
@@ -144,6 +152,13 @@ export function emitTokensCss<C extends string = never>(
   }
 
   if (compact.length > 0) parts.push(rule(':root[data-density="compact"]', compact))
+
+  // A coarse pointer beats density: `:root[data-density]` ties the compact
+  // block's specificity and comes after it, and the bare `:root` covers a
+  // document that chose none.
+  if (touch.length > 0) {
+    parts.push(mediaRule("(pointer: coarse)", ":root, :root[data-density]", touch))
+  }
 
   parts.push(resetCss, unlayeredCss, reducedMotionCss)
 

@@ -38,7 +38,8 @@ export const sheetRules = (open: string, pad: string): Styles => ({
   margin: "0",
   inlineSize: "100%",
   maxInlineSize: "100%",
-  maxBlockSize: "calc(100dvh - var(--ui-sheet-inset))",
+  // Clear of a notch or a status bar drawn over the page, as well as its inset.
+  maxBlockSize: "calc(100dvh - var(--ui-sheet-inset) - env(safe-area-inset-top))",
   overflow: "auto",
   overscrollBehavior: "contain",
   positionArea: "none",

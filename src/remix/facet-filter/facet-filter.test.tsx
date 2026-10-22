@@ -58,7 +58,7 @@ const offendersIn = (styles: string): string[] =>
 
     const rest = value
       .replace(/var\(--[\w-]+\)/g, "")
-      .replace(/env\(safe-area-inset-bottom\)|dvh/g, "")
+      .replace(/env\(safe-area-inset-(?:top|bottom)\)|dvh/g, "")
       .replace(/\b(opacity|translate|overlay|display|allow-discrete|calc)\b/g, "")
       .replace(/[()+\-*/\s,01]/g, "")
 

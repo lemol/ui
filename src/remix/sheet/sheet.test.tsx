@@ -21,6 +21,9 @@ describe("the sheet", () => {
     expect(styles).toContain("inset-block: auto 0")
     expect(styles).toContain("inline-size: 100%")
     expect(styles).toContain("padding-block-end: calc(var(--sp-4) + env(safe-area-inset-bottom))")
+    expect(styles).toContain(
+      "max-block-size: calc(100dvh - var(--ui-sheet-inset) - env(safe-area-inset-top))",
+    )
   })
 
   it("slides its own height in from below, open state and entry both", async () => {

@@ -67,7 +67,7 @@ const offendersIn = (styles: string): string[] =>
 
       const rest = value
         .replace(/var\(--[\w-]+\)/g, "")
-        .replace(/env\(safe-area-inset-bottom\)|dvh/g, "")
+        .replace(/env\(safe-area-inset-(?:top|bottom)\)|dvh/g, "")
         .replace(/min|calc|[()+\-*/,\s%\d]/g, "")
 
       return rest !== ""

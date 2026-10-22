@@ -1,5 +1,7 @@
 export type { HeadingLevel } from "../design/index.ts"
 export type { Align } from "./align.ts"
+export { appBarBreakpoint, appBarMedia, appBarParts, type AppBarSlot } from "./app-bar/app-bar.ts"
+export { AppBar, type AppBarBack, type AppBarProps } from "./app-bar/app-bar.tsx"
 export { Badge, type BadgeProps, type BadgeTone } from "./badge/badge.tsx"
 export {
   type BreadcrumbItem,

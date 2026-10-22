@@ -1,3 +1,4 @@
+import { AppBarDemo } from "./app-bar/app-bar.demo.tsx"
 import { BadgeDemo } from "./badge/badge.demo.tsx"
 import { BreadcrumbsDemo } from "./breadcrumbs/breadcrumbs.demo.tsx"
 import { ButtonDemo } from "./button/button.demo.tsx"
@@ -41,6 +42,7 @@ import { ToasterDemo } from "./toaster/toaster.demo.tsx"
  * from anything but its own source.
  */
 export const demos = {
+  appBar: { title: "AppBar", Demo: AppBarDemo },
   badge: { title: "Badge", Demo: BadgeDemo },
   breadcrumbs: { title: "Breadcrumbs", Demo: BreadcrumbsDemo },
   button: { title: "Button", Demo: ButtonDemo },

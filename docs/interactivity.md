@@ -35,6 +35,7 @@ adds it as a peer dependency, to the boundary allow-list and to each app's
 | Inputs, select, checkbox, radio, validation | native controls + constraint validation | none |
 | Tabs | route links with `aria-current` — these are server-rendered apps | none |
 | Tab bar | route links with `aria-current`, and a `popovertarget` button for *More* | none |
+| App bar | a link one level up, the rest the page's own controls | none |
 | Menu keyboard model | `@remix-run/ui/menu` over a native popover | on hydration |
 | Combobox | `@remix-run/ui/combobox` over a native `<select>` | on hydration |
 

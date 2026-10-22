@@ -1,3 +1,4 @@
+import { appBarTokens } from "./app-bar/tokens.ts"
 import { badgeTokens } from "./badge/tokens.ts"
 import { breadcrumbsTokens } from "./breadcrumbs/tokens.ts"
 import { buttonTokens } from "./button/tokens.ts"
@@ -35,6 +36,7 @@ import { toastTokens } from "./toaster/tokens.ts"
  * a component means adding its record here and nowhere else.
  */
 export const componentTokens = {
+  ...appBarTokens,
   ...badgeTokens,
   ...breadcrumbsTokens,
   ...buttonTokens,

@@ -291,6 +291,27 @@ row of hints without breaking the line, with a heavier lower edge a skin can
 retune. One key per cap; a chord is caps side by side. Eleven tokens in
 `kbd/tokens.ts`.
 
+### `AppBar`
+
+A record's head: the way back (`back`, required, since a pushed screen
+always has one: a link one level up, never the browser's history), the title
+as the page's `h1` over one dim `subtitle` (where the record sits), what it
+is doing (`status`), the controls for what the page shows (`controls`, a view
+switch) and its `actions` (a `⋯` menu). On a wide screen one row; below
+`appBarBreakpoint` (48rem, where a `TabBar` draws) a phone's app bar: back
+and the actions either side of the title over its subtitle, the status and
+controls on a row of their own, clear of a notch or a status bar drawn over
+the page. It sticks over the page on the page's own ground. The title takes
+two lines at most, the whole in its `title` attribute.
+
+A host that marks an ancestor `data-app-bar-stuck` while the bar sticks
+folds its second row and the title's second line away, and keeps the room
+they gave up below the bar so the page does not jump; one that marks nothing
+keeps both. A host that draws its own head, with motion of its own, spreads
+`appBarParts(stuck)` into its elements' own blocks under `appBarMedia`:
+`bar`, `row`, `back`, `title`, `subtitle` and `slot(area)`, where `stuck` is
+its own mark's selector.
+
 ### `Badge`
 
 A status pill: a `<span>` laid out `inline-flex`, so it sits in a sentence or

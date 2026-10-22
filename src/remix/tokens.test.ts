@@ -83,6 +83,7 @@ describe("the component token aggregate", () => {
     const prefixes = new Set(entries.map(([name]) => name.split("-").slice(0, 2).join("-")))
 
     expect([...prefixes].sort()).toEqual([
+      "ui-appbar",
       "ui-badge",
       "ui-breadcrumbs",
       "ui-btn",

@@ -45,7 +45,7 @@ test("installs from Git, then renders a component and emits a theme", () => {
         type: "module",
         dependencies: {
           "@lemol/ui": `git+file://${remote}#ui@0.1.0`,
-          remix: "3.0.0",
+          remix: "3.1.0",
         },
         scripts: { contract: "bun contract.tsx" },
       },

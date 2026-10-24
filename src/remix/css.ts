@@ -10,14 +10,23 @@ type Styles = Parameters<typeof remixCss>[0]
  * Recording runs on the server only, and only while the library's modules
  * evaluate: it stops at the first timer after this module loads. A style
  * built during a render, on a server that runs for days, is never kept.
+ *
+ * workerd throws on a timer armed at module scope, so there it stops at the
+ * first microtask instead, once the synchronous module graph has evaluated.
  */
 const declared: Array<Styles> = []
 let recording = typeof document === "undefined"
 
+const stopRecording = () => {
+  recording = false
+}
+
 if (recording) {
-  setTimeout(() => {
-    recording = false
-  }, 0)
+  try {
+    setTimeout(stopRecording, 0)
+  } catch {
+    queueMicrotask(stopRecording)
+  }
 }
 
 export const css: typeof remixCss = (...args) => {

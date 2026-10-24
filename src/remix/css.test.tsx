@@ -54,4 +54,28 @@ describe("componentStyles", () => {
 
     expect(componentStyles().length).toBe(before)
   })
+
+  // workerd throws on a timer armed at module scope, and a Worker that renders
+  // these components must still load. The query asks Bun for a fresh copy.
+  it("still loads, and still stops recording, where module scope may arm no timer", async () => {
+    const setTimer = globalThis.setTimeout
+    const path = "./css.ts?timers-refused"
+
+    globalThis.setTimeout = (() => {
+      throw new Error("Disallowed operation called within global scope")
+    }) as unknown as typeof setTimeout
+
+    let fresh: typeof import("./css.ts")
+
+    try {
+      fresh = await import(path)
+    } finally {
+      globalThis.setTimeout = setTimer
+    }
+
+    await Promise.resolve()
+    fresh.css({ color: "var(--ui-test-only)" })
+
+    expect(fresh.componentStyles()).toEqual([])
+  })
 })

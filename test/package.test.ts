@@ -51,6 +51,23 @@ describe("@lemol/ui", () => {
     }
   })
 
+  // A consumer that bundles, like todo-md's CLI, compiles this TSX itself.
+  // Bun.build resolves the classic createElement fallback (a spread before
+  // `key`) from "react" whatever the jsxImportSource, so that shape fails only
+  // in someone else's build.
+  test("bundles every exported subpath without reaching for react", async () => {
+    for (const target of Object.values((await manifest()).exports ?? {})) {
+      const result = await Bun.build({
+        entrypoints: [`${root}${target.slice(2)}`],
+        target: "bun",
+        external: ["remix", "remix/*"],
+        throw: false,
+      })
+
+      expect([target, result.logs.map(String)]).toEqual([target, []])
+    }
+  })
+
   // The layers were three packages, and the split between them is the point.
   // A "." barrel merging them would hide which layer a component came from —
   // the same reason mini does not re-export remix.

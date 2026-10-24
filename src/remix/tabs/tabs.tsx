@@ -139,15 +139,15 @@ export function Tabs(handle: Handle<TabsProps>) {
           )
 
           return item.disabled === true ? (
-            <span {...item.attrs} aria-disabled="true" key={item.key ?? item.href}>
+            <span key={item.key ?? item.href} {...item.attrs} aria-disabled="true">
               {content}
             </span>
           ) : (
             <a
+              key={item.key ?? item.href}
               {...item.attrs}
               aria-current={item.current === true ? "page" : undefined}
               href={item.href}
-              key={item.key ?? item.href}
             >
               {content}
             </a>

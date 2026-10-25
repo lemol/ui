@@ -50,7 +50,7 @@ const bar = (
     back={{ href: "/loops", label: "Loops" }}
     controls={<a href="?view=runs">Runs</a>}
     status={<span>Open</span>}
-    subtitle="nzila / L32"
+    subtitle="acme / L32"
     title="L32 · supervised by dogfood"
     titleId="loop-title"
   />
@@ -64,7 +64,7 @@ describe("AppBar", () => {
       /<a aria-label="Back to Loops" data-app-bar-back="" href="\/loops"[^>]*title="Back to Loops"/,
     )
     expect(markup).toMatch(/<h1 id="loop-title"[^>]*title="L32 · supervised by dogfood"/)
-    expect(markup).toContain(">nzila / L32</p>")
+    expect(markup).toContain(">acme / L32</p>")
     expect(markup).toMatch(/<svg aria-hidden="true"/)
   })
 

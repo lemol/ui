@@ -30,8 +30,8 @@ export function FacetFilterDemo() {
             label="Project"
             name="demo-facet-project"
             options={[
-              { value: "nzila", label: "nzila", href: "?", selected: true, count: 31 },
-              { value: "xonton", label: "xonton", href: "?project=xonton", count: 12 },
+              { value: "acme", label: "acme", href: "?", selected: true, count: 31 },
+              { value: "demo", label: "demo", href: "?project=demo", count: 12 },
             ]}
           />
         </Row>

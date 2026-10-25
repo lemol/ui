@@ -22,10 +22,10 @@ Future renderers (`@lemol/ui-react`, `@lemol/ui-opentui`) would sit beside
 `ui-remix` and share `ui-design`. They are out of scope here, but the package
 boundary is drawn so they do not require a refactor.
 
-`@mionso/design` in `repos/mionso` already implements a mature version of this
-idea — tokens, server-rendered primitives, an interactive layer, and a live
-catalogue. It is the source of the lessons recorded below. **It is not being
-touched.** It becomes a consumer later, under its own spec.
+An earlier design package, built for another app, already implements a mature
+version of this idea — tokens, server-rendered primitives, an interactive
+layer, and a live catalogue. It is the source of the lessons recorded below.
+**It is not being touched.** It becomes a consumer later, under its own spec.
 
 ## Packages
 
@@ -58,11 +58,11 @@ apps/
 
 This is the load-bearing decision. Every other choice follows from it.
 
-In `@mionso/design`, brand decisions live *inside* components. `Button`'s
+In that earlier package, brand decisions live *inside* components. `Button`'s
 `primary` tone is not "the accent colour" — it is an amber gradient with an
 inset white highlight and a `brightness(1.06)` hover. Token *names* are the
 contract there, but the styling *recipe* is not. So a shared `Button` plus a
-tokens-only design package would force mionso to fork `Button` to keep its look,
+tokens-only design package would force its app to fork `Button` to keep its look,
 which defeats the purpose.
 
 Instead: **a component styles itself only through contract tokens it declares
@@ -87,7 +87,7 @@ const toneStyles = {
 }
 ```
 
-A skin is then a set of token values. mionso keeps its exact gradient by
+A skin is then a set of token values. An app keeps its exact gradient by
 overriding one value and never touching the component:
 
 ```ts
@@ -130,7 +130,7 @@ The engine knows two variant axes and no more.
 
 - **Scheme.** A theme declares `base` values and an optional `dark` override.
 - **Density.** A `compact` override, the four-token swap already proven in
-  mionso (`--control-h`, `--control-h-sm`, `--row-h`, `--row-pad-y`).
+  the earlier package (`--control-h`, `--control-h-sm`, `--row-h`, `--row-pad-y`).
 
 ```ts
 export const miniTheme = defineTheme({
@@ -151,8 +151,7 @@ The emitter produces:
 :root[data-density="compact"] { --control-h: 28px; … }
 ```
 
-A theme omitting `dark` is dark-only or light-only, which is what mionso will
-declare. A third axis (contrast, brand) waits until something needs one; a
+A theme omitting `dark` is dark-only or light-only. A third axis (contrast, brand) waits until something needs one; a
 general named-modes mechanism was rejected as speculative, and it would require
 designing a selector-precedence story for combinations that do not yet exist.
 
@@ -162,8 +161,8 @@ designing a selector-precedence story for combinations that do not yet exist.
 ones — so in server mode a page works before and without client JavaScript, and
 in SPA mode the same components need no client code beyond the router.
 
-This is deliberately *not* mionso's Rule 2. mionso hand-writes a designed
-fallback per component and drives behaviour from a delegated runtime. Here the
+This deliberately departs from the earlier package, which hand-writes a
+designed fallback per component and drives behaviour from a delegated runtime. Here the
 platform provides the behaviour, so most components need no runtime at all.
 
 **The ladder, in order:**
@@ -204,8 +203,9 @@ platform provides the behaviour, so most components need no runtime at all.
   --palette        fuzzy filter over a server-rendered command list
 ```
 
-By comparison, mionso needs runtime wiring for `Dialog`, `CommandPalette`,
-`Toaster`, `SegmentedControl`, `DensityToggle`, `Disclosure`, and every trigger.
+By comparison, the earlier package needs runtime wiring for `Dialog`,
+`CommandPalette`, `Toaster`, `SegmentedControl`, `DensityToggle`, `Disclosure`,
+and every trigger.
 
 **Not in scope:** drag-and-drop reorder (↑/↓ submit buttons instead — no JS, and
 todo-md already works this way), virtualized tables, in-page tab panels.
@@ -233,9 +233,8 @@ The compat shim exists for one specific reason: a mistyped or unsupported
 `commandfor` produces **no error and no event** — a dead click. That silent
 failure mode is worse than a thrown exception, and fifteen lines closes it.
 
-Note that mionso's current asset target (es2020 / Chrome 109 / Safari 16.4) sits
-just below this floor. It raises that target when it adopts these packages,
-which also retires its "no top-level `await`" constraint.
+An app whose asset target sits below this floor raises that target when it
+adopts these packages.
 
 ## Behaviour protocol
 
@@ -248,15 +247,15 @@ descends window → target and only the bubble phase is absent. So:
 document.addEventListener("command", handler, true)
 ```
 
-That gives delegation, which is required: mionso's hard-won lesson is that
-querying elements and binding to them kills the behaviour on the first frame
+That gives delegation, which is required: the earlier package's hard-won lesson
+is that querying elements and binding to them kills the behaviour on the first frame
 navigation. One capturing listener survives frame navigation with no
 `MutationObserver`.
 
 Custom commands use the `--` namespace, which browsers guarantee never to claim.
 Reusing `command`/`commandfor` for our own behaviours — rather than inventing a
-`data-ui-*` attribute — collapses mionso's twenty-odd `data-mns-*` attributes
-into one standard vocabulary. A custom command needs a real `commandfor` target
+`data-ui-*` attribute — collapses the earlier package's twenty-odd private
+`data-*` attributes into one standard vocabulary. A custom command needs a real `commandfor` target
 to fire, which reads naturally: `command="--copy" commandfor="account-number"`.
 
 **Never hand-write an id.** Because a mismatched `commandfor` fails silently, a
@@ -301,9 +300,8 @@ must NOT import:
 
 A `<style>` element is valid in the body and applies document-wide, so this
 renders in server mode and inside the SPA tree with no special casing. It also
-retires the two traps mionso carries from injecting a template literal as
-`<style>` text — no backticks, and no `<`, `>` or `&`, both pinned by tests
-there. `emitTokensCss()` stays exported for anyone who prefers to write a static
+retires the two traps that come from injecting a template literal as `<style>`
+text — no backticks, and no `<`, `>` or `&`. `emitTokensCss()` stays exported for anyone who prefers to write a static
 file and use `<link>`.
 
 `bootScript` (no-flash scheme and density restore) stays inline in the document:
@@ -330,7 +328,7 @@ an app swaps in its own design.
 
 Storybook is React-based and these components are Remix 3 functions taking a
 `Handle`, with no hooks and no client render. So the playground is a Remix 3 app
-in this repo — which is also what mionso proved with its `/design` route,
+in this repo — which is also what the earlier package proved with its `/design` route,
 rendered from the same source the app uses "so it cannot drift the way a
 hand-maintained style guide does".
 
@@ -363,7 +361,7 @@ apps/playground
 ## Tooling
 
 **Bun** as package manager, test runner and runtime (`Bun.serve` +
-`router.fetch`, as money-web does). **Remix's asset server** as the browser
+`router.fetch`). **Remix's asset server** as the browser
 pipeline. **No bundler for the packages at all.**
 
 Vite was considered and rejected. Not a capability question — `bun --bun vite`
@@ -373,7 +371,7 @@ works. The reasons:
   scripts *and* styles, preloads generated from imports, optional fingerprinting,
   ETags, sourcemaps, HMR and script loaders, configured in `remix.json`, shared
   between the running server and the CLI, and checked by `remix doctor`.
-- **There is no library build to own.** `@mionso/design` ships
+- **There is no library build to own.** The earlier design package ships
   `main: "./src/index.ts"` — raw TypeScript consumed directly. Vite's strongest
   card, library mode, has nothing to do here.
 - Adding it would mean two compilers in one repo, `remix.json` no longer the
@@ -390,14 +388,13 @@ Two properties fixed deliberately:
 - **No Effect dependency.** Every other lemol repo pins `effect` exactly. These
   are presentation packages, so `remix` is the only peer, keeping `ui` out of
   the version-lockstep problem.
-- **Private, consumed as git dependencies**, like `framework` / `org` /
-  `nzila`, with root `overrides` redirecting to local clones.
+- **Private, consumed as git dependencies**, like `framework` and `org`.
 
 ## Testing
 
 - **Server-render test per component**, via `remix/ui/server`.
-- **Browser tests for the six runtime behaviours only.** mionso's reasoning
-  holds: a DOM shim would only be testing the shim.
+- **Browser tests for the six runtime behaviours only.** A DOM shim would only
+  be testing the shim.
 - **Pure logic extracted and tested directly** — the palette's match rule is the
   model, exported as a pure function.
 - **`test/boundaries.test.ts`** enforces the SPA import rules above.
@@ -428,33 +425,6 @@ composition root is allowed to depend on the UI packages.
 Its 444-line `src/web/app/ui/styles.css` is deleted and `src/web/app/ui/*.tsx`
 is rewritten on `ui-remix` + `mini`.
 
-**mionso is untouched.** It adopts later, under its own spec.
-
-## Composition-root edits
-
-`repos/ui` is currently invisible to the workspace — `workspace.yaml` declares
-mionso, framework, nzila, org and todo-md only.
-
-```diff
-  workspace.yaml
-+   ui:
-+     url: https://github.com/lemol/ui.git
-+     ref: main
-
-  package.json (workspace root)
-    "workspaces": [ "repos/*",
-+     "repos/ui/packages/*", "repos/ui/apps/*",
-    ]
-    "overrides": {
-+     "@lemol/ui-design":     "file:./repos/ui/packages/ui-design",
-+     "@lemol/ui-remix":      "file:./repos/ui/packages/ui-remix",
-+     "@lemol/ui-remix-mini": "file:./repos/ui/packages/ui-remix-mini",
-    }
-
-  tools/verify-order.ts
-+   the ui packages typecheck and test before todo-md
-```
-
 ## Milestones
 
 Each milestone gets its own implementation plan.
@@ -467,8 +437,7 @@ tokens of their own), `Heading` / `Text` / `Eyebrow` (type scale), `Field`
 (native dialog, invokers, compat), and `compat.ts`. `ui-remix-mini`: theme plus
 `Document` / `AppShell` / `Nav` / `EmptyState` / `ErrorState`. Playground with
 the catalogue, one composed page recipe, the theme / scheme / density switchers,
-the no-JS toggle, and one SPA route. The boundaries test. The composition-root
-edits.
+the no-JS toggle, and one SPA route. The boundaries test.
 
 **M2 — Catalogue.** `Popover` / `Menu`, `Table`, `Toaster`, `Disclosure`,
 `Select` / `Checkbox` / `Radio` / `Switch`, `SegmentedControl`, `Callout`,
@@ -479,7 +448,7 @@ edits.
 `styles.css`, rewriting `src/web/app/ui/*`, and adding the UX it currently
 lacks.
 
-**M4 — mionso.** Later, its own spec, once things are nice here.
+**M4 — Consumer app migration.** Later, its own spec, once things are nice here.
 
 **M5 — Motion system.** Depends on M2, not M4: the curated micro-interaction
 catalogue, view transitions across frame and document navigation,
@@ -531,8 +500,8 @@ sheet, so no component opts in. See [docs/motion.md](../../motion.md).
 ## Rejected alternatives
 
 - **Headless components with separate skins.** Maximum freedom, but `mini` and
-  mionso would each carry a full stylesheet and drift in ways no typecheck
-  catches.
+  every app's own design would each carry a full stylesheet and drift in ways no
+  typecheck catches.
 - **Overridable style recipes.** Most expressive, but you build and maintain a
   recipe-merge abstraction and override resolution becomes its own thing to
   debug.
@@ -544,10 +513,11 @@ sheet, so no component opts in. See [docs/motion.md](../../motion.md).
   plain. Superseded by leaning on the platform instead.
 - **Assume scripting, no native fallback.** Gives up robustness and works
   against Remix 3's server-first grain.
-- **Conservative baseline with a hand-written runtime.** Rebuilds mionso's
-  runtime and abandons the native-first principle.
-- **Lifting `@mionso/design` into `ui-remix` first.** Would ship `ui-remix`
-  amber-coloured for a while and delays `mini`; mionso is explicitly deferred.
+- **Conservative baseline with a hand-written runtime.** Rebuilds the earlier
+  package's runtime and abandons the native-first principle.
+- **Lifting the earlier design package into `ui-remix` first.** Would ship
+  `ui-remix` amber-coloured for a while and delays `mini`; its app's migration
+  is explicitly deferred.
 - **Vite.** See Tooling.
 - **`mini` re-exporting `ui-remix`.** A barrel to keep in sync that hides the
   base/skin boundary.

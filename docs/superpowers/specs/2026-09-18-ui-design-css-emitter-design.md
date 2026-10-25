@@ -64,7 +64,7 @@ and one of them gets it wrong with nothing to catch it.
 
 The package's stated limit is no *values*, not no CSS, and the admission test
 is what keeps that distinction from eroding into a skin. It is also what
-excluded most of what `@mionso/design` has in the same position: the radial
+excluded most of what an earlier design package has in the same position: the radial
 background wash, scrollbar theming, `text-decoration-thickness: 1px`,
 `text-underline-offset: 2px`, the focus ring's `border-radius`, and
 `-webkit-font-smoothing: antialiased`.
@@ -87,7 +87,7 @@ on a `theme.base` missing primitives, listing them.
 dies with no error, no warning and no stack — principle 6's silent failure,
 arriving as "one colour is wrong in production" months later. A backtick
 terminates the template literal if anyone ever inlines the sheet in source,
-which is the trap `@mionso/design` records. `{` and `}` in a value would break
+which is a trap an earlier design package records. `{` and `}` in a value would break
 out of the block it sits in.
 
 Escaping the characters instead was rejected: CSS escapes are valid in
@@ -259,7 +259,7 @@ outright. Overriding the look costs one declaration and no `!important`.
 `[hidden] { display: none !important }` is the one deliberately unlayered rule.
 The user agent's own `[hidden]` loses to any author `display`, and most
 components set one — so without it, toggling `element.hidden` from a runtime
-silently does nothing. `@mionso/design` has a second unlayered rule that hides
+silently does nothing. An earlier design package has a second unlayered rule that hides
 the no-JS submit fallback; that one follows the enhanced marker into
 `ui-remix`.
 

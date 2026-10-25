@@ -22,7 +22,7 @@
 
 ## M3 — todo-md adoption
 
-## M4 — mionso migration
+## M4 — Consumer app migration
 
 ## M5 — Motion system
 

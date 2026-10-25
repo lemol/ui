@@ -901,7 +901,7 @@ EOF
 - Consumes: `defineTheme`, `extendTheme`, `PrimitiveTokens`, `schema` from `@lemol/ui-design`; `emitTokensCss` from `@lemol/ui-design/css`; `ComponentTokenName`, `componentTokens` from `@lemol/ui-remix`.
 - Produces: `miniTheme: Theme<ComponentTokenName>`.
 
-**Palette:** warm-grey neutrals with a deep teal accent. Teal rather than blue keeps `accent` and `info` distinguishable on one screen, and `focus` is deliberately a different hue from `accent` so the ring reads against an accent-filled button. Nothing here derives from `@mionso/design`: the mechanisms in these packages came from there, none of the values did.
+**Palette:** warm-grey neutrals with a deep teal accent. Teal rather than blue keeps `accent` and `info` distinguishable on one screen, and `focus` is deliberately a different hue from `accent` so the ring reads against an accent-filled button. Nothing here derives from the earlier design package: the mechanisms in these packages came from there, none of the values did.
 
 **Units:** space, radius and sizing in `px`; type sizes in `rem`, so raising the browser font size enlarges text without stretching the layout grid. Two unit systems, deliberately: one axis follows the user's preference, the other the design's density.
 
@@ -1779,7 +1779,7 @@ remix style element to detect. The guard is a render test asserting that
 `index.html` and the token blocks in the app tree.
 ````
 
-Keep the paragraphs that follow at `:150-176` — the `@mionso/design` escaping
+Keep the paragraphs that follow at `:150-176` — the template-literal escaping
 traps, the emitter's character ban and `schemeBootScript` — unchanged.
 
 - [ ] **Step 2: Record the `danger-hover` line**

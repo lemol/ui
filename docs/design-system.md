@@ -243,9 +243,8 @@ document.
 `layerStatement` is exported separately for an SPA that wants the statement in
 `index.html` and the token blocks in the app tree.
 
-This also avoids two traps `@mionso/design` carries from injecting a template
-literal as `<style>` text, both pinned by tests there: no backticks anywhere in
-the sheet, including comments, because they terminate the template literal; and
+This also avoids two traps that come from injecting a template literal as
+`<style>` text: no backticks anywhere in the sheet, including comments, because they terminate the template literal; and
 no `<`, `>` or `&`, because the renderer escapes them, so a child combinator
 would ship as `&gt;` and silently break its rule.
 

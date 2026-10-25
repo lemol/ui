@@ -10,7 +10,7 @@
  * listener attached the ordinary way never fires; the capture phase descends
  * window → target, which is what the `true` is for. And it must be delegated
  * from `document`: querying elements and binding to them kills the behaviour
- * on the first frame navigation, which is the lesson `@mionso/design` paid
+ * on the first frame navigation, a lesson an earlier design package paid
  * for. Delegation needs no MutationObserver and survives markup that arrives
  * in a frame response.
  *

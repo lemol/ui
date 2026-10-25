@@ -10,8 +10,8 @@ every overlay. [interactivity.md](../../interactivity.md) says those are the
 only things client JavaScript does; [architecture.md](../../architecture.md)
 says they get "browser tests for the runtime behaviours only" and then does not
 say with what. This is the research for that choice, and it is meant to travel:
-whatever lands here is adopted by `todo-md`, `mionso`, `nzila`, `xonton` and
-`framework`.
+whatever lands here is adopted by `todo-md`, `framework` and the other projects
+built on this library.
 
 ## What the answer is being judged against
 

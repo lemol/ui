@@ -1521,7 +1521,7 @@ Replace the contents of `src/remix/runtime.ts`:
  * listener attached the ordinary way never fires; the capture phase descends
  * window → target, which is what the `true` is for. And it must be delegated
  * from `document`: querying elements and binding to them kills the behaviour
- * on the first frame navigation, which is the lesson `@mionso/design` paid
+ * on the first frame navigation, a lesson an earlier design package paid
  * for. Delegation needs no MutationObserver and survives markup that arrives
  * in a frame response.
  *
@@ -1963,7 +1963,7 @@ In `docs/architecture.md`, in the Testing section, replace the bullet reading **
   runner, so `bun test` stays the only runner and `bun run check` the only gate.
   They drive the playground's own router through `Bun.serve`, so what is tested
   is the real document and the real asset pipeline. A DOM shim would be testing
-  the shim, which is the same conclusion `@mionso/design` reached.
+  the shim.
   Two limits: Playwright's WebKit is built from WebKit `main` and is not Safari,
   and every engine it bundles has Invoker Commands natively — so Safari 17 and
   a genuinely unsupporting engine are both out of reach. The backfill is

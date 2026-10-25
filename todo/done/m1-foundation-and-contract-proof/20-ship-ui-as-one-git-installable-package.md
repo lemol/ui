@@ -12,14 +12,12 @@ exports, so a consumer writes
 and imports `@lemol/todo-md/hub`. ui is the odd one out: `@lemol/ui-design` and
 `@lemol/ui-remix` live in `packages/`, and a Bun git dependency always installs
 the repository's *root* package — there is no subdirectory form of the
-specifier. So no consumer outside `@lemol/workspace` can name them at all.
+specifier. So no consumer outside a shared Bun workspace can name them at all.
 
-xonton is the first external consumer and hit this in its task 01. Its
-`packages/design` and `packages/ui-remix` currently declare
-`"@lemol/ui-design": "workspace:*"`, which resolves only inside the composed
-workspace and makes a standalone `repos/xonton` clone uninstallable. That
-exception is tracked in xonton's `test/packages.test.ts` and disappears when
-this task lands.
+The first external consumer hit this straight away. Its packages declare
+`"@lemol/ui-design": "workspace:*"`, which resolves only inside a shared
+workspace and makes a standalone clone of that consumer uninstallable. That
+exception disappears when this task lands.
 
 ## What to build
 
@@ -44,16 +42,14 @@ this task lands.
 
 ## Blast radius outside this repository
 
-- `@lemol/workspace`: three `file:` overrides collapse to one, and the
-  ownership table in `AGENTS.md` names one package instead of three.
-- xonton: its two manifests switch to the git specifier, and its
-  `docs/architecture.md` dependency table, `docs/specs/milestone-1.md` §3 and
-  `AGENTS.md` all name `@lemol/ui-design` / `@lemol/ui-remix` today.
+- A composing workspace: three `file:` overrides collapse to one.
+- The first external consumer: its manifests switch to the git specifier, and
+  the documents that name `@lemol/ui-design` / `@lemol/ui-remix` follow.
 
 Coordinated commits, one per repository.
 
 ## Done when
 
 - `bun run check` is green here.
-- A repository outside the workspace can depend on ui by git specifier and
+- A repository outside any shared workspace can depend on ui by git specifier and
   import a component and a theme from it.

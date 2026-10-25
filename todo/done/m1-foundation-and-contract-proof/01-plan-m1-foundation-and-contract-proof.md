@@ -73,10 +73,6 @@ Catalogue at `/c/:component`, built from `*.demo.tsx` files colocated with each 
 
 `test/boundaries.test.ts` — the three packages may import `remix/ui`, `remix/ui/*` and `@lemol/ui-design`; they must not import `node:*`, `bun`, `effect`, `remix/router`, `remix/routes`, `remix/assets` or `remix/spa`. This makes "runs in SPA mode" a checked property rather than a claim.
 
-## Composition-root edits (in the workspace repo, not here)
-
-Add `ui` to `workspace.yaml`; add `repos/ui/packages/*` and `repos/ui/apps/*` to the root `workspaces`; add `file:` overrides for the three packages; order the ui packages before todo-md in `tools/verify-order.ts`.
-
 ## Baseline and tooling
 
 Chrome 114+ / Safari 17+ / Firefox 125+ — the Popover API floor. Invoker Commands used natively with the compat shim behind them; anchor positioning behind `@supports (anchor-name: --a)`. Bun as package manager, test runner and runtime; Remix's asset server for browser assets; no bundler and no build step for the packages; no Effect dependency, so `remix` is the only peer.

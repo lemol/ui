@@ -64,8 +64,7 @@ A custom command needs a real `commandfor` target to fire, which reads
 naturally: `command="--copy" commandfor="account-number"`.
 
 Reusing `command`/`commandfor` rather than inventing a `data-ui-*` attribute
-means one standard vocabulary instead of a private one. For comparison,
-`@mionso/design` carries about twenty `data-mns-*` attributes to do this job.
+means one standard vocabulary instead of a private one.
 
 ## The complete list of hand-written client JS
 

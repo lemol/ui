@@ -32,7 +32,7 @@ later pass.
 
 > `CommandEvent` is non-bubbling, composed, trusted and cancellable.
 > Non-bubbling defeats ordinary `document` delegation — but the capture phase
-> still reaches the target [...] mionso's hard-won lesson is that querying
+> still reaches the target [...] the earlier package's hard-won lesson is that querying
 > elements and binding to them kills the behaviour on the first frame
 > navigation.
 

@@ -8,7 +8,7 @@ so that a future renderer can be added without refactoring the ones that exist.
 `@lemol/ui` is one package at the repository root, and the layers are subpaths
 of it. That is forced from outside: a Bun git dependency always installs a
 repository's *root* package, and the specifier has no subdirectory form — so
-anything under `packages/` is unreachable to every consumer outside the composed
+anything under `packages/` is unreachable to every consumer outside a shared Bun
 workspace. A root package re-exporting `packages/*/src` would not have fixed it
 either, because the source imported its siblings by name and a git-installed
 checkout has no `node_modules` to resolve that through.
@@ -170,8 +170,7 @@ why the package has no `.` export.
 
 | App | Status |
 | --- | --- |
-| `todo-md` (`repos/todo-md`, `src/web`) | The first real consumer. Its core modules stay dependency-free; `src/web` is a composition root and may depend on `@lemol/ui`. |
-| `mionso` (`repos/mionso`, `money-web`) | Deferred. `@mionso/design` is untouched and adopts later under its own spec. |
+| `todo-md` (`src/web`) | The first real consumer. Its core modules stay dependency-free; `src/web` is a composition root and may depend on `@lemol/ui`. |
 
 An application defines its own look as a theme plus `--ui-*` overrides on top of
 `@lemol/ui/design` and `@lemol/ui/remix`. `@lemol/ui/mini` is one such design,
@@ -209,7 +208,7 @@ than a runner; `bunx playwright install chromium` once per machine.
   runner, so `bun test` stays the only runner and `bun run check` the only gate.
   They drive the playground's own router through `Bun.serve`, so what is tested
   is the real document and the real asset pipeline. A DOM shim would be testing
-  the shim, which is the same conclusion `@mionso/design` reached.
+  the shim.
   Two limits: Playwright's WebKit is built from WebKit `main` and is not Safari,
   and every engine it bundles has Invoker Commands natively — so Safari 17 and
   a genuinely unsupporting engine are both out of reach. The backfill is
@@ -229,20 +228,18 @@ than a runner; `bunx playwright install chromium` once per machine.
 
 ## Workspace composition
 
-`repos/ui` is composed by `@lemol/workspace`: declared in `workspace.yaml`, a
-member of the root `workspaces` (with `repos/ui/apps/*` listed beside it, since
-Bun has no nested workspaces), and typechecked and tested before `todo-md` in
-`tools/verify-order.ts`. A sibling that lives only in that workspace — xonton's
-`design` and `ui-remix` — names it `"@lemol/ui": "workspace:*"`, and the root
-install links that name straight to this clone: the working tree, not a copy,
-and nothing to refresh after a commit. A sibling that must also install alone,
-such as `todo-md`, pins a tagged release by git specifier instead, the same
-way any outside consumer does.
+A clone of this repository can be a member of a larger Bun workspace: listed in
+its root `workspaces`, with the clone's `apps/*` listed beside it, since Bun has
+no nested workspaces. A package that lives only in that workspace names it
+`"@lemol/ui": "workspace:*"`, and the root install links that name straight to
+this clone: the working tree, not a copy, and nothing to refresh after a commit.
+A package that must also install alone, such as `todo-md`, pins a tagged
+release by git specifier instead, the same way any outside consumer does.
 
 Bun resolves a workspace by walking up to the nearest ancestor whose
-`workspaces` patterns match the directory it runs in, so `bun install` here
-installs the whole workspace and writes its lockfile, not this repository's.
-`bun.lock` here serves a clone outside the workspace, which is still a valid
+`workspaces` patterns match the directory it runs in, so inside such a workspace
+`bun install` here installs the whole workspace and writes its lockfile, not
+this repository's. `bun.lock` here serves a standalone clone, which is a valid
 way to use this repository since it takes nothing from its siblings.
 
 Inside this repository the catalogue imports the source relatively and takes

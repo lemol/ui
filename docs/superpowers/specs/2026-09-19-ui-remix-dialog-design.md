@@ -331,7 +331,7 @@ export function installCommandRuntime(): void
 One `document.addEventListener("command", handler, true)`. Capturing, because
 `CommandEvent` does not bubble and an ordinary delegated listener never fires.
 Delegated, because binding to queried elements dies on the first frame
-navigation — the lesson `@mionso/design` paid for.
+navigation — a lesson an earlier design package paid for.
 
 M1 registers nothing. The registry ships anyway, so M2 adds a command instead of
 adding plumbing, and the subpath exists from the start so an app imports the

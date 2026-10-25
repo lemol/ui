@@ -39,7 +39,7 @@ If the contract is wrong, it is wrong here — before a catalogue sits on it.
 > }
 > ```
 
-> A skin is then a set of token values. mionso keeps its exact gradient by
+> A skin is then a set of token values. An app keeps its exact gradient by
 > overriding one value and never touching the component:
 >
 > ```ts

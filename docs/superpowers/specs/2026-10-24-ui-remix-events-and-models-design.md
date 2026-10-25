@@ -83,9 +83,8 @@ for a job the reconciler does natively.
 ## 2. What `interactivity.md` says about hand-written behaviour (task 38)
 
 The ladder ends at **3. Hand-written** and says nothing about the shape that
-code takes. Apps built on this package — xonton first — read
-`docs/interactivity.md` as their ladder, and xonton has grown about twenty
-client entries that coordinate through untyped `document` events and the
+code takes. Apps built on this package read `docs/interactivity.md` as
+their ladder, and the first of them has grown about twenty client entries that coordinate through untyped `document` events and the
 document's own `dataset`. The rules belong here, once:
 
 - **State an app owns is a model**, a `TypedEventTarget` subclass with no DOM
@@ -95,7 +94,7 @@ document's own `dataset`. The rules belong here, once:
   declared** on `HTMLElementEventMap` / `DocumentEventMap` in one module per
   app, so a listener's type comes from the declaration rather than a cast.
   The `--` command namespace stays this package's; app events use the app's
-  own prefix (`xonton:`).
+  own prefix (`acme:`).
 - **The narrowest signal**, from the guide's table: an `on()` handler's
   second argument for "latest event wins", a queued task's argument for
   work keyed to one render, `handle.signal` for component-lifetime
@@ -117,8 +116,8 @@ semantic event when it finishes — `ui:schemechange` on the root after
 `--set-scheme`, `ui:copied` on the button after `--copy` — so an app could
 react with `on(...)` instead of observing attributes.
 
-Held, not scheduled: **no consumer exists**. xonton's settings preview sets
-the root's attributes itself and does not use `--set-scheme`; nothing else
+Held, not scheduled: **no consumer exists**. The one app with a settings
+preview sets the root's attributes itself and does not use `--set-scheme`; nothing else
 listens. An event nobody reads is API to maintain. Task 39 carries the
 design and starts when an app names the event it needs.
 

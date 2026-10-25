@@ -419,8 +419,8 @@ neutrals with a deep teal accent: warm neutrals against a cool accent is the
 pairing, and teal rather than blue keeps `accent` and `info` distinguishable
 when both appear on one screen.
 
-Nothing here is derived from `@mionso/design`. The mechanisms in these packages
-came from there; none of the values did.
+Nothing here is derived from the earlier design package. The mechanisms in
+these packages came from there; none of the values did.
 
 ### Units
 

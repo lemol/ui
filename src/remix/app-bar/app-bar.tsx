@@ -108,7 +108,7 @@ export interface AppBarProps {
   readonly title: string
   /** The `h1`'s id, for the page's `aria-labelledby`. */
   readonly titleId?: string | undefined
-  /** One dim line under the title: where the record sits ("nzila / L32"). */
+  /** One dim line under the title: where the record sits ("acme / L32"). */
   readonly subtitle?: string | undefined
   /** What the record is doing: the second row's start on a phone. */
   readonly status?: RemixNode | undefined

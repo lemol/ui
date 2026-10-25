@@ -10,7 +10,7 @@ Plan todo-md's adoption of the UI packages. Full spec: `docs/superpowers/specs/2
 
 todo-md becomes the first real consumer. Its web UI today has a 444-line `src/web/app/ui/styles.css` and its own `ui/` layer (`board`, `dashboard`, `task`, `status`, `groups`, `projects`, `markdown`, `secondary`, `document`), with no dialogs and little interactivity. Adopting `mini` should be a visible upgrade, not a reskin.
 
-## Rule changes in repos/todo-md
+## Rule changes in todo-md
 
 Its `AGENTS.md` currently forbids this outright. Narrow the rule to the core:
 
@@ -29,7 +29,7 @@ And extend the web allowlist in `test/boundaries.test.ts`, which asserts `web mu
 
 Delete `src/web/app/ui/styles.css`. Rewrite `src/web/app/ui/*.tsx` on `ui-remix` + `mini`. Add the UX it lacks — dialogs for the add/edit/move forms, toasts for flash messages, a live filter bar, a command palette.
 
-Keep its light editorial look as a theme: light canvas (`#FBFBFA`), serif headings (Iowan Old Style / Charter), a 760px measure, monospace badges, hairline borders, and its `prefers-color-scheme: dark` variant. That look is the opposite end of the range from mionso's dark amber, which is exactly what makes todo-md a real test of the token contract rather than a friendly one.
+Keep its light editorial look as a theme: light canvas (`#FBFBFA`), serif headings (Iowan Old Style / Charter), a 760px measure, monospace badges, hairline borders, and its `prefers-color-scheme: dark` variant. That look is the opposite end of the range from a dark amber design, which is exactly what makes todo-md a real test of the token contract rather than a friendly one.
 
 ## Check before planning the rewrite
 

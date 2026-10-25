@@ -106,7 +106,7 @@ describe("webManifest", () => {
   it("names the app, starts it standalone at the root, and lists its icons", () => {
     const manifest = JSON.parse(
       webManifest({
-        name: "xonton",
+        name: "demo",
         background: "#16161D",
         theme: "#121218",
         icons: [{ src: "/i.png", sizes: "192x192", type: "image/png", purpose: "maskable" }],
@@ -116,8 +116,8 @@ describe("webManifest", () => {
 
     expect(manifest).toMatchObject({
       id: "/",
-      name: "xonton",
-      short_name: "xonton",
+      name: "demo",
+      short_name: "demo",
       start_url: "/",
       scope: "/",
       display: "standalone",

@@ -36,7 +36,7 @@ export function AppBarDemo() {
             </Button>
           }
           status={<Badge tone="info">Running</Badge>}
-          subtitle="nzila / #598"
+          subtitle="acme / #42"
           title="Session flow returns every turn to us and lands only our waiting turn"
         />
       </div>

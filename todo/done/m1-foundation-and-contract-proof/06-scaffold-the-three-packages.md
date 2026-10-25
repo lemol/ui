@@ -25,7 +25,7 @@ TypeScript from `src/`.
 > are presentation packages, so `remix` is the only peer, keeping `ui` out of the
 > version-lockstep problem.
 
-> **There is no library build to own.** `@mionso/design` ships
+> **There is no library build to own.** The earlier design package ships
 > `main: "./src/index.ts"` — raw TypeScript consumed directly. Vite's strongest
 > card, library mode, has nothing to do here.
 

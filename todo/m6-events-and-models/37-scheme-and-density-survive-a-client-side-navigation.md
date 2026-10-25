@@ -22,4 +22,4 @@ tags: [bug]
 
 **Done when.** A toggled scheme and density survive any number of client-side navigations, a server-chosen value still wins, and `bun run check` passes.
 
-**Out of scope.** Persisting the choice server-side (a cookie or session). xonton renders its own document from its saved settings and is unaffected.
+**Out of scope.** Persisting the choice server-side (a cookie or session). An app that renders its own document from saved settings is unaffected.

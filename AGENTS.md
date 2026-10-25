@@ -2,9 +2,9 @@
 
 UI shared by lemol projects: a renderer-agnostic design-token core, a Remix 3
 component library, and one concrete minimal design built on both. Three layers
-under `src/`, shipped as one package at the repository root — a workspace sibling
-takes `@lemol/ui` as `workspace:*`, a project outside it by git specifier, and
-either imports a subpath.
+under `src/`, shipped as one package at the repository root — a member of the
+same Bun workspace takes `@lemol/ui` as `workspace:*`, any other project by git
+specifier, and either imports a subpath.
 
 ## Read first
 
@@ -40,7 +40,7 @@ apps/
 ## Commands
 
 ```sh
-bun install                        # installs the whole lemol-workspace; this clone is a member of it
+bun install
 bunx playwright install chromium   # once: the browser test/browser/ drives
 bun run check         # lint + typecheck + test: the gate for every change
 bun test

@@ -270,8 +270,7 @@ This was caught by compiling the design, not by reading it — see "Already
 verified".
 
 - **`base` is total, `dark` and `compact` are partial.** A theme omitting `dark`
-  typechecks — that is task 10's stated "done when", and it is what mionso's
-  theme will need.
+  typechecks — that is task 10's stated "done when".
 - **`C` is the cross-package seam.** It defaults to `never`, so `ui-design`
   knows nothing about components, satisfying *"`ui-design` never learns which
   components exist; it takes a record."* `ui-remix-mini` supplies it:

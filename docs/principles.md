@@ -11,11 +11,11 @@ with something to retheme declares its own `--ui-*` tokens beside itself,
 defaulting to a primitive; one styled from structural keywords and primitives
 alone declares none. A skin is a set of token values.
 
-**Why.** The alternative was tried. In `@mionso/design`, brand decisions live
-inside components — `Button`'s primary tone is an amber gradient with an inset
-white highlight and a `brightness(1.06)` hover. Token names are the contract
-there, but the styling *recipe* is not, so a second app wanting a different
-button has to fork the component. Fork it and you now maintain two
+**Why.** The alternative was tried. When brand decisions live inside
+components — say `Button`'s primary tone is an amber gradient with an inset
+white highlight and a `brightness(1.06)` hover — token names are the contract,
+but the styling *recipe* is not, so a second app wanting a different button has
+to fork the component. Fork it and you now maintain two
 implementations of the same markup, ARIA, and behaviour, and they drift in ways
 no typecheck catches.
 
@@ -41,8 +41,7 @@ before and without any client JavaScript; in SPA mode the same components need
 no client code beyond the router.
 
 **Why.** This is a consequence of principle 2 rather than a separate cost. We
-are not hand-writing a fallback per component the way `@mionso/design` does —
-the platform provides the behaviour, so the no-JS path is what you get for
+are not hand-writing a fallback per component — the platform provides the behaviour, so the no-JS path is what you get for
 free. That is what makes the principle affordable enough to keep.
 
 ## 4. SPA safety is enforced, not trusted
@@ -65,8 +64,7 @@ Behaviours use custom commands in the `--` namespace, read by a single
 attached the ordinary way never fires — but capture descends window → target,
 so it still reaches. And the listener must be delegated from `document`,
 because querying elements and binding to them kills the behaviour on the first
-frame navigation. `@mionso/design` learned the second one the hard way and
-records it as a rule.
+frame navigation.
 
 See [interactivity.md](interactivity.md).
 
@@ -85,8 +83,8 @@ reported months later as "the button doesn't work sometimes".
 Packages ship TypeScript from `src/`. Browser assets are the Remix asset
 server's job, configured in `remix.json`. Do not add a bundler.
 
-**Why.** There is nothing for one to do. `@mionso/design` ships
-`main: "./src/index.ts"` and is consumed directly; `@remix-run/assets` already
+**Why.** There is nothing for one to do. A package that ships
+`main: "./src/index.ts"` is consumed directly; `@remix-run/assets` already
 compiles browser scripts and styles on demand, generates preloads from imports,
 and handles fingerprinting, ETags, sourcemaps and HMR. A second bundler would
 mean two compilers in one repo, `remix.json` no longer the single source of

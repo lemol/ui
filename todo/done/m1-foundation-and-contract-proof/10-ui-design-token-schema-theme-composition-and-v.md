@@ -27,7 +27,7 @@ this package.
 
 > - **Scheme.** A theme declares `base` values and an optional `dark` override.
 > - **Density.** A `compact` override, the four-token swap already proven in
->   mionso (`--control-h`, `--control-h-sm`, `--row-h`, `--row-pad-y`).
+>   the earlier package (`--control-h`, `--control-h-sm`, `--row-h`, `--row-pad-y`).
 
 > **Typing.** `ui-design` never learns which components exist; it takes a record.
 
@@ -40,6 +40,5 @@ this package.
 
 ## Done when
 
-- A theme omitting `dark` typechecks — dark-only or light-only is legal, and is
-  what mionso will declare.
+- A theme omitting `dark` typechecks — dark-only or light-only is legal.
 - `bun run check` is green.

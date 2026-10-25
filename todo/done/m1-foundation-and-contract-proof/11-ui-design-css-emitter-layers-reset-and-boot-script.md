@@ -39,9 +39,8 @@ subpath. `emitTokensCss()` returns CSS text, never a component.
 > `prefers-reduced-motion: reduce` zeroes every duration globally in the emitted
 > sheet, so no component opts in.
 
-> It also retires the two traps mionso carries from injecting a template literal
-> as `<style>` text — no backticks, and no `<`, `>` or `&`, both pinned by tests
-> there.
+> It also retires the two traps that come from injecting a template literal as
+> `<style>` text — no backticks, and no `<`, `>` or `&`.
 
 > `emitTokensCss()` stays exported for anyone who prefers to write a static file
 > and use `<link>`.

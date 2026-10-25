@@ -15,7 +15,7 @@ is asserted from documentation, not from anything running in this repo.
 ## Scope
 
 - `remix.json` configuring the asset server.
-- `Bun.serve` + `router.fetch`, as money-web does.
+- `Bun.serve` + `router.fetch`.
 - `run(router, { fallback })` with `clientEntry` resolved through the asset
   server.
 - One route rendering server-side with no client JavaScript.
@@ -25,7 +25,7 @@ is asserted from documentation, not from anything running in this repo.
 ## From the spec
 
 > **Bun** as package manager, test runner and runtime (`Bun.serve` +
-> `router.fetch`, as money-web does). **Remix's asset server** as the browser
+> `router.fetch`). **Remix's asset server** as the browser
 > pipeline. **No bundler for the packages at all.**
 
 > `@remix-run/assets` already is the pipeline: on-demand compilation of browser

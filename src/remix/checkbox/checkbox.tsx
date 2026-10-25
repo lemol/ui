@@ -53,7 +53,18 @@ export interface CheckboxProps {
   hint?: string | undefined
   error?: string | undefined
   id?: string | undefined
+  /**
+   * Ticked, controlled. In a hydrated component the runtime puts it back
+   * after every click until a render passes a new one. A form that never
+   * hydrates can pass either this or `defaultChecked`.
+   */
   checked?: boolean | undefined
+  /**
+   * Ticked to start, and the person's after that: for a checkbox in a
+   * hydrated component whose form, not the component, holds the choice. The
+   * server renders it as the same `checked` attribute.
+   */
+  defaultChecked?: boolean | undefined
   value?: string | undefined
   required?: boolean | undefined
   disabled?: boolean | undefined
@@ -62,7 +73,9 @@ export interface CheckboxProps {
 
 export function Checkbox(handle: Handle<CheckboxProps>) {
   return () => {
-    const { name, label, hint, error, checked, value, required, disabled, mix } = handle.props
+    const { name, label, hint, error, checked, defaultChecked, value, required, disabled, mix } =
+      handle.props
+
     const stem = handle.props.id !== undefined && handle.props.id !== "" ? handle.props.id : name
     const messages = fieldMessages(stem, hint, error)
 
@@ -77,7 +90,7 @@ export function Checkbox(handle: Handle<CheckboxProps>) {
           name={name}
           required={required}
           type="checkbox"
-          {...givenProps({ checked, value })}
+          {...givenProps({ checked, defaultChecked, value })}
         />
         <div mix={bodyStyle}>
           <label for={stem} mix={labelStyle(disabled === true)}>

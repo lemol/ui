@@ -509,6 +509,10 @@ track/thumb to retint, so it draws its own — `appearance: none` on a real
 `:checked`. It stays a real checkbox throughout; `role="switch"` and a mirrored
 `aria-checked` are the only additions.
 
+`Checkbox`'s `checked` is controlled the way `Field`'s `value` is, and
+`defaultChecked` is its `defaultValue`: a checkbox in a hydrated component
+whose form holds the choice takes `defaultChecked`.
+
 All three share `form-control.ts`'s `fieldMessages()` for the id/
 `aria-describedby`/`aria-invalid` wiring `Field` also has — factored out
 because three copies of that scaffold is the line the M2 plan draws before

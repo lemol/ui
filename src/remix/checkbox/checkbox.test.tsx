@@ -25,6 +25,17 @@ describe("Checkbox", () => {
     expect(markup).toContain("disabled")
   })
 
+  it("starts ticked from defaultChecked, leaving the tick to the person", async () => {
+    const ticked = markupOf(
+      await renderToHtml(<Checkbox defaultChecked label="Subscribe" name="newsletter" />),
+    )
+
+    const plain = markupOf(await renderToHtml(<Checkbox label="Subscribe" name="newsletter" />))
+
+    expect(ticked).toMatch(/<input[^>]*\bchecked\b/)
+    expect(plain).not.toMatch(/<input[^>]*\bchecked\b/)
+  })
+
   it("wires a hint through aria-describedby", async () => {
     const markup = markupOf(
       await renderToHtml(<Checkbox hint="Weekly digest" label="Subscribe" name="newsletter" />),

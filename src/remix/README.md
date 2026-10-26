@@ -346,7 +346,13 @@ dialog on the page. Exit degrades in Safari, which has no `overlay` property,
 and the backdrop is untinted below Chromium 122, which does not inherit custom
 properties into `::backdrop`.
 
-Twenty-two tokens in `dialog/tokens.ts`.
+The panel sets its own text at the body's values: type, line height,
+`white-space`, alignment and cursor. The top layer lifts a `<dialog>` out of
+the page's boxes but not out of its inheritance, so a dialog mounted beside
+its trigger in a menu item would otherwise take the item's `nowrap`, and no
+line of its form would wrap.
+
+Twenty-six tokens in `dialog/tokens.ts`.
 
 Under `sheetBreakpoint` (40rem) the panel is a sheet: see *Sheets* below.
 
@@ -785,7 +791,7 @@ catalogue ships too: `Popover`, `Menu`, `Disclosure`/`Accordion`, `Table`,
 `ComponentTokenName`; the four layout components add nothing to it, which is
 what they exist to demonstrate, the three typographic ones add twenty-two
 between them, `Field` adds twenty-seven, `Badge` twenty-three, `Dialog`
-twenty-two, `Popover` thirteen, `Menu` eleven, `Disclosure` thirteen, `Table`
+twenty-six, `Popover` thirteen, `Menu` eleven, `Disclosure` thirteen, `Table`
 twelve, `Toaster` thirty, `Checkbox` and `Radio` nine each, `Switch`
 eighteen, `SegmentedControl` fifteen, `Callout` twenty-four, `Meter` two
 (shared by `Progress`), `CommandPalette` twelve, `Breadcrumbs` eight,

@@ -21,6 +21,9 @@ const keywords = new Set([
   "auto",
   "pointer",
   "100%",
+  // The panel's text starts where the body's does: no wrapping rule, no
+  // tracking, no case. Resets, not looks; the look is the type tokens.
+  "normal",
   // The two ends of a fade. A token for "invisible" would be a token whose
   // only sane value is the one it has.
   "0",
@@ -218,6 +221,28 @@ describe("DialogPanel", () => {
     expect(closeBlock).toContain("background: var(--ui-dialog-close-bg)")
     expect(closeBlock).toContain("color: var(--ui-dialog-close-ink)")
     expect(closeBlock).not.toContain("--ui-dialog-bg")
+  })
+
+  it("sets its own text, whatever it is mounted in", async () => {
+    // The top layer lifts a <dialog> out of the page's boxes, not out of its
+    // inheritance. Mounted in a menu item, a panel took the item's nowrap,
+    // pointer and type, and no line of its form could wrap.
+    const panelBlock = panelBlockOf(await renderToHtml(panel()))
+
+    for (const declaration of [
+      "white-space: normal",
+      "cursor: auto",
+      "text-align: start",
+      "font-family: var(--ui-dialog-font-family)",
+      "font-size: var(--ui-dialog-font-size)",
+      "font-weight: var(--ui-dialog-font-weight)",
+      "font-style: normal",
+      "line-height: var(--ui-dialog-line-height)",
+      "letter-spacing: normal",
+      "text-transform: none",
+    ]) {
+      expect(panelBlock).toContain(declaration)
+    }
   })
 
   it("keeps each element's blocks disjoint by property", async () => {

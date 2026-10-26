@@ -1,6 +1,10 @@
 /**
- * Dialog's contract. Twenty-two names, every default a primitive except the
+ * Dialog's contract. Twenty-six names, every default a primitive except the
  * two literals `allowedLiterals` already holds for Button and Field.
+ *
+ * The four type tokens default to the body's own primitives, as the reset's
+ * `body` rule reads them, so a dialog reads like the page wherever it is
+ * mounted, and a brand can still set a dialog's text apart.
  *
  * `backdrop-bg` reads `scrim`, the primitive that exists for exactly this. It
  * resolves only where `::backdrop` inherits from its originating element —
@@ -27,6 +31,11 @@ export const dialogTokens = {
   "ui-dialog-pad": "var(--sp-6)",
   "ui-dialog-gap": "var(--sp-4)",
   "ui-dialog-header-gap": "var(--sp-4)",
+
+  "ui-dialog-font-family": "var(--font-sans)",
+  "ui-dialog-font-size": "var(--fs-md)",
+  "ui-dialog-font-weight": "var(--fw-regular)",
+  "ui-dialog-line-height": "var(--lh-base)",
 
   "ui-dialog-close-size": "var(--control-h-sm)",
   "ui-dialog-close-radius": "var(--r-sm)",

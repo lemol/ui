@@ -39,6 +39,12 @@ const offset = "0 calc(var(--ui-dialog-enter-offset) * -1)"
  * Under `sheetBreakpoint` the panel is a sheet: docked to the bottom edge,
  * the screen's width, sliding up (`sheet.ts`). Last in the block, so it wins
  * the panel's own size and entry by source order.
+ *
+ * The panel sets every inherited text property a container sets for its own
+ * look, at the body's values. The top layer lifts a `<dialog>` out of the
+ * page's boxes but not out of its inheritance, so a dialog mounted beside its
+ * trigger in a menu item took the item's `nowrap`, pointer and type, and no
+ * line of its form wrapped.
  */
 const panelStyle = css({
   maxInlineSize: "min(var(--ui-dialog-max-inline-size), calc(100% - var(--ui-dialog-inset) * 2))",
@@ -48,6 +54,16 @@ const panelStyle = css({
   padding: "var(--ui-dialog-pad)",
   background: "var(--ui-dialog-bg)",
   color: "var(--ui-dialog-ink)",
+  fontFamily: "var(--ui-dialog-font-family)",
+  fontSize: "var(--ui-dialog-font-size)",
+  fontWeight: "var(--ui-dialog-font-weight)",
+  fontStyle: "normal",
+  lineHeight: "var(--ui-dialog-line-height)",
+  letterSpacing: "normal",
+  textTransform: "none",
+  textAlign: "start",
+  whiteSpace: "normal",
+  cursor: "auto",
   borderStyle: "solid",
   borderWidth: "var(--ui-dialog-border-width)",
   borderColor: "var(--ui-dialog-border)",

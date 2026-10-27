@@ -21,8 +21,8 @@
   },
   "scripts": {
     "check": "bun run lint && bun run typecheck && bun run test",
-    "lint": "oxfmt --check && oxlint",
-    "fix": "oxlint --fix && oxfmt",
+    "lint": "bun fmt --check && oxlint",
+    "fix": "oxlint --fix && bun fmt",
     "typecheck": "tsc -p tsconfig.json",
     "test": "bun test",
     "test:git-consumer": "bun test test/git-consumer.test.ts",
@@ -32,7 +32,6 @@
     "@playwright/cli": "^0.1.21",
     "@stylistic/eslint-plugin": "^5.10.0",
     "@types/bun": "^1.4.2",
-    "oxfmt": "^0.72.0",
     "oxlint": "^1.87.0",
     "playwright": "^1.63.0",
     "typescript": "^7.0.2"

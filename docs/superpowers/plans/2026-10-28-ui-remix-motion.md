@@ -43,7 +43,7 @@ Copied from the task, `docs/` and `AGENTS.md`. Every task's requirements include
 - **Verify degradation:**
   - *Verify 1 (@starting-style degradation):* `@keyframes` animations (`shake`, `pop`, `drawCheck`, `dissolve`, `shimmer`) rely on CSS Animations Level 1, not `@starting-style`, and run everywhere. Overlay entry/exit transitions isolate `@starting-style` in nested blocks so engines without support open instantly. Vendor pseudo-elements (like `::-webkit-search-cancel-button`) drop silently on unsupported engines.
   - *Verify 2 (reduced motion):* Every duration token defaults to `var(--dur-*)`. The global reset zeroes `--dur-*` with `!important` under `prefers-reduced-motion: reduce` and `:root[data-motion="reduce"]`.
-  - *Verify 3 (no literals):* Repo-wide test in `src/remix/tokens.test.ts` guards that no token default carries literal durations (`\d+ms`) or easing curves (`cubic-bezier`). Emitted CSS tests guard that view-transition rules read only design tokens.
+  - *Verify 3 (no literals):* a rendered-CSS guard, `src/remix/motion/no-literals.test.ts` (created in Task A, extended by C–H), renders each `motion.ts` mixin and every component this plan touches (Field, CopyButton, Badge, TabBar, Button, Tabs, Toaster, Skeleton), runs `stylesOf(...)` over the output, and fails on `/\b\d+(\.\d+)?m?s\b/` or `cubic-bezier`. It reads the places literals would actually land (component `css()` blocks, keyframes, view-transition rules). A guard over token defaults would be vacuous: `src/remix/tokens.test.ts` (`defaults every token to a primitive that exists`) already rejects any default that is not `var(--primitive)` or an allowed literal. Today's tree is clean: `grep -rnE "cubic-bezier|[0-9]+m?s[\" ,;]" src apps` outside tests and `src/design` finds only `src/mini/theme.ts` (primitive values) and a comment in `sheet/tokens.ts`. Task J's router test applies the same regex to the rendered motion page's `<style>` blocks.
 - **The gate for every change is `bun run check`** (lint + typecheck + test).
 - **Commit messages** end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **No proof changes.** The check stage proves this head with the existing scenarios; this plan registers no new ones.
@@ -55,7 +55,7 @@ Checked against the current tree before this plan was written; each carries the 
 - **`remix` 3.1.0 ships no same-document view-transition caller.** `grep -rl "startViewTransition" "$R/src" "$R/dist"` (with `$R` the resolved `remix` install) prints nothing (`rc=1`), and `grep -rli "view-transition" "$R/guides" "$R/INDEX.md" "$R/README.md"` prints nothing (`rc=1`). Same-document transitions need `document.startViewTransition()`, which is JavaScript — so "opt-in CSS with no JavaScript" holds for cross-document only. This plan ships the CSS side (minted names, `::view-transition-group` timing) ready for a caller, and records the caller as depending on `remix` or a future ladder-step-3 behaviour, not on this milestone.
 - **Tabs are route links and cannot morph in M5.** `src/remix/tabs/tabs.tsx` documents: "Tabs as route links, not in-page panels: each tab is an `<a>` to its own URL...". Switching tabs is a navigation. Since cross-document view transitions are not enabled across playground pages (to keep navigation consistent) and Remix ships no same-document caller, the Tabs sliding indicator morph cannot run live during navigation in M5. The CSS rules ship ready and benignly inert, with the gap documented on the motion page.
 - **Two visible elements sharing a `view-transition-name` throw and skip the transition.** Task-brief premise, restated in `docs/motion.md` ("Names must be minted, not written"); the factory in Task B exists because of it.
-- **A view-transition-name must be a `<custom-ident>`, and following `overlay()` names are verbatim with no sanitising.** In CSS Values 4, `<dashed-ident>` (such as names with `--`) is a valid `<custom-ident>`. Following `src/remix/dialog/overlay.tsx` ("`name` is used as the id verbatim, with no sanitising... sanitising would hide its cause rather than prevent it"), `viewTransitionName(id, part?)` does NOT sanitise characters. To prevent stem/part collisions without mutating caller strings, `id` and `part` are joined with a `--` part delimiter when `part` is given: `("new", "task-dialog")` yields `"new--task-dialog"` and `("new-task", "dialog")` yields `"new-task--dialog"`. They never collide.
+- **A view-transition-name must be a `<custom-ident>`; the factory refuses what it cannot keep unique or valid.** Following `src/remix/dialog/overlay.tsx` ("surface the cause"), `viewTransitionName(id, part?)` never rewrites a caller's string; it joins `id` and `part` with `--` and **throws, naming the input,** when `id` or `part` contains `--` (the delimiter, so `("a--b","c")` and `("a","b--c")` can never meet, nor `("x--toast")` and `("x","toast")`), when `id` is empty, when `part` is the empty string, or when either is not a valid ident (`/^[A-Za-z_][A-Za-z0-9_-]*$/` — an id such as `1st` or `my toast` would otherwise be silently dropped by the browser). Uniqueness across *different* stems is the caller's contract, the same as `overlay()` names; the guarantee is that stem and part cannot be re-split into another pair.
 - **Motion page route pattern is `/pages/dashboard`.** `apps/playground/app/routes.ts` maps `dashboard: get("/pages/dashboard")`; Task J copies that shape as `motion: get("/pages/motion")`.
 - **The switchers already preserve unknown params.** `HiddenFields` carries every current param except `except`, so the new `motion` param rides along in every existing form with no change to them.
 
@@ -63,7 +63,7 @@ Checked against the current tree before this plan was written; each carries the 
 
 Five failure modes the plan implies but no task's tests fully exercise; each line gets its test pinned to the owning task in that task's own step style.
 
-- Two `Tabs` (or two toasts, two menus) on one page derive the same transition name because their stems collide — Task B's non-collision test (`viewTransitionName("new", "task-dialog") !== viewTransitionName("new-task", "dialog")`) plus Task G's stem-scoping test.
+- Two `Tabs` (or two toasts, two menus) on one page derive the same transition name because their stems collide — Task B's refusal tests (`--` in a stem or part throws; `("a-b","c")` and `("a","b-c")` differ) plus Task G's stem-scoping test.
 - A `Tabs` with no `name` renders today's instant switch with no error — Task G asserts the indicator carries no `view-transition-name` when the stem is absent.
 - `CopyButton` confirmed state preserves DOM elements for animation — Task D asserts the button contains the checkmark SVG and label containers; the runtime sets `data-copy-confirmed` without overwriting `textContent`, and removes the attribute on revert so subsequent copies re-trigger the animation.
 - Under `prefers-reduced-motion: reduce`, the UA's own root crossfade is UA behaviour, not ours — Task I asserts only our `::view-transition-group` / root-pseudo timing rules read tokens (and so zero out), and names the UA default as explicitly uncovered.
@@ -75,8 +75,8 @@ Five failure modes the plan implies but no task's tests fully exercise; each lin
 | --- | --- | --- |
 | `src/remix/motion/motion.ts` | Create: shared keyframe mixin factories (`shake`, `pop`, `drawCheck`, `dissolve`, `shimmer`) | A |
 | `src/remix/motion/motion.test.ts` | Create: keyframe names, token reads, degradation shape | A |
-| `src/remix/motion/names.ts` | Create: the minted `view-transition-name` factory (verbatim, `--` delimiter) | B |
-| `src/remix/motion/names.test.ts` | Create: uniqueness, no-sanitising, delimiter non-collision, ident validity | B |
+| `src/remix/motion/names.ts` | Create: the minted `view-transition-name` factory (verbatim or refused, `--` reserved as the join) | B |
+| `src/remix/motion/names.test.ts` | Create: join, refusals (`--`, empty, non-ident), ident validity | B |
 | `src/remix/motion/README.md` | Create: what lives here and why keyframes are shared but tokens are not | A |
 | `src/remix/field/tokens.ts` | Modify: `ui-field-error-duration`, `ui-field-error-easing` | C |
 | `src/remix/field/field.tsx` | Modify: shake on `[aria-invalid]`, dissolve on the search cancel button | C |
@@ -85,9 +85,11 @@ Five failure modes the plan implies but no task's tests fully exercise; each lin
 | `src/remix/copy-button/copy-button.tsx` | Modify: confirm state draws check SVG and dissolves confirm label | D |
 | `src/remix/copy-button/copy-button.test.tsx` | Modify: the confirm suite | D |
 | `src/remix/runtime.ts` | Modify: `--copy` toggles `data-copy-confirmed` attribute, clears on revert | D |
-| `src/remix/runtime.test.ts` | Modify: attribute addition and revert assertions | D |
+| `test/browser/copy-button.browser.test.ts` | Modify: assert label state through `data-copy-label` / `aria-hidden` and the button's accessible name, not `textContent` (lines 34, 66, 75 break otherwise) | D |
 | `src/remix/tokens.ts` | Modify: aggregate `copyTokens` | D |
-| `src/remix/tokens.test.ts` | Modify: `ui-copy` prefix joins list; repo-wide no-literals guard | D |
+| `src/remix/tokens.test.ts` | Modify: `ui-copy` prefix joins list | D |
+| `src/remix/motion/no-literals.test.ts` | Create: rendered-CSS guard — no literal durations or easing curves in mixins or touched components | A |
+| `src/remix/skeleton/skeleton.tsx` | Modify: consume the shared shimmer keyframes instead of its own `ui-skeleton-shimmer` | A |
 | `src/remix/index.ts` | Modify: export `viewTransitionName` | B |
 | `src/remix/badge/tokens.ts` | Modify: `ui-badge-pop-duration`, `ui-badge-pop-easing` | E |
 | `src/remix/badge/badge.tsx` | Modify: count pop-in | E |
@@ -130,7 +132,7 @@ No new package subpath: `motion/` is internal to the `remix` layer, reached rela
 
 **Interfaces:**
 - Consumes: `css` from `../css.ts` (same-layer relative import, allowed).
-- Produces: `shake(timing)`, `pop(timing)`, `drawCheck(timing)`, `dissolve(timing)`, `shimmer(timing)` for Tasks C–F and J, each taking `{ duration: string; easing: string }` (component token refs as strings) and returning a `CSSMixinDescriptor` carrying an `animation` shorthand plus its `@keyframes` block. Keyframe names are shared and fixed: `ui-motion-shake`, `ui-motion-pop`, `ui-motion-draw`, `ui-motion-dissolve`, `ui-motion-shimmer` — two elements sharing a `@keyframes` name is the normal case (the `Spinner` precedent), not a collision.
+- Produces: `shake(timing)`
 
 - [ ] **Step 1: Write the failing test** in `src/remix/motion/motion.test.ts`. Render a probe element mixing each factory with literal token refs (e.g. `shake({ duration: "var(--ui-probe-duration)", easing: "var(--ui-probe-easing)" })`) through `renderToHtml` + `stylesOf`, and assert:
   - Each block contains its `@keyframes ui-motion-*` name.
@@ -158,12 +160,17 @@ Expected: FAIL — module does not exist.
   - `pop`: `scale` 0.6→1 on the spring easing the caller passes.
   - `drawCheck`: `stroke-dashoffset` for an SVG check path.
   - `dissolve`: opacity + slight translate.
-  - `shimmer`: gradient sweep background-position `200% 0` to `-200% 0` (for shimmering text or accents).
-  Each factory takes timing strings — distances and offsets are small structural constants inside the keyframes, the same way `Spinner`'s `rotate` is.
+  - `shimmer`: background-position sweep `200% 0` to `-200% 0` — lifted verbatim from `src/remix/skeleton/skeleton.tsx` (`@keyframes ui-skeleton-shimmer`, same body). The keyframes move to `motion.ts` as `ui-motion-shimmer`; `Skeleton` consumes the mixin (its `animation` keeps reading `--ui-skeleton-duration`/`--ui-skeleton-easing`), and its test is updated for the renamed keyframes. One definition, two consumers.
+  `shimmer` only owns the sweep (background-position + keyframes). Whatever wears it supplies its own `backgroundImage`/`backgroundSize` from tokens: `Skeleton` keeps its gradient on `--ui-skeleton-bg`/`--ui-skeleton-shimmer`; the playground's shimmer text (Task J) uses a page-local `css()` block with `backgroundImage: linear-gradient(90deg, var(--ink-muted) 25%, var(--ink) 50%, var(--ink-muted) 75%)`, `backgroundSize: 200% 100%`, `backgroundClip: text`, `color: transparent`, and timing from `var(--dur-slow)`/`var(--ease-in-out-smooth)` — primitives only, no literals.
+  Each factory takes timing strings
+
+- [ ] **Step 3b: Move Skeleton onto the shared keyframes and add the literal guard.**
+  - `skeleton.tsx` drops its local `@keyframes ui-skeleton-shimmer` and mixes `shimmer({ duration: "var(--ui-skeleton-duration)", easing: "var(--ui-skeleton-easing)" })`; its test changes `@keyframes ui-skeleton-shimmer` to `@keyframes ui-motion-shimmer` and still asserts the `infinite` iteration (the mixin takes an optional `iterations`, default 1, so Skeleton passes `"infinite"`).
+  - Create `src/remix/motion/no-literals.test.ts` (see *Verify 3*): render every mixin and `Skeleton`, `stylesOf(...)`, and `expect(styles).not.toMatch(/\b\d+(\.\d+)?m?s\b/)` / `not.toContain("cubic-bezier")`. Tasks C–H each add their component to the list in their own Step 1.
 
 - [ ] **Step 4: Run the test to verify it passes.**
 
-Run: `bun test src/remix/motion/motion.test.ts`
+Run: `bun test src/remix/motion/motion.test.ts src/remix/motion/no-literals.test.ts src/remix/skeleton/skeleton.test.tsx`
 Expected: PASS.
 
 - [ ] **Step 5: Write `src/remix/motion/README.md`.** Keyframes are shared because sharing them is safe; timing tokens are per-component because retuning is per-component; names (`view-transition-name`) are minted in `names.ts` using the `overlay()` pattern (verbatim, `--` part delimiter) because sharing names throws.
@@ -171,7 +178,7 @@ Expected: PASS.
 - [ ] **Step 6: Commit.**
 
 ```bash
-git add src/remix/motion/ && git commit -m "feat(motion): shared keyframe mixins for the polish layer
+git add src/remix/motion/ src/remix/skeleton/ && git commit -m "feat(motion): shared
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -188,21 +195,20 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: nothing.
 - Produces: `viewTransitionName(id: string, part?: string): string` for Tasks G–H — extending the `overlay()` pattern to transition names. Components pass their already-minted id (`overlay()`/`popover()`/`toast()` ids, `Field`'s name stem, `Tabs`' `name` stem) plus an optional part (`"indicator"`, `"surface"`, `"toast"`), and never write the name themselves.
-- Following `src/remix/dialog/overlay.tsx`, `id` is used verbatim with no sanitising ("sanitising would hide its cause rather than prevent it"). When `part` is provided, `id` and `part` are joined with `--` (a delimiter distinct from `-`), guaranteeing that `("new", "task-dialog")` yields `"new--task-dialog"` while `("new-task", "dialog")` yields `"new-task--dialog"`, preventing delimiter collisions by construction.
+- Following `src/remix/dialog/overlay.tsx`, `id` and `part` are used verbatim or refused, never rewritten: the factory throws an `Error` whose message names the offending argument and value when `id`/`part` contains `--`, when `id` is empty, when `part` is `""`, or when either fails `/^[A-Za-z_][A-Za-z0-9_-]*$/`. With `--` banned from both inputs, the joined string splits back to exactly one `(id, part)` pair, so no two distinct pairs collide.
 
 - [ ] **Step 1: Write the failing test** in `src/remix/motion/names.test.ts`. Assert:
-  - `viewTransitionName("new-task", "dialog")` returns `"new-task--dialog"`.
-  - `viewTransitionName("saved")` returns `"saved"`.
-  - Verbatim preservation: `viewTransitionName("custom_ident", "part")` returns `"custom_ident--part"` (no mutating or stripping valid characters).
-  - Delimiter non-collision: `viewTransitionName("new", "task-dialog") !== viewTransitionName("new-task", "dialog")`.
-  - Delimiter non-collision with spaces or stems: `viewTransitionName("a-b", "c") !== viewTransitionName("a", "b-c")`.
-  - `<custom-ident>` validity: result is a non-empty string starting with a letter, underscore, or double hyphen (CSS Values 4 `<dashed-ident>`).
+  - `viewTransitionName("new-task", "dialog")` returns `"new-task--dialog"`; `viewTransitionName("saved")` returns `"saved"`.
+  - Non-collision of single-dash splits: `("new", "task-dialog")` ≠ `("new-task", "dialog")`; `("a-b", "c")` ≠ `("a", "b-c")`.
+  - Refusals, each `toThrow` with a message containing the offending value: `("a--b", "c")`, `("a", "b--c")`, `("x--toast")`, `("")`, `("x", "")`, `("1st")`, `("my toast")`.
+  - Ident validity: every accepted result matches `/^[A-Za-z_][A-Za-z0-9_-]*$/` (property check over the accepted fixtures above).
 
 ```ts
 expect(viewTransitionName("new-task", "dialog")).toBe("new-task--dialog")
 expect(viewTransitionName("saved")).toBe("saved")
-expect(viewTransitionName("new", "task-dialog")).not.toBe(viewTransitionName("new-task", "dialog"))
 expect(viewTransitionName("a-b", "c")).not.toBe(viewTransitionName("a", "b-c"))
+expect(() => viewTransitionName("a--b", "c")).toThrow("a--b")
+expect(() => viewTransitionName("x", "")).toThrow()
 ```
 
 - [ ] **Step 2: Run it to verify it fails.**
@@ -212,11 +218,25 @@ Expected: FAIL — module does not exist.
 
 - [ ] **Step 3: Implement `viewTransitionName(id: string, part?: string): string` in `src/remix/motion/names.ts`.**
   ```ts
+  const ident = /^[A-Za-z_][A-Za-z0-9_-]*$/
+
+  function check(label: string, value: string) {
+    if (value.includes("--") || !ident.test(value)) {
+      throw new Error(`viewTransitionName: ${label} ${JSON.stringify(value)} must be a plain ident without "--"`)
+    }
+  }
+
   export function viewTransitionName(id: string, part?: string): string {
-    return part !== undefined && part.length > 0 ? `${id}--${part}` : id
+    check("id", id)
+
+    if (part === undefined) return id
+
+    check("part", part)
+
+    return `${id}--${part}`
   }
   ```
-  No sanitising: verbatim preservation matching `overlay()`. Delimiter `--` ensures stem and part never collide.
+  Verbatim or refused, never rewritten — `overlay()`'s contract. `--` is reserved as the join, so stem and part cannot be re-split.
 
 - [ ] **Step 4: Export it from `src/remix/index.ts`** beside `overlay`.
 
@@ -278,11 +298,11 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 **Files:**
 - Create: `src/remix/copy-button/tokens.ts`
-- Modify: `src/remix/copy-button/copy-button.tsx`, `src/remix/copy-button/copy-button.test.tsx`, `src/remix/runtime.ts`, `src/remix/runtime.test.ts`, `src/remix/tokens.ts`, `src/remix/tokens.test.ts`
+- Modify: `src/remix/copy-button/copy-button.tsx`, `src/remix/copy-button/copy-button.test.tsx`, `src/remix/runtime.ts`, `test/browser/copy-button.browser.test.ts`
 
 **Interfaces:**
 - Consumes: `drawCheck`, `dissolve` from `../motion/motion.ts`.
-- Produces: repo-wide no-literal duration/easing guard test in `tokens.test.ts`.
+- Produces: the `ui-copy` token tier and the `data-copy-label` / `data-copy-confirmed` hooks the runtime and CSS share.
 
 New tokens:
 ```ts
@@ -291,35 +311,37 @@ New tokens:
 ```
 
 The component and runtime changes:
-- `CopyButton` renders an icon wrapper (carrying the checkmark SVG path) and label containers for both the default label/children and the confirm label. Under `[data-copy-confirmed]`, the checkmark SVG draws via `drawCheck` and the confirm label dissolves in via `dissolve`, while default label dissolves out.
-- In `src/remix/runtime.ts`: `--copy`'s handler sets `source.setAttribute("data-copy-confirmed", "")` WITHOUT overwriting `source.textContent`. In the revert timer callback, `source.removeAttribute("data-copy-confirmed")` removes the attribute, allowing a subsequent copy to re-trigger the animation cleanly.
+- `CopyButton` renders an icon wrapper (the checkmark SVG path) and two label spans: `<span data-copy-label="idle">` (the children) and `<span data-copy-label="confirm" aria-hidden="true">` (the confirm label). Under `[data-copy-confirmed]`, the check draws via `drawCheck`, the confirm label dissolves in via `dissolve`, and the idle label dissolves out.
+- **Accessible name.** Opacity does not remove a node from the accessibility tree, so the runtime owns it: on `--copy` it sets `data-copy-confirmed` and toggles `aria-hidden` (`true` on the idle label, removed from the confirm label); the revert timer restores both. The button's accessible name is therefore exactly the visible label — `Copy API key`, then `Copied!`, then `Copy API key` — matching what the old `textContent` swap exposed.
+- In `src/remix/runtime.ts`: `--copy` no longer writes `source.textContent` (it would destroy the SVG and label nodes the animation needs). It sets the attribute and `aria-hidden` states above; the revert timer reverses them, so a second copy re-triggers the animation. The `data-copy-original-label` bookkeeping goes away with the text swap.
+- Where a consumer renders a `CopyButton` without the spans (none in-tree), the runtime falls back to the old `textContent` swap.
 
 - [ ] **Step 1: Write the failing tests.**
   - Component test in `copy-button.test.tsx`: render `CopyButton`, assert the checkmark SVG path and label wrapper are present; assert a `[data-copy-confirmed]` rule whose `animation` names `ui-motion-draw` with `ui-copy-confirm-*` tokens, and confirm label dissolves via `dissolve`.
-  - Runtime test in `runtime.test.ts`: trigger `--copy`, assert `data-copy-confirmed` attribute is set on the button; advance timers past `COPY_CONFIRM_DURATION_MS`, assert `data-copy-confirmed` is removed; trigger `--copy` again, assert `data-copy-confirmed` is set once more.
-  - Repo-wide token guard in `tokens.test.ts`: add `it("contains no literal durations or easing curves anywhere in token defaults")` asserting that no token default in `componentTokens` matches `/\d+ms|\d+s|cubic-bezier/`.
+  - Runtime behaviour in `test/browser/copy-button.browser.test.ts` (`src/remix/runtime.test.ts` has no DOM — its only case is `does nothing where there is no document`, so nothing is added there). Rewrite the three `textContent` assertions: after a click, `getByRole("button", { name: "Copied!" })` resolves and `[data-copy-confirmed]` is present; after the revert, `getByRole("button", { name: "Copy API key" })` resolves and the attribute is gone; a second click before the revert keeps `Copied!` as the name and records two writes.
+  - Add `copy-button` to the rendered-CSS guard `src/remix/motion/no-literals.test.ts` (Task A).
 
 - [ ] **Step 2: Run them to verify they fail.**
 
-Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/runtime.test.ts src/remix/tokens.test.ts`
+Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/tokens.test.ts src/remix/motion/no-literals.test.ts`, then `bun test test/browser/copy-button.browser.test.ts` (needs `bunx playwright install chromium`).
 Expected: FAIL.
 
 - [ ] **Step 3: Implement.**
   - Create `src/remix/copy-button/tokens.ts` with `ui-copy-confirm-duration` and `ui-copy-confirm-easing`.
   - In `copy-button.tsx`, render checkmark SVG and confirm label span; mix `drawCheck` and `dissolve` under `&[data-copy-confirmed]`.
-  - In `runtime.ts`, `--copy` sets `data-copy-confirmed` attribute; revert timer removes it.
+  - In `runtime.ts`, `--copy` sets `data-copy-confirmed` and the `aria-hidden` swap; the revert timer reverses both.
   - In `tokens.ts`, aggregate `copyTokens`.
-  - In `tokens.test.ts`, add `"ui-copy"` to prefixes and implement the repo-wide no-literal guard.
+  - In `tokens.test.ts`, add `"ui-copy"` to the prefix list.
 
 - [ ] **Step 4: Run the tests.**
 
-Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/runtime.test.ts src/remix/tokens.test.ts`
+Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/tokens.test.ts src/remix/motion/no-literals.test.ts` and `bun test test/browser/copy-button.browser.test.ts`.
 Expected: PASS.
 
 - [ ] **Step 5: Commit.**
 
 ```bash
-git add src/remix/copy-button/ src/remix/runtime.ts src/remix/runtime.test.ts src/remix/tokens.ts src/remix/tokens.test.ts && git commit -m "feat(copy-button): confirmed state draws a check and dissolves
+git add src/remix/copy-button/ src/remix/runtime.ts test/browser/copy-button.browser.test.ts src/remix/motion/no-literals.test.ts
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -413,11 +435,12 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `viewTransitionName` from `../motion/names.ts` (Task B).
 - Produces: the worked example of a minted morph later tasks copy.
 
-No new tokens: `::view-transition-group` timing reads the existing `ui-tabs-transition-duration`/`ui-tabs-transition-easing`.
+No new tokens. **Group timing is not emitted from the component.** A `css()` block nests every key under the element class (probed: `css({ viewTransitionName: "views--indicator", "::view-transition-group(views--indicator)": {...} })` renders `.rmxc-… { view-transition-name: …; ::view-transition-group(views--indicator) { … } }` inside `@layer rmx.…`), so the pseudo-selector becomes a descendant of the element and never matches the root-attached pseudo tree — a test for its presence would pass over dead CSS. Components therefore declare only the minted `view-transition-name`; the transition's duration and easing come from the document-level `::view-transition-group(*)` / `::view-transition-old(*)` / `::view-transition-new(*)` rules Task I emits (token-driven, root-level, so reduced motion zeroes them). Per-component timing is out of scope.
 
 - [ ] **Step 1: Write the failing tests** in `src/remix/tabs/tabs.test.tsx`.
-  - With `name="views"`: assert the line-variant indicator rule carries `view-transition-name: views--indicator` (the exact output of `viewTransitionName("views", "indicator")`); assert a `::view-transition-group(views--indicator)` rule setting `animation-duration`/`animation-timing-function` from the tabs transition tokens.
-  - Without `name`: assert no `view-transition-name` appears anywhere in the styles — today's instant switch, unchanged.
+  - With `name="views"`: assert (the `view-transition-name` declaration only — see the *Group timing* note below).
+  - Add `Tabs` to `no-literals.test.ts`; assert the styles contain no `::view-transition` selector (position, not just presence, is the bug).
+  - Without `name`: assert no
 
 - [ ] **Step 2: Run them to verify they fail.**
 
@@ -451,9 +474,9 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Consumes: `viewTransitionName` from `../motion/names.ts`.
 - Produces: nothing for later tasks.
 
-No new tokens: group timing reads the existing `ui-toast-transition-duration`/`ui-toast-transition-easing`. The toast's id is already page-unique by the `toast()` contract.
+No new tokens, and no component-level `::view-transition-group` rule (same reason as Task G: it would nest under the element class and never match; timing comes from Task I's document-level rules). **Caller status, as for Tabs:** toasts appear in the same document, and with no `startViewTransition` caller (Load-bearing findings) the minted names never morph in M5. The CSS ships ready and benignly inert; the motion page says so.
 
-- [ ] **Step 1: Write the failing test** in `src/remix/toaster/toaster.test.tsx`. Render `toast("saved")` and assert the shell block carries `view-transition-name: saved--toast` (via `viewTransitionName(id, "toast")`) plus a `::view-transition-group(saved--toast)` timing rule on the toast tokens. Render two toasters with different names and assert their names differ.
+Render `toast("saved")` and assert the shell block carries `view-transition-name: saved--toast` (via `viewTransitionName(id, "toast")`) and that the styles contain no `::view-transition` selector. Render two toasts with different ids and assert their names differ. Add `Toaster` to `no-literals.test.ts`.
 
 - [ ] **Step 2: Run it to verify it fails.**
 
@@ -470,7 +493,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit.**
 
 ```bash
-git add src/remix/toaster/ && git commit -m "feat(toaster): stack shifts morph under view transitions
+git add src/remix/toaster/ && git commit -m "feat(toaster): mint per-toast transition names (inert until a same-document caller exists)
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -488,10 +511,10 @@ Explicitly out of scope: dropdown menu size morph. `Menu`/`Popover` entry/exit a
 - Consumes: nothing.
 - Produces: `EmitOptions.viewTransitions: "auto"` for callers, and `ThemeStyleProps.viewTransitions?: "auto"`.
 
-Decision: `emitTokensCss(theme, options)` accepts `options?: { viewTransitions?: "auto" }`. When present, it emits `@view-transition { navigation: auto; }` and token-timed root-pseudo rules. `ThemeStyleProps` gains `viewTransitions?: "auto" | undefined` to forward the option to `emitTokensCss`. Absent by default, so default stylesheets are byte-identical to existing output.
+Decision: `emitTokensCss(theme, options)` accepts `options?: { viewTransitions?: "auto" }`. When present, it emits `@view-transition { navigation: auto; }` and the token-timed, document-level `::view-transition-group(*)`, `::view-transition-old(*)`, `::view-transition-new(*)` rules — the only place per-name morph timing (Tabs indicator, toasts) can live, since a component's nested `css()` block cannot reach the root-attached pseudo tree (Task G). `ThemeStyleProps` gains `viewTransitions?: "auto" | undefined` to forward the option to `emitTokensCss`. Absent by default, so default stylesheets are byte-identical to existing output.
 
 - [ ] **Step 1: Write the failing tests.**
-  - `src/design/css/emit.test.ts`: default `emitTokensCss(theme)` contains no `@view-transition`; with `{ viewTransitions: "auto" }` it contains `@view-transition { navigation: auto; }` and `::view-transition-old(root), ::view-transition-new(root)` reading `var(--dur-base)` and `var(--ease-in-out-smooth)` — no literals.
+  - `src/design/css/emit.test.ts`: default `emitTokensCss(theme)` contains no `@view-transition`; with `{ viewTransitions: "auto" }` it contains `@view-transition { navigation: auto; }` and top-level (not nested inside any rule) `::view-transition-group(*)`, `::view-transition-old(*)`, `::view-transition-new(*)` rules reading `var(--dur-base)` and `var(--ease-in-out-smooth)` — no literals. Assert the selector's position: the rule text starts at column 0 of the sheet, outside any `{ … }`.
   - `src/remix/theme-style.test.tsx`: default render contains no `@view-transition`; with `viewTransitions="auto"` it renders the opt-in rules.
 
 - [ ] **Step 2: Run them to verify they fail.**
@@ -499,7 +522,7 @@ Decision: `emitTokensCss(theme, options)` accepts `options?: { viewTransitions?:
 Run: `bun test src/design/css/emit.test.ts src/remix/theme-style.test.tsx`
 Expected: FAIL — no such option or prop.
 
-- [ ] **Step 3: Implement.** Emit the at-rule and root-pseudo timing only when `options?.viewTransitions === "auto"`. Forward `viewTransitions` from `ThemeStyle` to `emitTokensCss`. Supported in Chrome 126+, Safari 18.2+; unsupported in stable Firefox where navigation remains ordinary full-page loads. Root old/new pseudo rules read `--dur-base`/`--ease-in-out-smooth` so reduced-motion zeroes them centrally.
+- [ ] **Step 3: Implement.** Emit the at-rule and root-pseudo timing only when `options?.viewTransitions === "auto"`. Forward `viewTransitions` from `ThemeStyle` to `emitTokensCss`. Supported in Chrome 126+, Safari 18.2+; unsupported in stable Firefox where navigation remains ordinary full-page loads. Group/old/new pseudo rules read `--dur-base`/`--ease-in-out-smooth` so reduced-motion zeroes them centrally.
 
 - [ ] **Step 4: Run the tests.**
 
@@ -535,12 +558,12 @@ Design: The toggle is **query-only** (`?motion=reduce`), not persisted, followin
 Page sections (each: `Eyebrow` + `Heading level={2}` + live components + `Text tone="muted"` degradation note):
 1. **Confirm**: `CopyButton` with SVG `drawCheck` and label `dissolve`.
 2. **Invalid**: `Field` with `error` shake (`ui-motion-shake`).
-3. **Counts**: `Badge` with live count pop-in (`ui-motion-pop`).
+3. **Counts**: `Badge` with live count pop-in (`ui-motion-pop`); the note states that a pop (and Field's shake) replays on every page load and frame swap that inserts the element, including for unchanged badges.
 4. **Notification**: `TabBar` with badge and dot pop-in.
 5. **Search**: `Field type="search"` with clear dissolve.
 6. **Loading**: `Skeleton` block + text-sized `Skeleton` + revealed content panel mixing `dissolve`, plus Shimmer Text demonstration mixing `shimmer` from `motion.ts`.
 7. **Tabs**: line `Tabs` with `name`, noting route-link status and caller gap.
-8. **Stacked**: two toasts with stacking transition names.
+8. **Stacked**: two toasts with minted transition names, stating plainly that the stack shift is inert until a same-document `startViewTransition` caller exists (same gap as Tabs).
 9. **Press**: `Button` scale press feedback beside `Switch` toggle feedback.
 10. **Menu**: `Menu`/`Popover` entry morph with `interpolate-size` deferral note.
 11. **Transitions**: same- vs cross-document support table + `@view-transition` opt-in code snippet.

@@ -32,5 +32,4 @@
 
 ## M6 — Events and models
 
-- [ ] [38 - interactivity.md says how hand-written behaviour is shaped](./m6-events-and-models/38-interactivity-md-says-how-hand-written-behaviour-is-shaped.md)
 - [ ] [39 - Commands announce their outcome as typed events](./m6-events-and-models/39-commands-announce-their-outcome-as-typed-events.md)

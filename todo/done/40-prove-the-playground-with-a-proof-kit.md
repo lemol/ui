@@ -2,6 +2,8 @@
 title: Prove the playground with a proof kit
 tags: [onboarding]
 findings: [proof-exists, agent:proof-pins-effect]
+completed_at: 2026-10-28T07:59:26Z
+outcome: completed
 ---
 **Why.** Readiness rule `proof-exists` (rules v2) is a Gap: ui ships Remix 3 components and has a Playwright browser kit, but nzila has no `prove` for it, so no run leaves a screenshot, a video or a manifest for its reviewer to check. ui already serves the playground's real router to Playwright in `test/browser/harness.ts`. A proof kit replays the same surface as named steps instead of assertions. See the `lemol:prove` skill and `@lemol/proof`'s README (tag `proof@0.1.0`).
 

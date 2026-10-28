@@ -1,7 +1,7 @@
 # ui
 
-- [ ] [40 - Prove the playground with a proof kit](./40-prove-the-playground-with-a-proof-kit.md)
 - [ ] [42 - Switch takes defaultChecked and a label node](./42-switch-takes-defaultchecked-and-a-label-node.md)
+- [ ] [43 - Prove from a run worktree](./43-prove-from-a-run-worktree.md)
 
 ## M1 — Foundation and contract proof
 

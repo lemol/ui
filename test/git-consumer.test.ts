@@ -1,6 +1,6 @@
 import { afterAll, beforeAll, expect, test } from "bun:test"
 import { execFileSync, spawnSync } from "node:child_process"
-import { mkdirSync, mkdtempSync, readFileSync, rmSync, writeFileSync } from "node:fs"
+import { mkdirSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from "node:fs"
 import { tmpdir } from "node:os"
 import { join } from "node:path"
 
@@ -94,6 +94,11 @@ test("installs from Git, then renders a component and emits a theme", () => {
   const install = spawnSync("bun", ["install"], { cwd: consumer, encoding: "utf8" })
 
   expect([install.status, install.stderr]).toEqual([0, install.stderr])
+
+  // The proof kit pins `effect`, but as a dev-only workspace member: a git
+  // dependency installs the root package alone, so none of it may follow.
+  expect(readdirSync(join(consumer, "node_modules"))).not.toContain("effect")
+  expect(readFileSync(join(consumer, "bun.lock"), "utf8")).not.toContain('"effect@')
 
   const run = spawnSync("bun", ["run", "contract"], { cwd: consumer, encoding: "utf8" })
 

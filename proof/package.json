@@ -1,0 +1,12 @@
+{
+  "name": "@lemol/ui-proof",
+  "version": "0.0.0",
+  "private": true,
+  "description": "The playground's proof kit: Playwright scenarios over the catalogue's own router, run by bun proof/run.ts",
+  "type": "module",
+  "dependencies": {
+    "@lemol/proof": "git+https://github.com/lemol/proof.git#proof@0.1.0",
+    "effect": "4.0.0",
+    "playwright": "^1.63.0"
+  }
+}

@@ -90,14 +90,19 @@ and handles fingerprinting, ETags, sourcemaps and HMR. A second bundler would
 mean two compilers in one repo, `remix.json` no longer the single source of
 asset config, and `remix doctor` blind to half the build.
 
-## 8. No Effect dependency
+## 8. The shipped package has no Effect dependency
 
-`remix` is the only peer dependency.
+`remix` is its only peer dependency. The proof kit in `proof/` follows
+`@lemol/proof`'s exact `effect` pin, but it is a private, dev-only workspace
+member, so nothing a consumer installs carries it.
 
 **Why.** Every other lemol repo pins `effect` to an exact version and must
 change it in lockstep with the others. These are presentation packages that do
 not need it, so staying out of that constraint costs nothing and buys the
-freedom to version independently.
+freedom to version independently. The proof kit cannot stay out — its helper
+peers on `effect` — so it lives where the constraint stops at the repository:
+`test/git-consumer.test.ts` installs the package by git and checks that no
+`effect` follows it.
 
 ## 9. Themes are data; components are not forked
 

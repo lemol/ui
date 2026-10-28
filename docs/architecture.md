@@ -101,6 +101,7 @@ src/
     png.ts                encodePng, with a stored deflate of its own
 apps/
   playground/             catalogue, page recipes, theme and no-JS switches
+proof/                    the playground's proof kit -- see "Proof" below
 ```
 
 ## Why `design` holds no components
@@ -226,11 +227,41 @@ than a runner; `bunx playwright install chromium` once per machine.
   by a relative path, so this is the only one that fails when the package stops
   being installable. It tests `HEAD`, not the working tree.
 
+## Proof
+
+A test asserts; a proof shows. `proof/` is a private workspace member,
+`@lemol/ui-proof`, that replays the catalogue as named steps in a real browser
+through `@lemol/proof`, and leaves a screenshot per step, a video and a
+`manifest.json` for a reviewer to check. It serves the playground's own router
+the way `test/browser/harness.ts` does — the real document, assets and demos,
+no fixtures.
+
+```
+proof/
+  run.ts                  reads PROOF_DIR and PROOF_SCENARIOS, calls run()
+  kit.ts                  the actions: one per step, each with its `expected`
+  kit/launch.ts           the playground's router on an ephemeral port
+  scenarios.ts            the registry
+  scenarios/<id>.ts       one scenario each; the id is the path, unsuffixed
+```
+
+```sh
+PROOF_DIR="$PWD/proof-output" bun proof/run.ts                            # all of them
+PROOF_DIR="$PWD/proof-output" PROOF_SCENARIOS=dialog/open bun proof/run.ts
+```
+
+`PROOF_DIR` must be an existing empty directory. It is not a test: neither
+`bun test` nor `bun run check` runs or typechecks it, because it takes
+`@lemol/proof` by tagged git release and `effect` at that helper's exact pin,
+and only this member installs them — see [principles.md](principles.md) rule 8.
+`bunx tsc -p proof` typechecks it on its own; `test/boundaries.test.ts` keeps
+`src/` and `apps/` from importing it.
+
 ## Workspace composition
 
 A clone of this repository can be a member of a larger Bun workspace: listed in
-its root `workspaces`, with the clone's `apps/*` listed beside it, since Bun has
-no nested workspaces. A package that lives only in that workspace names it
+its root `workspaces`, with the clone's `apps/*` and `proof` listed beside it,
+since Bun has no nested workspaces. A package that lives only in that workspace names it
 `"@lemol/ui": "workspace:*"`, and the root install links that name straight to
 this clone: the working tree, not a copy, and nothing to refresh after a commit.
 A package that must also install alone, such as `todo-md`, pins a tagged

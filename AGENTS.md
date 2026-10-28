@@ -35,6 +35,7 @@ src/
   mini/        @lemol/ui/mini        one concrete design: theme + app shell
 apps/
   playground/  catalogue, page recipes, theme and no-JS switches
+proof/         the playground's proof kit, run by bun proof/run.ts — never a test
 ```
 
 ## Commands
@@ -80,7 +81,9 @@ bun run playground    # the catalogue
 - **No build step.** The package ships TypeScript from `src/`. Browser assets are
   the Remix asset server's job, configured in `remix.json`. Do not add a
   bundler.
-- **No Effect.** `remix` is the only peer dependency.
+- **No Effect in the shipped package.** `remix` is its only peer dependency.
+  Only the dev-only proof kit in `proof/` takes `effect`, at `@lemol/proof`'s
+  pin.
 - **Blank lines carry structure.** Separate value consts from function
   consts; leave a blank line after a multi-line const, between consts and
   a following call, around every `if`, loop, `switch` and `try`, and before

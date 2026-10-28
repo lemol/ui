@@ -143,6 +143,32 @@ const sourceFiles = () =>
     ...new Glob(pattern).scanSync({ cwd: srcRoot, onlyFiles: true }),
   ])
 
+// The proof kit is a dev-only workspace member that pins `effect`. Neither the
+// package nor the catalogue it serves may reach it, by path or by name.
+const kitRoot = join(root, "proof")
+const kitPackages = ["@lemol/proof", "@lemol/ui-proof"]
+
+/** Returns a message for each import in `source` that reaches the proof kit. `file` is relative to the root. */
+export const kitImports = (file: string, source: string): string[] =>
+  specifiersOf(source).flatMap((specifier) => {
+    if (specifier.startsWith(".")) {
+      const target = relative(kitRoot, resolve(root, dirname(file), specifier))
+
+      return target.startsWith("..") ? [] : [`${file}: imports the proof kit (${specifier})`]
+    }
+
+    return kitPackages.some((entry) => matches(entry, specifier))
+      ? [`${file}: imports ${specifier}, the proof kit`]
+      : []
+  })
+
+const servedFiles = () =>
+  ["src", "apps"].flatMap((dir) =>
+    [...new Glob("**/*.{ts,tsx}").scanSync({ cwd: join(root, dir), onlyFiles: true })]
+      .filter((file) => !file.split(sep).includes("node_modules"))
+      .map((file) => join(dir, file)),
+  )
+
 describe("the SPA import boundary", () => {
   // A layer missing from `allowed` would otherwise be checked against nothing.
   test("covers every layer under src", () => {
@@ -281,5 +307,48 @@ describe("the SPA import boundary", () => {
         `${at("opentui", "index.ts")}: not inside a known layer`,
       ])
     })
+  })
+})
+
+describe("the proof kit boundary", () => {
+  test("nothing under src or apps imports the proof kit", () => {
+    const files = servedFiles()
+
+    expect(files.some((file) => file.startsWith(`apps${sep}`))).toBe(true)
+    const found = files.flatMap((file) => kitImports(file, readFileSync(join(root, file), "utf8")))
+
+    expect(found).toEqual([])
+  })
+
+  test("the checker rejects the kit by path and by name", () => {
+    const router = join("apps", "playground", "app", "router.ts")
+    const button = join("src", "remix", "button", "button.tsx")
+    const source = [
+      'import { launch } from "../../../proof/kit/launch.ts"',
+      'import { run } from "@lemol/proof"',
+      'import { decodeManifest } from "@lemol/proof/manifest"',
+      'import { scenarios } from "@lemol/ui-proof"',
+    ].join("\n")
+
+    expect(kitImports(router, source)).toEqual([
+      `${router}: imports the proof kit (../../../proof/kit/launch.ts)`,
+      `${router}: imports @lemol/proof, the proof kit`,
+      `${router}: imports @lemol/proof/manifest, the proof kit`,
+      `${router}: imports @lemol/ui-proof, the proof kit`,
+    ])
+    expect(kitImports(button, 'import { run } from "../../../proof/run.ts"')).toEqual([
+      `${button}: imports the proof kit (../../../proof/run.ts)`,
+    ])
+    expect(
+      kitImports(
+        router,
+        [
+          'import { Button } from "../../../src/remix/index.ts"',
+          'import { routes } from "./routes.ts"',
+          'import { render } from "remix/middleware/render"',
+          'import { proofed } from "../../../proofed/index.ts"',
+        ].join("\n"),
+      ),
+    ).toEqual([])
   })
 })

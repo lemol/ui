@@ -1,2 +1,5 @@
 gate: bun run check
 retest: bun test {files}
+prove:
+  command: bun proof/run.ts
+  scenarios: proof/scenarios

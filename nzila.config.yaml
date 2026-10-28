@@ -1,0 +1,2 @@
+gate: bun run check
+retest: bun test {files}

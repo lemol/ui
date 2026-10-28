@@ -1,5 +1,7 @@
 # ui
 
+- [ ] [40 - Prove the playground with a proof kit](./40-prove-the-playground-with-a-proof-kit.md)
+
 ## M1 — Foundation and contract proof
 
 ## M2 — Catalogue

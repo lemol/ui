@@ -36,10 +36,11 @@ adds it as a peer dependency, to the boundary allow-list and to each app's
 | Tabs | route links with `aria-current` — these are server-rendered apps | none |
 | Tab bar | route links with `aria-current`, and a `popovertarget` button for *More* | none |
 | App bar | a link one level up, the rest the page's own controls | none |
-| Menu keyboard model | `@remix-run/ui/menu` over a native popover | on hydration |
-| Combobox | `@remix-run/ui/combobox` over a native `<select>` | on hydration |
+| Menu keyboard model | planned — `@remix-run/ui/menu` over a native popover | on hydration |
+| Combobox | planned — `@remix-run/ui/combobox` over a native `<select>` | on hydration |
 
 ¹ plus the compat shim below.
+No component in `src/` uses `@remix-run/ui` yet.
 
 ## The command protocol
 
@@ -160,6 +161,39 @@ statically placed popover.
    capture-phase listener. Do not add a second listener.
 4. If it has real logic, export that as a pure function and test it directly.
 5. Document the command in the list above.
+
+## If the app needs hand-written behaviour
+
+When an application built on this package must write client code (ladder step
+3), keep to four rules:
+
+1. **State an app owns is a model.** A plain TypeScript subclass of
+   `TypedEventTarget<{ change: Event }>` from `remix/component`, with no DOM in
+   it, tested without a browser. A component subscribes with
+   `{ signal: handle.signal }` and calls `handle.update()`; components sharing
+   one model receive it through context, never through `clientEntry` props,
+   which are serialised across the server/client boundary.
+2. **Custom events are namespaced, built from an `Event` subclass, and
+   declared** on `HTMLElementEventMap` or `DocumentEventMap` in one module per
+   app, so a listener's type comes from the ambient declaration rather than a
+   cast. The `--` command namespace stays this package's; an app uses its own
+   prefix (such as `app:`).
+3. **The narrowest signal**, as in the guide's table: an `on()` handler's second
+   argument for "latest event wins", a queued task's (`queueTask()`) argument
+   for work keyed to a single render, and `handle.signal` for component-lifetime
+   listeners. Setup that runs once goes in setup scope, not inside the render
+   function, where the task signal aborts on every re-render.
+4. **DOM the client owns is declared**: `data-rmx-preserve-dom` for a subtree,
+   `data-rmx-preserve-attrs` for attributes. Explicit declarations prevent the
+   frame reconciler from stripping client-owned state on navigation. Root blank
+   scheme and density persistence (task 37) is the worked example.
+
+For code examples, see the Remix interactivity guide
+(`node_modules/remix/guides/05-interactivity.md` at
+`#saving-a-client-owned-document`, `#creating-custom-mixins`, and
+`#optimistic-updates-and-cancellation-with-handle-signal`). The full design
+rationale is in
+`docs/superpowers/specs/2026-10-24-ui-remix-events-and-models-design.md`.
 
 ## Not in scope
 

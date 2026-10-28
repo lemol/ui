@@ -1,6 +1,5 @@
 # ui
 
-- [ ] [42 - Switch takes defaultChecked and a label node](./42-switch-takes-defaultchecked-and-a-label-node.md)
 - [ ] [43 - Prove from a run worktree](./43-prove-from-a-run-worktree.md)
 
 ## M1 — Foundation and contract proof

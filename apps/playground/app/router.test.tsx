@@ -47,6 +47,27 @@ describe("the home route", () => {
     expect(page).toContain('name="nojs"')
     expect(page).toContain('name="compat"')
   })
+
+  // The runtime turns a same-origin GET form into a client navigation, which
+  // keeps the document and every script already in it. Scheme and density
+  // re-render fine that way; scripts and compat change what the document
+  // loads, so only those two leave the navigation to the browser.
+  it("loads a fresh document only from the scripts and compat switches", async () => {
+    const forms = (await html("/")).split("<form").slice(1)
+
+    const opensDocument = (field: string) => {
+      const form = forms.find((candidate) => candidate.includes(`name="${field}"`)) ?? ""
+
+      return form.slice(0, form.indexOf(">")).includes("data-rmx-document")
+    }
+
+    expect(["scheme", "density", "nojs", "compat"].map(opensDocument)).toEqual([
+      false,
+      false,
+      true,
+      true,
+    ])
+  })
 })
 
 describe("client entries", () => {

@@ -115,7 +115,10 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
           </div>
         </form>
 
-        <form action={pathname} method="get">
+        {/* `data-rmx-document` hands this navigation to the browser. Left to
+            the runtime it would swap the page in place, keeping every script
+            the document already loaded — scripts "off" with the runtime on. */}
+        <form action={pathname} data-rmx-document method="get">
           <div mix={group}>
             <span mix={label}>Scripts</span>
             <HiddenFields except={["nojs"]} params={params} />
@@ -130,7 +133,9 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
           </div>
         </form>
 
-        <form action={pathname} method="get">
+        {/* The backfill is decided as the entry boots, so it too needs a
+            fresh document rather than an in-place swap. */}
+        <form action={pathname} data-rmx-document method="get">
           <div mix={group}>
             <span mix={label}>Compat</span>
             <HiddenFields except={["compat"]} params={params} />

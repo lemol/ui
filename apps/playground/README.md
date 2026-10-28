@@ -54,6 +54,11 @@ cancels the platform's own trusted `CommandEvent` and drives the invocation
 itself — which is what `test/browser/dialog.browser.test.ts` uses to tell the
 two paths apart.
 
+With scripts on, the runtime turns a switch's GET form into a client
+navigation that keeps the document. Scheme and density re-render fine that
+way; scripts and compat change what the document loads, so their forms carry
+`data-rmx-document` and leave the navigation to the browser.
+
 There is no theme switcher: M1 ships one theme, and a switcher with one option
 is decoration. It arrives with the second theme.
 

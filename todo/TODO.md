@@ -1,7 +1,5 @@
 # ui
 
-- [ ] [43 - Prove from a run worktree](./43-prove-from-a-run-worktree.md)
-
 ## M1 — Foundation and contract proof
 
 ## M2 — Catalogue

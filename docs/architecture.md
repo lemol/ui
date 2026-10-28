@@ -190,7 +190,7 @@ leaving `allowPackages` at `remix` alone — so the app's own controllers,
 router, document and pages stay unreachable, and the allow-list never becomes
 a deny-list chasing them.
 
-Otherwise the repo follows its siblings: oxlint + oxfmt, one root `tsconfig.json` over
+Otherwise the repo follows its siblings: oxlint + `bun fmt`, one root `tsconfig.json` over
 `src`, `apps` and `test` with the playground extending it, and `bun run check` =
 lint + typecheck + test as the single gate for every change.
 

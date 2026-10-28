@@ -1,3 +1,4 @@
+setup: bun proof/link-worktree.ts
 gate: bun run check
 retest: bun test {files}
 prove:

@@ -61,8 +61,50 @@ describe("Switch", () => {
       await renderToHtml(<Switch checked disabled label="Dark mode" name="dark-mode" />),
     )
 
-    expect(markup).toContain("checked")
+    expect(markup).toMatch(/<input[^>]*\schecked(?:\s|>)/)
+    expect(markup).toContain('aria-checked="true"')
     expect(markup).toContain("disabled")
+  })
+
+  it("starts on from defaultChecked, leaving the switch to the person", async () => {
+    const on = markupOf(
+      await renderToHtml(<Switch defaultChecked label="Dark mode" name="dark-mode" />),
+    )
+
+    const off = markupOf(await renderToHtml(<Switch label="Dark mode" name="dark-mode" />))
+
+    expect(on).toMatch(/<input[^>]*\schecked(?:\s|>)/)
+    expect(on).not.toContain("aria-checked")
+    expect(off).not.toMatch(/<input[^>]*\schecked(?:\s|>)/)
+    expect(off).not.toContain("aria-checked")
+  })
+
+  it("mirrors a controlled off state explicitly", async () => {
+    const markup = markupOf(
+      await renderToHtml(<Switch checked={false} label="Dark mode" name="dark-mode" />),
+    )
+
+    expect(markup).toContain('aria-checked="false"')
+    expect(markup).not.toMatch(/<input[^>]*\schecked(?:\s|>)/)
+  })
+
+  it("draws a label node inside its label", async () => {
+    const markup = markupOf(
+      await renderToHtml(
+        <Switch
+          label={
+            <>
+              Interrupt<span data-more=""> current work</span>
+            </>
+          }
+          name="urgent"
+        />,
+      ),
+    )
+
+    expect(markup).toMatch(
+      /<label for="urgent"[^>]*>Interrupt<span data-more=""> current work<\/span><\/label>/,
+    )
   })
 
   it("wires a hint and an error through aria-describedby", async () => {

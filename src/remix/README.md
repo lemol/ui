@@ -512,12 +512,15 @@ one property, every engine in the baseline, no `appearance: none` and no
 hand-drawn box. `Switch` cannot do that: no native input type gives it a
 track/thumb to retint, so it draws its own — `appearance: none` on a real
 `<input type="checkbox" role="switch">`, the thumb a `::before` translated on
-`:checked`. It stays a real checkbox throughout; `role="switch"` and a mirrored
-`aria-checked` are the only additions.
+`:checked`. It stays a real checkbox throughout; `role="switch"` and, when
+controlled, a mirrored `aria-checked` are the only additions. Otherwise
+`aria-checked` is omitted so the native checked state follows the person's clicks.
 
-`Checkbox`'s `checked` is controlled the way `Field`'s `value` is, and
-`defaultChecked` is its `defaultValue`: a checkbox in a hydrated component
-whose form holds the choice takes `defaultChecked`.
+`Checkbox` and `Switch` take controlled `checked` the way `Field` takes
+`value`, and `defaultChecked` is their `defaultValue`: a control in a hydrated
+component whose form holds the choice takes `defaultChecked`. `Switch`'s
+required `label` is a `RemixNode`, so wording can include inline markup;
+`Checkbox` and `Radio` keep string labels.
 
 All three share `form-control.ts`'s `fieldMessages()` for the id/
 `aria-describedby`/`aria-invalid` wiring `Field` also has — factored out

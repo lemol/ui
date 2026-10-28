@@ -55,9 +55,11 @@ itself — which is what `test/browser/dialog.browser.test.ts` uses to tell the
 two paths apart.
 
 With scripts on, the runtime turns a switch's GET form into a client
-navigation that keeps the document. Scheme and density re-render fine that
-way; scripts and compat change what the document loads, so their forms carry
-`data-rmx-document` and leave the navigation to the browser.
+navigation that keeps the document, so every switch's form carries
+`data-rmx-document` and leaves the navigation to the browser. Scripts and
+compat change what the document loads, and scheme and density must too:
+switching back to system/default renders a blank axis, which a client
+navigation would preserve from the previous render instead of clearing.
 
 There is no theme switcher: M1 ships one theme, and a switcher with one option
 is decoration. It arrives with the second theme.

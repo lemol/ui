@@ -57,7 +57,9 @@ export interface DocumentProps {
    * to the media query.
    *
    * An attribute rendered here beats the remembered one: the boot script only
-   * fills in an axis the document left blank.
+   * fills in an axis the document left blank. A blank axis is named in
+   * `data-rmx-preserve-attrs` so a client-side navigation keeps the client's
+   * value for it the same way.
    */
   scheme?: "light" | "dark" | undefined
   density?: "compact" | undefined

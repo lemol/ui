@@ -49,9 +49,11 @@ describe("the home route", () => {
   })
 
   // The runtime turns a same-origin GET form into a client navigation, which
-  // keeps the document and every script already in it. Scheme and density
-  // re-render fine that way; scripts and compat change what the document
-  // loads, so only those two leave the navigation to the browser.
+  // keeps the document and every script already in it. All four switches
+  // leave the navigation to the browser: scripts and compat change what the
+  // document loads, and scheme and density must too — switching back to
+  // system/default renders a blank axis, which a client navigation would
+  // preserve from the previous render instead of clearing.
   it("loads a fresh document from every switch", async () => {
     const forms = (await html("/")).split("<form").slice(1)
 

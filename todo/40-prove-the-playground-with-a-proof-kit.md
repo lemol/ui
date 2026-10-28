@@ -31,3 +31,11 @@ findings: [proof-exists, agent:proof-pins-effect]
 **Out of scope.** Pixel comparison or visual regression. Proving every catalogue entry: later tasks add scenarios through their `proves:`. Moving the existing `test/browser/` suite onto the kit.
 
 onboard:01M60NRYYCCYMSZTHNTH4GM5NH:tasks/prove-the-playground-with-a-proof-kit.md
+
+## Comments
+
+### @nzila at 2026-10-28 07:39:35 +00:00
+
+Abandoned by api: flow route unblock.abandon
+
+nzila run 01M60PRPCGY69EJ77HJZMXHAE9

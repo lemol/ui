@@ -43,7 +43,7 @@ Copied from the task, `docs/` and `AGENTS.md`. Every task's requirements include
 - **Verify degradation:**
   - *Verify 1 (@starting-style degradation):* `@keyframes` animations (`shake`, `pop`, `drawCheck`, `dissolve`, `shimmer`) rely on CSS Animations Level 1, not `@starting-style`, and run everywhere. Overlay entry/exit transitions isolate `@starting-style` in nested blocks so engines without support open instantly. Vendor pseudo-elements (like `::-webkit-search-cancel-button`) drop silently on unsupported engines.
   - *Verify 2 (reduced motion):* Every duration token defaults to `var(--dur-*)`. The global reset zeroes `--dur-*` with `!important` under `prefers-reduced-motion: reduce` and `:root[data-motion="reduce"]`.
-  - *Verify 3 (no literals):* a rendered-CSS guard, `src/remix/motion/no-literals.test.ts` (created in Task A, extended by C–H), renders each `motion.ts` mixin and every component this plan touches (Field, CopyButton, Badge, TabBar, Button, Tabs, Toaster, Skeleton), runs `stylesOf(...)` over the output, and fails on `/\b\d+(\.\d+)?m?s\b/` or `cubic-bezier`. It reads the places literals would actually land (component `css()` blocks, keyframes, view-transition rules). A guard over token defaults would be vacuous: `src/remix/tokens.test.ts` (`defaults every token to a primitive that exists`) already rejects any default that is not `var(--primitive)` or an allowed literal. Today's tree is clean: `grep -rnE "cubic-bezier|[0-9]+m?s[\" ,;]" src apps` outside tests and `src/design` finds only `src/mini/theme.ts` (primitive values) and a comment in `sheet/tokens.ts`. Task J's router test applies the same regex to the rendered motion page's `<style>` blocks.
+  - *Verify 3 (no literals):* a rendered-CSS guard, `src/remix/motion/no-literals.test.ts` (created in Task A, extended by C–H), renders each `motion.ts` mixin and every component this plan touches (Field, CopyButton, Badge, TabBar, Button, Tabs, Toaster, Skeleton), runs `stylesOf(...)` over the output, and fails on `/\b\d+(\.\d+)?m?s\b/` or `cubic-bezier`. It reads the places literals would actually land (component `css()` blocks, keyframes, view-transition rules). A guard over token defaults would be vacuous: `src/remix/tokens.test.ts` (`defaults every token to a primitive that exists`) already rejects any default that is not `var(--primitive)` or an allowed literal. Today's tree is clean: `grep -rnE "cubic-bezier|[0-9]+m?s[\" ,;]" src apps` outside tests and `src/design` finds only `src/mini/theme.ts` (primitive values) and a comment in `sheet/tokens.ts`. Task J's router test applies the same regex to component styles (`stylesOf()` / `data-rmx-style` blocks only, excluding the emitted `:root` token definitions and the reduced-motion reset) on the rendered motion page.
 - **The gate for every change is `bun run check`** (lint + typecheck + test).
 - **Commit messages** end with `Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>`.
 - **No proof changes.** The check stage proves this head with the existing scenarios; this plan registers no new ones.
@@ -341,7 +341,7 @@ Expected: PASS.
 - [ ] **Step 5: Commit.**
 
 ```bash
-git add src/remix/copy-button/ src/remix/runtime.ts test/browser/copy-button.browser.test.ts src/remix/motion/no-literals.test.ts
+git add src/remix/copy-button/ src/remix/runtime.ts test/browser/copy-button.browser.test.ts src/remix/motion/no-literals.test.ts && git commit -m "feat(copy-button): confirm check and dissolve
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -438,9 +438,9 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 No new tokens. **Group timing is not emitted from the component.** A `css()` block nests every key under the element class (probed: `css({ viewTransitionName: "views--indicator", "::view-transition-group(views--indicator)": {...} })` renders `.rmxc-… { view-transition-name: …; ::view-transition-group(views--indicator) { … } }` inside `@layer rmx.…`), so the pseudo-selector becomes a descendant of the element and never matches the root-attached pseudo tree — a test for its presence would pass over dead CSS. Components therefore declare only the minted `view-transition-name`; the transition's duration and easing come from the document-level `::view-transition-group(*)` / `::view-transition-old(*)` / `::view-transition-new(*)` rules Task I emits (token-driven, root-level, so reduced motion zeroes them). Per-component timing is out of scope.
 
 - [ ] **Step 1: Write the failing tests** in `src/remix/tabs/tabs.test.tsx`.
-  - With `name="views"`: assert (the `view-transition-name` declaration only — see the *Group timing* note below).
+  - With `name="views"`: assert `view-transition-name: views--indicator` via `viewTransitionName("views", "indicator")` (the `view-transition-name` declaration only, and no `::view-transition` group selector — see the *Group timing* note above).
   - Add `Tabs` to `no-literals.test.ts`; assert the styles contain no `::view-transition` selector (position, not just presence, is the bug).
-  - Without `name`: assert no
+  - Without `name`: assert the indicator carries no `view-transition-name`.
 
 - [ ] **Step 2: Run them to verify they fail.**
 
@@ -476,14 +476,17 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 No new tokens, and no component-level `::view-transition-group` rule (same reason as Task G: it would nest under the element class and never match; timing comes from Task I's document-level rules). **Caller status, as for Tabs:** toasts appear in the same document, and with no `startViewTransition` caller (Load-bearing findings) the minted names never morph in M5. The CSS ships ready and benignly inert; the motion page says so.
 
-Render `toast("saved")` and assert the shell block carries `view-transition-name: saved--toast` (via `viewTransitionName(id, "toast")`) and that the styles contain no `::view-transition` selector. Render two toasts with different ids and assert their names differ. Add `Toaster` to `no-literals.test.ts`.
+- [ ] **Step 1: Write the failing tests** in `src/remix/toaster/toaster.test.tsx`.
+  - Render `toast("saved")` and assert the shell block carries `view-transition-name: saved--toast` (via `viewTransitionName(id, "toast")`) and that the styles contain no `::view-transition` selector.
+  - Render two toasts with different ids and assert their names differ.
+  - Add `Toaster` to `no-literals.test.ts`.
 
 - [ ] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/toaster/toaster.test.tsx`
 Expected: FAIL — no transition names.
 
-- [ ] **Step 3: Implement.** Apply `viewTransitionName(toast.id, "toast")` and its `::view-transition-group` timing to the toast shell block.
+- [ ] **Step 3: Implement.** Apply `viewTransitionName(toast.id, "toast")` to the toast shell block (no group timing; timing comes from Task I's document-level rules).
 
 - [ ] **Step 4: Run the tests.**
 
@@ -571,7 +574,7 @@ Page sections (each: `Eyebrow` + `Heading level={2}` + live components + `Text t
 - [ ] **Step 1: Write the failing tests.**
   - `src/design/css/reset.test.ts`: `:root[data-motion="reduce"]` zeroes every `--dur-*` token with `!important`.
   - `src/mini/document.test.tsx`: `motion="reduce"` renders `data-motion="reduce"`.
-  - `apps/playground/app/router.test.tsx`: `?motion=reduce` sets `data-motion="reduce"` on `<html>`.
+  - `apps/playground/app/router.test.tsx`: `?motion=reduce` sets `data-motion="reduce"` on `<html>`; assert no literals in component style blocks (`stylesOf()` / `data-rmx-style` blocks only, excluding `:root` token definitions and the reset) on `/pages/motion`.
 
 - [ ] **Step 2: Run them to verify they fail.**
 

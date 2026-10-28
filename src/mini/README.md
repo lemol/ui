@@ -93,7 +93,11 @@ user already made and is not an enhancement, so a page dropping its browser
 entry normally keeps it. Turning it off is for the one page asserting it
 carries no script element at all. An axis the document rendered itself —
 `scheme="dark"` from a query param — beats the remembered one; the boot script
-only fills in what the document left blank.
+only fills in what the document left blank. Those blank axes are also named in
+`data-rmx-preserve-attrs` on `<html>`, so a toggled scheme or density survives a
+client-side navigation; the playground's switchers load a fresh document
+(`data-rmx-document`) because switching back to *system* or *default* renders a
+blank axis, which would otherwise keep the previous value.
 
 ## Limits of the shell
 

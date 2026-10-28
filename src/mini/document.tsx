@@ -120,8 +120,23 @@ export function Document(handle: Handle<DocumentProps>) {
       children,
     } = handle.props
 
+    // The axes this render left blank. Remix reconciles `<html>` on a
+    // client-side navigation and would strip a toggled attribute the incoming
+    // markup does not carry; naming them keeps the client's value, while an
+    // axis rendered here is not named and so is overwritten.
+    const blank = [
+      scheme === undefined ? "data-scheme" : null,
+      density === undefined ? "data-density" : null,
+    ].filter((name) => name !== null)
+
     return (
-      <html data-density={density} data-scheme={scheme} id={documentRootId} lang={lang}>
+      <html
+        data-density={density}
+        data-rmx-preserve-attrs={blank.length === 0 ? undefined : blank.join(" ")}
+        data-scheme={scheme}
+        id={documentRootId}
+        lang={lang}
+      >
         <head>
           <meta charset="utf-8" />
           <meta name="viewport" content="width=device-width, initial-scale=1" />

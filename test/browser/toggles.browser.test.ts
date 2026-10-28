@@ -1,4 +1,5 @@
 import { afterAll, expect, test } from "bun:test"
+import type { Page } from "playwright"
 import { closeHarness, withPage } from "./harness.ts"
 
 afterAll(closeHarness)
@@ -65,5 +66,79 @@ test("both toggles are inert with the runtime absent", async () => {
 
     expect(await button.getAttribute("command")).toBe("--toggle-density")
     expect(await page.locator("script").count()).toBe(0)
+  })
+})
+
+/** Marks the document, so a full navigation — which discards `window` — fails
+ *  the assertion that follows rather than passing for the wrong reason. */
+const markDocument = (page: Page) => page.evaluate(() => Object.assign(window, { marker: true }))
+const sameDocument = (page: Page) =>
+  page.evaluate(() => (window as unknown as { marker?: boolean }).marker === true)
+
+const attribute = (page: Page, name: string) =>
+  page.evaluate((n) => document.documentElement.getAttribute(n), name)
+
+test("a toggled scheme survives a client-side navigation", async () => {
+  await withPage(async (page, baseUrl) => {
+    await page.emulateMedia({ colorScheme: "light" })
+    await page.goto(`${baseUrl}/c/schemeToggle`)
+    await markDocument(page)
+    await page.getByRole("button", { name: "Toggle theme" }).click()
+    expect(await attribute(page, "data-scheme")).toBe("dark")
+
+    await page.getByRole("link", { name: "Dashboard" }).click()
+    await page.waitForFunction(() => document.title.startsWith("Dashboard"))
+
+    expect(await sameDocument(page)).toBe(true)
+    expect(await attribute(page, "data-scheme")).toBe("dark")
+  })
+})
+
+test("a toggled density survives a client-side navigation", async () => {
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/densityToggle`)
+    await markDocument(page)
+    await page.getByRole("button", { name: "Compact density" }).click()
+    expect(await attribute(page, "data-density")).toBe("compact")
+
+    await page.getByRole("link", { name: "Dashboard" }).click()
+    await page.waitForFunction(() => document.title.startsWith("Dashboard"))
+
+    expect(await sameDocument(page)).toBe(true)
+    expect(await attribute(page, "data-density")).toBe("compact")
+  })
+})
+
+test("a server-chosen scheme beats the one the previous page carried", async () => {
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/schemeToggle?scheme=dark`)
+    expect(await attribute(page, "data-scheme")).toBe("dark")
+    await page.evaluate(() => {
+      const link = document.createElement("a")
+
+      link.href = "/pages/dashboard?scheme=light"
+      link.id = "to-light"
+      link.textContent = "to light"
+      document.body.append(link)
+    })
+    await markDocument(page)
+    await page.locator("#to-light").click()
+    await page.waitForFunction(() => document.title.startsWith("Dashboard"))
+
+    expect(await sameDocument(page)).toBe(true)
+    expect(await attribute(page, "data-scheme")).toBe("light")
+  })
+})
+
+test("switching the scheme back to system leaves no data-scheme", async () => {
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/schemeToggle?scheme=dark`)
+    expect(await attribute(page, "data-scheme")).toBe("dark")
+
+    await page.getByRole("button", { name: "System", exact: true }).click()
+    await page.waitForURL("**scheme=system**")
+    await page.waitForLoadState("load")
+
+    expect(await attribute(page, "data-scheme")).toBeNull()
   })
 })

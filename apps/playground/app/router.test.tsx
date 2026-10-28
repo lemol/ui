@@ -52,7 +52,7 @@ describe("the home route", () => {
   // keeps the document and every script already in it. Scheme and density
   // re-render fine that way; scripts and compat change what the document
   // loads, so only those two leave the navigation to the browser.
-  it("loads a fresh document only from the scripts and compat switches", async () => {
+  it("loads a fresh document from every switch", async () => {
     const forms = (await html("/")).split("<form").slice(1)
 
     const opensDocument = (field: string) => {
@@ -62,8 +62,8 @@ describe("the home route", () => {
     }
 
     expect(["scheme", "density", "nojs", "compat"].map(opensDocument)).toEqual([
-      false,
-      false,
+      true,
+      true,
       true,
       true,
     ])
@@ -218,14 +218,14 @@ describe("the catalogue route", () => {
   it("renders unset, light, dark and compact with no client JavaScript", async () => {
     // Assertions read the <html> open tag, not the page. The emitted sheet
     // carries `:root[data-scheme="dark"]` and `:root[data-density="compact"]`
-    // selectors of its own, so a whole-page `not.toContain("data-scheme")`
+    // selectors of its own, so a whole-page `not.toContain("data-scheme=")`
     // would fail on every request.
     // Unset: no attribute at all, so the media query decides the scheme.
     const unset = await html("/c/button?nojs")
 
     expect(unset).not.toContain("<script")
-    expect(htmlTag(unset)).not.toContain("data-scheme")
-    expect(htmlTag(unset)).not.toContain("data-density")
+    expect(htmlTag(unset)).not.toContain("data-scheme=")
+    expect(htmlTag(unset)).not.toContain("data-density=")
 
     // The value with a job the others do not have: the emitter guards its
     // dark block with `:root:not([data-scheme="light"])`, so `light` is what
@@ -250,15 +250,15 @@ describe("the catalogue route", () => {
   it("treats the switchers' explicit defaults as unset", async () => {
     const tag = htmlTag(await html("/c/button?scheme=system&density=default"))
 
-    expect(tag).not.toContain("data-scheme")
-    expect(tag).not.toContain("data-density")
+    expect(tag).not.toContain("data-scheme=")
+    expect(tag).not.toContain("data-density=")
   })
 
   it("ignores a scheme or density it does not recognise", async () => {
     const tag = htmlTag(await html("/c/button?scheme=sepia&density=roomy"))
 
-    expect(tag).not.toContain("data-scheme")
-    expect(tag).not.toContain("data-density")
+    expect(tag).not.toContain("data-scheme=")
+    expect(tag).not.toContain("data-density=")
   })
 
   it("still renders every tone with the runtime absent", async () => {

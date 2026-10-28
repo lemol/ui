@@ -56,7 +56,10 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
 
     return (
       <div mix={bar}>
-        <form action={pathname} method="get">
+        {/* `data-rmx-document`: switching back to system or default renders a
+            blank axis, which an in-place swap would preserve from the last
+            render instead of clearing. */}
+        <form action={pathname} data-rmx-document method="get">
           <div mix={group}>
             <span mix={label}>Scheme</span>
             <HiddenFields except={["scheme"]} params={params} />
@@ -90,7 +93,7 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
           </div>
         </form>
 
-        <form action={pathname} method="get">
+        <form action={pathname} data-rmx-document method="get">
           <div mix={group}>
             <span mix={label}>Density</span>
             <HiddenFields except={["density"]} params={params} />

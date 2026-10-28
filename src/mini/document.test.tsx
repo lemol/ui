@@ -99,8 +99,8 @@ describe("Document", () => {
   it("renders the scheme and density the server chose, and nothing when it chose neither", async () => {
     // Read the open tag, not the page: the emitted sheet carries
     // :root[data-scheme="dark"] selectors of its own.
-    expect(htmlTag(await renderToHtml(<Document title="Tasks" />))).not.toContain("data-scheme")
-    expect(htmlTag(await renderToHtml(<Document title="Tasks" />))).not.toContain("data-density")
+    expect(htmlTag(await renderToHtml(<Document title="Tasks" />))).not.toContain("data-scheme=")
+    expect(htmlTag(await renderToHtml(<Document title="Tasks" />))).not.toContain("data-density=")
 
     const chosen = htmlTag(
       await renderToHtml(<Document density="compact" scheme="dark" title="T" />),
@@ -133,5 +133,31 @@ describe("Document", () => {
 
     expect(page.indexOf("<meta charset")).toBeLessThan(icon)
     expect(icon).toBeLessThan(page.indexOf("@layer rmx-reset, base, rmx;"))
+  })
+})
+
+describe("Document preserved axes", () => {
+  it("names both axes when neither is set", async () => {
+    const page = await renderToHtml(<Document title="Tasks" />)
+
+    expect(htmlTag(page)).toContain('data-rmx-preserve-attrs="data-scheme data-density"')
+  })
+
+  it("names only density when the scheme is set", async () => {
+    const page = await renderToHtml(<Document scheme="dark" title="Tasks" />)
+
+    expect(htmlTag(page)).toContain('data-rmx-preserve-attrs="data-density"')
+  })
+
+  it("names only the scheme when density is set", async () => {
+    const page = await renderToHtml(<Document density="compact" title="Tasks" />)
+
+    expect(htmlTag(page)).toContain('data-rmx-preserve-attrs="data-scheme"')
+  })
+
+  it("omits the attribute when both are set", async () => {
+    const page = await renderToHtml(<Document density="compact" scheme="dark" title="Tasks" />)
+
+    expect(htmlTag(page)).not.toContain("data-rmx-preserve-attrs")
   })
 })

@@ -241,9 +241,15 @@ proof/
   run.ts                  reads PROOF_DIR and PROOF_SCENARIOS, calls run()
   kit.ts                  the actions: one per step, each with its `expected`
   kit/launch.ts           the playground's router on an ephemeral port
+  link-worktree.ts        mirrors the main checkout's proof/node_modules into a run worktree
   scenarios.ts            the registry
   scenarios/<id>.ts       one scenario each; the id is the path, unsuffixed
 ```
+
+A run worktree has no `node_modules`, so `bun proof/run.ts` cannot resolve
+`@lemol/proof` from there. Run `bun proof/link-worktree.ts` (the config's
+`setup`) first: it mirrors the main checkout's `proof/node_modules` into the
+worktree link by link, and does nothing in the main checkout itself.
 
 ```sh
 PROOF_DIR="$PWD/proof-output" bun proof/run.ts                            # all of them

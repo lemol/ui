@@ -6,6 +6,7 @@ import {
   mkdirSync,
   mkdtempSync,
   readdirSync,
+  readFileSync,
   readlinkSync,
   realpathSync,
   rmSync,
@@ -63,6 +64,12 @@ describe("proof/link-worktree.ts", () => {
     symlinkSync(scopedTarget, join(mainModules, "@scope", "pkg"))
     symlinkSync("../plain/cli.js", join(mainModules, ".bin", "tool"))
 
+    // Non-symlink entries a hoisted linker (or a marker file) could leave behind.
+    // These pin the main-checkout guard: without it the script would delete them.
+    mkdirSync(join(mainModules, "realpkg"), { recursive: true })
+    writeFileSync(join(mainModules, "realpkg", "index.js"), "export const real = true\n")
+    writeFileSync(join(mainModules, ".bun-tag"), "tag\n")
+
     const worktree = join(scratch, "worktree")
 
     git(main, "worktree", "add", worktree, "HEAD")
@@ -71,7 +78,20 @@ describe("proof/link-worktree.ts", () => {
     const mainRun = spawnSync("bun", ["proof/link-worktree.ts"], { cwd: main, encoding: "utf8" })
 
     expect([mainRun.status, mainRun.stderr]).toEqual([0, ""])
-    expect(readdirSync(mainModules).sort()).toEqual([".bin", "@scope", "plain"])
+    expect(readdirSync(mainModules).sort()).toEqual([
+      ".bin",
+      ".bun-tag",
+      "@scope",
+      "plain",
+      "realpkg",
+    ])
+    expect(lstatSync(join(mainModules, "realpkg")).isSymbolicLink()).toBe(false)
+    expect(lstatSync(join(mainModules, "realpkg", "index.js")).isSymbolicLink()).toBe(false)
+    expect(lstatSync(join(mainModules, ".bun-tag")).isSymbolicLink()).toBe(false)
+    expect(readFileSync(join(mainModules, "realpkg", "index.js"), "utf8")).toBe(
+      "export const real = true\n",
+    )
+    expect(readFileSync(join(mainModules, ".bun-tag"), "utf8")).toBe("tag\n")
 
     // Run in the worktree: mirrors links
     const wtRun = spawnSync("bun", ["proof/link-worktree.ts"], { cwd: worktree, encoding: "utf8" })

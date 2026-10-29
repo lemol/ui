@@ -120,10 +120,19 @@ describe("proof/link-worktree.ts", () => {
     expect(realpathSync(wtPkg)).toBe(realpathSync(scopedTarget))
     expect(realpathSync(wtTool)).toBe(realpathSync(plainCli))
 
-    // Second run changes nothing
+    // Second run changes nothing: same inodes and mtimes, not a delete-and-relink
+    const linkPaths = [wtPlain, wtPkg, wtTool]
+    const identity = (path: string) => {
+      const stat = lstatSync(path)
+
+      return { ino: stat.ino, mtimeMs: stat.mtimeMs }
+    }
+
+    const before = linkPaths.map(identity)
     const wtRun2 = spawnSync("bun", ["proof/link-worktree.ts"], { cwd: worktree, encoding: "utf8" })
 
     expect([wtRun2.status, wtRun2.stderr]).toEqual([0, ""])
+    expect(linkPaths.map(identity)).toEqual(before)
     expect(realpathSync(wtPlain)).toBe(realpathSync(plainTarget))
     expect(realpathSync(wtPkg)).toBe(realpathSync(scopedTarget))
     expect(realpathSync(wtTool)).toBe(realpathSync(plainCli))

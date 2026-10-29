@@ -242,12 +242,12 @@ const invalidDeclarations = {
 // A server-invalid control shakes as it is inserted: frame navigation replaces
 // the control after a failed submission, so the shake is the round-trip signal.
 // `:user-invalid` does not shake, since blur is not that signal.
-const clearTiming = "var(--ui-field-clear-duration) var(--ui-field-clear-easing)"
-
 const errorTiming = {
   duration: "var(--ui-field-error-duration)",
   easing: "var(--ui-field-error-easing)",
 }
+
+const clearTiming = "var(--ui-field-clear-duration) var(--ui-field-clear-easing)"
 
 /**
  * Everything every control shares, and every state it can be in.

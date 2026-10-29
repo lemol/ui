@@ -1,8 +1,10 @@
 const ident = /^[A-Za-z_][A-Za-z0-9_-]*$/
 
-// A bare CSS-wide or `view-transition-name` keyword: `none` would mean "no name".
+// A bare CSS-wide or `view-transition-name` keyword, in any case (CSS keywords
+// are case-insensitive): `none` would mean "no name", `default` is never an ident.
 const reserved = new Set([
   "none",
+  "default",
   "auto",
   "match-element",
   "inherit",
@@ -32,7 +34,7 @@ export function viewTransitionName(id: string, part?: string): string {
 
   const name = part === undefined ? id : (check("part", part), `${id}--${part}`)
 
-  if (reserved.has(name)) {
+  if (reserved.has(name.toLowerCase())) {
     throw new Error(`viewTransitionName: ${JSON.stringify(name)} is a reserved keyword, not a name`)
   }
 

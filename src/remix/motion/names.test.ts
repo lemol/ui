@@ -27,6 +27,9 @@ describe("viewTransitionName", () => {
       ["1st", undefined, '"1st"'],
       ["my toast", undefined, '"my toast"'],
       ["none", undefined, '"none"'],
+      ["None", undefined, '"None"'],
+      ["Revert-Layer", undefined, '"Revert-Layer"'],
+      ["default", undefined, '"default"'],
     ]
 
     for (const [id, part, named] of refused) {

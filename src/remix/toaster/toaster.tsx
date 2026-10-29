@@ -2,6 +2,7 @@ import { attrs, type Handle, type MixInput, type RemixNode } from "remix/compone
 import { Button, type ButtonProps } from "../button/button.tsx"
 import { css } from "../css.ts"
 import { invoke } from "../invocation.ts"
+import { viewTransitionName } from "../motion/names.ts"
 import { DEFAULT_TOAST_DURATION_MS, TOAST_DURATION_ATTR } from "./constants.ts"
 
 export type ToastTone = "neutral" | "success" | "warning" | "danger" | "info"
@@ -125,6 +126,10 @@ export interface Toaster {
  * ```
  */
 export function toast(name: string): Toaster {
+  // Minted here, not in the shell: a bad id throws where it is written, and
+  // the shell carries it verbatim in its style attribute. Inert until a
+  // same-document caller exists — no startViewTransition caller ships in M5.
+  const transitionName = viewTransitionName(name, "toast")
   const dismiss = invoke("--dismiss-toast", name)
   const hide = invoke("hide-popover", name)
 
@@ -148,6 +153,7 @@ export function toast(name: string): Toaster {
           mix={[shellStyle, toneStyles[tone], attrs({ [TOAST_DURATION_ATTR]: String(ms) }), mix]}
           popover="manual"
           role="status"
+          style={`view-transition-name: ${transitionName}`}
         >
           {children}
           <button

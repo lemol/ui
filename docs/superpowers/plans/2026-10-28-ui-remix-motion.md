@@ -476,24 +476,24 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 No new tokens, and no component-level `::view-transition-group` rule (same reason as Task G: it would nest under the element class and never match; timing comes from Task I's document-level rules). **Caller status, as for Tabs:** toasts appear in the same document, and with no `startViewTransition` caller (Load-bearing findings) the minted names never morph in M5. The CSS ships ready and benignly inert; the motion page says so.
 
-- [ ] **Step 1: Write the failing tests** in `src/remix/toaster/toaster.test.tsx`.
+- [x] **Step 1: Write the failing tests** in `src/remix/toaster/toaster.test.tsx`.
   - Render `toast("saved")` and assert the shell block carries `view-transition-name: saved--toast` (via `viewTransitionName(id, "toast")`) and that the styles contain no `::view-transition` selector.
   - Render two toasts with different ids and assert their names differ.
   - Add `Toaster` to `no-literals.test.ts`.
 
-- [ ] **Step 2: Run it to verify it fails.**
+- [x] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/toaster/toaster.test.tsx`
 Expected: FAIL — no transition names.
 
-- [ ] **Step 3: Implement.** Apply `viewTransitionName(toast.id, "toast")` to the toast shell block (no group timing; timing comes from Task I's document-level rules).
+- [x] **Step 3: Implement.** Apply `viewTransitionName(toast.id, "toast")` to the toast shell block (no group timing; timing comes from Task I's document-level rules).
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/toaster/toaster.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/toaster/ && git commit -m "feat(toaster): mint per-toast transition names (inert until a same-document caller exists)

@@ -115,6 +115,29 @@ describe("toast", () => {
     }
   })
 
+  it("mints a transition name per toast for a stack shift, in its style attribute", async () => {
+    const Saved = toast("saved")
+    const Synced = toast("synced")
+    const html = await renderToHtml(
+      <>
+        <Saved.Toast>Saved.</Saved.Toast>
+        <Synced.Toast>Synced.</Synced.Toast>
+      </>,
+    )
+
+    expect(/<div[^>]*id="saved"[^>]*>/.exec(markupOf(html))?.[0]).toContain(
+      'style="view-transition-name: saved--toast"',
+    )
+    expect(/<div[^>]*id="synced"[^>]*>/.exec(markupOf(html))?.[0]).toContain(
+      'style="view-transition-name: synced--toast"',
+    )
+    expect(stylesOf(html)).not.toContain("view-transition")
+  })
+
+  it("refuses, where it is minted, an id that cannot name a transition", () => {
+    expect(() => toast("1st")).toThrow('"1st"')
+  })
+
   it("keeps the shell, tone and close blocks disjoint by property", async () => {
     const Saved = toast("saved-toast")
     const html = await renderToHtml(<Saved.Toast tone="success">Saved.</Saved.Toast>)

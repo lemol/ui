@@ -8,6 +8,7 @@ import { Field } from "../field/field.tsx"
 import { Skeleton } from "../skeleton/skeleton.tsx"
 import { TabBar } from "../tab-bar/tab-bar.tsx"
 import { Tabs } from "../tabs/tabs.tsx"
+import { toast } from "../toaster/toaster.tsx"
 import { dissolve, drawCheck, pop, shake, shimmer } from "./motion.ts"
 
 const literal = /\b\d+(\.\d+)?m?s\b/
@@ -40,6 +41,11 @@ const renders: Record<string, () => RemixNode> = {
   tabs: () => (
     <Tabs items={[{ label: "A", href: "/a", current: true }]} label="Views" name="views" />
   ),
+  toaster: () => {
+    const T = toast("probe")
+
+    return <T.Toast>Hi</T.Toast>
+  },
 }
 
 describe("motion, as rendered", () => {

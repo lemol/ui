@@ -18,6 +18,11 @@ const group = css({
   marginBlockEnd: "var(--sp-8)",
 })
 
+const chosen =
+  "Lemol Studio — design, research and the shared component library for every product team"
+
+const narrow = css({ maxInlineSize: "24rem" })
+
 const actions = css({
   marginBlockStart: "var(--sp-4)",
 })
@@ -69,6 +74,16 @@ export function FieldDemo() {
           </Button>
         </div>
       </form>
+
+      <p mix={label}>field: a chosen value longer than its box</p>
+      <div mix={[group, narrow]}>
+        <Field control="select" label="Workspace" name="workspace">
+          <option value="personal">Personal</option>
+          <option selected value="studio">
+            {chosen}
+          </option>
+        </Field>
+      </div>
 
       <p mix={label}>field: the states</p>
       <div mix={group}>

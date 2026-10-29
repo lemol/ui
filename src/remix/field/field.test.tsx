@@ -59,6 +59,15 @@ const keywords = new Set([
   "1",
   "auto",
   "0",
+  // The chosen value in the closed select: a button that takes the select's
+  // type and ink, and one line cut with an ellipsis, icons inline beside it.
+  "inherit",
+  "block",
+  "hidden",
+  "nowrap",
+  "ellipsis",
+  "inline",
+  "middle",
 ])
 
 /** Every var() a value names, so a calc() of two tokens is read as two. */
@@ -814,26 +823,48 @@ describe("Field, as a select", () => {
     expect(offendersIn(stylesOf(html))).toEqual([])
   })
 
-  it("puts the chosen option's whole content in the closed select only when rich", async () => {
+  it("puts the chosen option's whole content in every closed select", async () => {
     // A customizable select clones the chosen option into <selectedcontent>
-    // inside a <button> that leads the select; a plain one shows the label.
-    const plain = await renderToHtml(
+    // inside a <button> that leads the select. Every select renders the pair:
+    // the platform's own label is a UA-shadow box no author rule can cut with
+    // an ellipsis. An engine without customizable select drops it while parsing.
+    const html = await renderToHtml(
       <Field control="select" label="Plan" name="plan">
         {plans}
       </Field>,
     )
 
-    const rich = await renderToHtml(
-      <Field control="select" label="Plan" name="plan" rich>
-        {plans}
-      </Field>,
+    expect(html).toMatch(/<select[^>]*><button[^>]*><selectedcontent><\/selectedcontent><\/button>/)
+  })
+
+  it("cuts the chosen value to one line with an ellipsis, its icons inline beside it", async () => {
+    // A flex selectedcontent clips but draws no ellipsis: text-overflow needs a
+    // block container. Its children go inline, or the reset's svg { display:
+    // block } puts an icon on a line of its own.
+    const picker = pickerBlockOf(
+      await renderToHtml(
+        <Field control="select" label="Plan" name="plan">
+          {plans}
+        </Field>,
+      ),
     )
 
-    expect(plain).not.toContain("<selectedcontent")
-    expect(rich).toMatch(/<select[^>]*><button[^>]*><selectedcontent><\/selectedcontent><\/button>/)
-    expect(
-      offendersIn(stylesOf(rich)).filter((value) => !["0", "inherit"].includes(value)),
-    ).toEqual([])
+    const content = ruleIn(picker, "& selectedcontent")
+    const child = ruleIn(picker, "& selectedcontent > *")
+
+    for (const declaration of [
+      "display: block;",
+      "min-inline-size: 0;",
+      "overflow: hidden;",
+      "white-space: nowrap;",
+      "text-overflow: ellipsis;",
+    ]) {
+      expect(content).toContain(declaration)
+    }
+
+    expect(child).toContain("display: inline;")
+    expect(child).toContain("vertical-align: middle;")
+    expect(child).toContain("margin-inline-end: var(--ui-field-option-gap);")
   })
 
   it("keeps the native control under a customizable select, gated on support", async () => {

@@ -210,10 +210,11 @@ top-layer popover — `--ui-field-picker-*` for its surface, `--ui-field-option-
 for its rows, the checkmark moved to a row's end — while the keyboard model,
 the screen reader's reading, submission and validation stay the platform's.
 Elsewhere the gate drops it all and the select is the plain one above. An
-`<option value="">` reads as a placeholder. Options may carry an icon beside
-their label; `rich` adds the `<button><selectedcontent>` pair so the closed
-select shows the chosen option's icon too, and an engine without customizable
-select drops that pair while parsing.
+`<option value="">` reads as a placeholder. Every select renders the
+`<button><selectedcontent>` pair, so the closed select shows the chosen option's
+whole content, icon included, on one line cut with an ellipsis. The button is
+named by the full value, so the cut text is still read whole. An engine without
+customizable select drops the pair while parsing.
 
 The list enters and leaves as `Popover`'s surface does, on its own
 `--ui-field-picker-transition-*` tokens. Its closed state is written on

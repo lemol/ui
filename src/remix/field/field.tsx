@@ -160,15 +160,6 @@ export interface FieldTextareaProps extends FieldEditable {
 export interface FieldSelectProps extends FieldCommon {
   control: "select"
   /**
-   * The closed select shows the chosen option's whole content — an icon or a
-   * mark beside its label — rather than its label alone, where the engine
-   * draws a customizable select (`appearance: base-select`). It renders the
-   * `<button><selectedcontent>` pair the platform clones the option into; an
-   * engine without customizable select drops both while parsing, so the
-   * select there is the plain one.
-   */
-  rich?: boolean | undefined
-  /**
    * The `<option>`s. Required, because a select with none is an empty box.
    *
    * There is no `value` prop, and that is not an omission. `<select>` has no
@@ -405,9 +396,18 @@ const pickerRules = {
     color: "var(--ui-field-option-check-ink)",
   },
   "& selectedcontent": {
-    display: "flex",
-    alignItems: "center",
-    gap: "var(--ui-field-option-gap)",
+    display: "block",
+    minInlineSize: "0",
+    overflow: "hidden",
+    whiteSpace: "nowrap",
+    textOverflow: "ellipsis",
+  },
+  // A flex box would clip with no ellipsis; an inline child keeps the gap the
+  // flex row gave.
+  "& selectedcontent > *": {
+    display: "inline",
+    verticalAlign: "middle",
+    marginInlineEnd: "var(--ui-field-option-gap)",
   },
   // The empty choice is a prompt, not a value: it reads as a placeholder.
   "&:enabled:has(option[value='']:checked)": { color: "var(--ui-field-placeholder-ink)" },
@@ -439,9 +439,12 @@ const selectBox = css({
 })
 
 /**
- * A `rich` select's button, which the platform sets where the closed select's
- * label would be. It draws no box of its own — the select is the box — so it
- * takes the select's font and ink and lays the cloned option out on one row.
+ * Every select's button, which the platform sets where the closed select's
+ * label would be, so the closed select shows the chosen option's whole content
+ * (an icon beside its label). The platform's own label is a UA-shadow box no
+ * author rule can cut with an ellipsis. It draws no box of its own — the select
+ * is the box — so it takes the select's font and ink and lays the cloned option
+ * out on one row. An engine without customizable select drops it while parsing.
  */
 const selectButtonStyle = css({
   display: "flex",
@@ -530,11 +533,9 @@ export function Field(handle: Handle<FieldProps>) {
                 name={name}
                 required={required}
               >
-                {props.rich === true ? (
-                  <button mix={selectButtonStyle} type="button">
-                    <selectedcontent />
-                  </button>
-                ) : null}
+                <button mix={selectButtonStyle} type="button">
+                  <selectedcontent />
+                </button>
                 {props.children}
               </select>
               <svg aria-hidden="true" fill="none" mix={chevronStyle} viewBox="0 0 12 12">

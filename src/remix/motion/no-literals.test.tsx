@@ -7,6 +7,7 @@ import { CopyButton } from "../copy-button/copy-button.tsx"
 import { Field } from "../field/field.tsx"
 import { Skeleton } from "../skeleton/skeleton.tsx"
 import { TabBar } from "../tab-bar/tab-bar.tsx"
+import { Tabs } from "../tabs/tabs.tsx"
 import { dissolve, drawCheck, pop, shake, shimmer } from "./motion.ts"
 
 const literal = /\b\d+(\.\d+)?m?s\b/
@@ -35,6 +36,9 @@ const renders: Record<string, () => RemixNode> = {
       ]}
       label="Main"
     />
+  ),
+  tabs: () => (
+    <Tabs items={[{ label: "A", href: "/a", current: true }]} label="Views" name="views" />
   ),
 }
 

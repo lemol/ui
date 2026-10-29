@@ -437,25 +437,25 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 No new tokens. **Group timing is not emitted from the component.** A `css()` block nests every key under the element class (probed: `css({ viewTransitionName: "views--indicator", "::view-transition-group(views--indicator)": {...} })` renders `.rmxc-… { view-transition-name: …; ::view-transition-group(views--indicator) { … } }` inside `@layer rmx.…`), so the pseudo-selector becomes a descendant of the element and never matches the root-attached pseudo tree — a test for its presence would pass over dead CSS. Components therefore declare only the minted `view-transition-name`; the transition's duration and easing come from the document-level `::view-transition-group(*)` / `::view-transition-old(*)` / `::view-transition-new(*)` rules Task I emits (token-driven, root-level, so reduced motion zeroes them). Per-component timing is out of scope.
 
-- [ ] **Step 1: Write the failing tests** in `src/remix/tabs/tabs.test.tsx`.
+- [x] **Step 1: Write the failing tests** in `src/remix/tabs/tabs.test.tsx`.
   - With `name="views"`: assert `view-transition-name: views--indicator` via `viewTransitionName("views", "indicator")` (the `view-transition-name` declaration only, and no `::view-transition` group selector — see the *Group timing* note above).
   - Add `Tabs` to `no-literals.test.ts`; assert the styles contain no `::view-transition` selector (position, not just presence, is the bug).
   - Without `name`: assert the indicator carries no `view-transition-name`.
 
-- [ ] **Step 2: Run them to verify they fail.**
+- [x] **Step 2: Run them to verify they fail.**
 
 Run: `bun test src/remix/tabs/tabs.test.tsx`
 Expected: FAIL — no `name` prop, no transition names.
 
-- [ ] **Step 3: Implement.** `TabsProps` gains `name?: string` — an id stem used only to scope the indicator's transition name; absent means no morph. Apply the minted name `viewTransitionName(name, "indicator")` to the `[aria-current]` element's rule.
+- [x] **Step 3: Implement.** `TabsProps` gains `name?: string` — an id stem used only to scope the indicator's transition name; absent means no morph. Apply the minted name `viewTransitionName(name, "indicator")` to the `[aria-current]` element's rule.
   - *Caller status:* Tabs are route links (`<a>` elements to individual URLs). Tab switching is full document navigation. Since cross-document VT is not active on playground pages and Remix 3.1.0 does not ship a same-document `startViewTransition` caller, the Tabs indicator morph cannot run live during navigation in M5. The CSS rules ship ready and benignly inert, with the gap documented on the motion page.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/tabs/tabs.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/tabs/ && git commit -m "feat(tabs): sliding indicator via a minted transition name

@@ -1,6 +1,13 @@
 import { describe, expect, it } from "bun:test"
 import { renderToHtml } from "../../../test/render.ts"
-import { sharedProperties, styleBlocksOf, stylesOf, valuesOf } from "../../../test/styles.ts"
+import {
+  markupOf,
+  sharedProperties,
+  styleBlocksOf,
+  stylesOf,
+  valuesOf,
+} from "../../../test/styles.ts"
+import { viewTransitionName } from "../motion/names.ts"
 import { TabsDemo } from "./tabs.demo.tsx"
 import { Tabs } from "./tabs.tsx"
 import { tabsTokens } from "./tokens.ts"
@@ -125,6 +132,35 @@ describe("Tabs", () => {
     const read = new Set([...styles.matchAll(/var\(--(ui-tabs-[\w-]+)\)/g)].map((m) => m[1]))
 
     expect([...read].sort()).toEqual(Object.keys(tabsTokens).sort())
+  })
+
+  it("names the current tab for a morph when given a stem, and nothing without one", async () => {
+    const named = await renderToHtml(<Tabs items={items} label="Views" name="views" />)
+    const current = /<a[^>]*aria-current="page"[^>]*>/.exec(markupOf(named))?.[0] ?? ""
+
+    expect(current).toContain(
+      `style="view-transition-name: ${viewTransitionName("views", "indicator")}"`,
+    )
+    expect(current).toContain('style="view-transition-name: views--indicator"')
+    expect(markupOf(named).match(/view-transition-name/g)).toHaveLength(1)
+    expect(stylesOf(named)).not.toContain("view-transition")
+    expect(markupOf(await renderToHtml(<Tabs items={items} label="Views" />))).not.toContain(
+      "view-transition-name",
+    )
+  })
+
+  it("gives two strips two names", async () => {
+    const markup = markupOf(
+      await renderToHtml(
+        <>
+          <Tabs items={items} label="A" name="views" />
+          <Tabs items={items} label="B" name="sections" />
+        </>,
+      ),
+    )
+
+    expect(markup).toContain("view-transition-name: views--indicator")
+    expect(markup).toContain("view-transition-name: sections--indicator")
   })
 
   it("has a demo that renders", async () => {

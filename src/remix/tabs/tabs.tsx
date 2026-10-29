@@ -5,6 +5,7 @@ import {
   type RemixNode,
 } from "remix/component"
 import { css } from "../css.ts"
+import { viewTransitionName } from "../motion/names.ts"
 
 /**
  * Tabs as route links, not in-page panels (interactivity.md, "Not in
@@ -117,6 +118,14 @@ export interface TabsProps {
   /** `line` by default: under a page's title. `pill` for a compact switch. */
   readonly variant?: TabsVariant | undefined
   /**
+   * An id stem scoping the current tab's `view-transition-name` for a morph:
+   * the current tab carries `view-transition-name: <name>--indicator`.
+   * Absent means no name and today's instant switch. Inert until a caller
+   * exists: tab switching is full document navigation, and no same-document
+   * `startViewTransition` caller ships in M5.
+   */
+  readonly name?: string | undefined
+  /**
    * Adds properties Tabs does not declare — a margin, a grid placement. It
    * does not reliably override one Tabs declares; set its `--ui-tabs-*` token.
    */
@@ -125,7 +134,11 @@ export interface TabsProps {
 
 export function Tabs(handle: Handle<TabsProps>) {
   return () => {
-    const { label, items, variant = "line", mix } = handle.props
+    const { label, items, variant = "line", name, mix } = handle.props
+    const indicator =
+      name === undefined
+        ? undefined
+        : `view-transition-name: ${viewTransitionName(name, "indicator")}`
 
     return (
       <nav aria-label={label} mix={[tabsBase, variantStyles[variant], mix]}>
@@ -148,6 +161,7 @@ export function Tabs(handle: Handle<TabsProps>) {
               {...item.attrs}
               aria-current={item.current === true ? "page" : undefined}
               href={item.href}
+              style={item.current === true ? indicator : undefined}
             >
               {content}
             </a>

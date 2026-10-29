@@ -65,6 +65,15 @@ describe("ThemeStyle", () => {
     expect(html).toContain("--ui-app-x: 1px;")
   })
 
+  it("opts into cross-document view transitions only when asked", async () => {
+    expect(await renderToHtml(<ThemeStyle theme={theme} />)).not.toContain("@view-transition")
+
+    const opted = await renderToHtml(<ThemeStyle theme={theme} viewTransitions="auto" />)
+
+    expect(opted).toContain("@view-transition {\n  navigation: auto;\n}")
+    expect(opted).toContain("::view-transition-group(*)")
+  })
+
   it("sets innerHTML on the style element and renders no children", async () => {
     // Every test above reads rendered HTML, and emitTokensCss() currently bans
     // &, < and > — so a rewrite to text children (`<style>{css}</style>`)

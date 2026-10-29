@@ -74,6 +74,27 @@ describe("the sheet", () => {
   })
 })
 
+describe("the view-transition opt-in", () => {
+  const optedIn = emitTokensCss(threeAxes, { viewTransitions: "auto" })
+
+  it("is absent by default, leaving the sheet byte-identical", () => {
+    expect(sheet).not.toContain("view-transition")
+    expect(emitTokensCss(threeAxes, {})).toBe(sheet)
+  })
+
+  it("comes last, at the top level, outside every block", () => {
+    expect(optedIn.startsWith(sheet.slice(0, -1))).toBe(true)
+    expect(optedIn).toContain("\n@view-transition {\n  navigation: auto;\n}\n")
+  })
+
+  it("times every transition pseudo-element from tokens the reset zeroes", () => {
+    expect(optedIn).toContain(
+      "\n::view-transition-group(*),\n::view-transition-old(*),\n::view-transition-new(*) {\n  animation-duration: var(--dur-base);\n  animation-timing-function: var(--ease-in-out-smooth);\n}\n",
+    )
+    expect(optedIn.slice(sheet.length - 1)).not.toMatch(/\b\d+(\.\d+)?m?s\b|cubic-bezier/)
+  })
+})
+
 describe("component tokens", () => {
   const themed = defineTheme<"ui-btn-bg">({
     base: { ...fullBase(), "ui-btn-bg": "theme-value" },

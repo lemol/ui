@@ -7,6 +7,8 @@ export interface ThemeStyleProps {
   theme: Theme<ComponentTokenName>
   /** Defaults to this package's aggregate. Supply a wider record to add to it. */
   componentTokens?: Readonly<Record<string, string>> | undefined
+  /** Opt into cross-document view transitions. Absent by default. */
+  viewTransitions?: "auto" | undefined
 }
 
 /**
@@ -34,8 +36,10 @@ export interface ThemeStyleProps {
  */
 export function ThemeStyle(handle: Handle<ThemeStyleProps>) {
   return () => {
-    const { theme, componentTokens = ownTokens } = handle.props
+    const { theme, componentTokens = ownTokens, viewTransitions } = handle.props
 
-    return <style innerHTML={unsafeHTML(emitTokensCss(theme, { componentTokens }))} />
+    return (
+      <style innerHTML={unsafeHTML(emitTokensCss(theme, { componentTokens, viewTransitions }))} />
+    )
   }
 }

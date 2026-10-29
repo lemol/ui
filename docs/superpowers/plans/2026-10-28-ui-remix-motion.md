@@ -516,23 +516,23 @@ Explicitly out of scope: dropdown menu size morph. `Menu`/`Popover` entry/exit a
 
 Decision: `emitTokensCss(theme, options)` accepts `options?: { viewTransitions?: "auto" }`. When present, it emits `@view-transition { navigation: auto; }` and the token-timed, document-level `::view-transition-group(*)`, `::view-transition-old(*)`, `::view-transition-new(*)` rules — the only place per-name morph timing (Tabs indicator, toasts) can live, since a component's nested `css()` block cannot reach the root-attached pseudo tree (Task G). `ThemeStyleProps` gains `viewTransitions?: "auto" | undefined` to forward the option to `emitTokensCss`. Absent by default, so default stylesheets are byte-identical to existing output.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `src/design/css/emit.test.ts`: default `emitTokensCss(theme)` contains no `@view-transition`; with `{ viewTransitions: "auto" }` it contains `@view-transition { navigation: auto; }` and top-level (not nested inside any rule) `::view-transition-group(*)`, `::view-transition-old(*)`, `::view-transition-new(*)` rules reading `var(--dur-base)` and `var(--ease-in-out-smooth)` — no literals. Assert the selector's position: the rule text starts at column 0 of the sheet, outside any `{ … }`.
   - `src/remix/theme-style.test.tsx`: default render contains no `@view-transition`; with `viewTransitions="auto"` it renders the opt-in rules.
 
-- [ ] **Step 2: Run them to verify they fail.**
+- [x] **Step 2: Run them to verify they fail.**
 
 Run: `bun test src/design/css/emit.test.ts src/remix/theme-style.test.tsx`
 Expected: FAIL — no such option or prop.
 
-- [ ] **Step 3: Implement.** Emit the at-rule and root-pseudo timing only when `options?.viewTransitions === "auto"`. Forward `viewTransitions` from `ThemeStyle` to `emitTokensCss`. Supported in Chrome 126+, Safari 18.2+; unsupported in stable Firefox where navigation remains ordinary full-page loads. Group/old/new pseudo rules read `--dur-base`/`--ease-in-out-smooth` so reduced-motion zeroes them centrally.
+- [x] **Step 3: Implement.** Emit the at-rule and root-pseudo timing only when `options?.viewTransitions === "auto"`. Forward `viewTransitions` from `ThemeStyle` to `emitTokensCss`. Supported in Chrome 126+, Safari 18.2+; unsupported in stable Firefox where navigation remains ordinary full-page loads. Group/old/new pseudo rules read `--dur-base`/`--ease-in-out-smooth` so reduced-motion zeroes them centrally.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/design/css/emit.test.ts src/remix/theme-style.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/design/css/ src/remix/theme-style.tsx src/remix/theme-style.test.tsx && git commit -m "feat(design): opt-in cross-document view transitions

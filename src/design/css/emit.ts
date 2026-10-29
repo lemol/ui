@@ -6,6 +6,8 @@ import { reducedMotionCss, resetCss, unlayeredCss } from "./reset.ts"
 export interface EmitOptions<C extends string = never> {
   /** Every component's token record, aggregated by the package that owns the components. */
   readonly componentTokens?: Readonly<Record<C, string>>
+  /** Opt into cross-document view transitions. Absent by default: the sheet is byte-identical without it. */
+  readonly viewTransitions?: "auto" | undefined
 }
 
 type Entries = readonly (readonly [string, string])[]
@@ -117,6 +119,28 @@ function validate(
 }
 
 /**
+ * The cross-document view-transition opt-in, emitted only when
+ * `options?.viewTransitions === "auto"`. A component's nested `css()` block
+ * cannot reach the root-attached pseudo tree — every key nests under the
+ * element class — so the transition's timing lives here, at the top level,
+ * on tokens the reduced-motion reset zeroes. Only the UA's own root crossfade
+ * escapes the tokens, and that is UA behaviour, not ours.
+ *
+ * Supported in Chrome 126+ and Safari 18.2+; stable Firefox ignores the
+ * at-rule and navigation stays an ordinary full-page load.
+ */
+const viewTransitionCss = `@view-transition {
+  navigation: auto;
+}
+
+::view-transition-group(*),
+::view-transition-old(*),
+::view-transition-new(*) {
+  animation-duration: var(--dur-base);
+  animation-timing-function: var(--ease-in-out-smooth);
+}`
+
+/**
  * The whole stylesheet as text: the layer statement, the token blocks for each
  * variant axis the theme has (scheme, density, then touch), the element defaults, the one unlayered rule, and
  * the reduced-motion reset.
@@ -161,6 +185,8 @@ export function emitTokensCss<C extends string = never>(
   }
 
   parts.push(resetCss, unlayeredCss, reducedMotionCss)
+
+  if (options?.viewTransitions === "auto") parts.push(viewTransitionCss)
 
   return `${parts.join("\n\n")}\n`
 }

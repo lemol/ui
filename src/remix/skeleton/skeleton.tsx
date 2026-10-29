@@ -1,5 +1,6 @@
 import { type Handle, type MixInput } from "remix/component"
 import { css } from "../css.ts"
+import { shimmer } from "../motion/motion.ts"
 
 /**
  * A gradient sweeping across itself, not an opacity pulse: a shimmer reads
@@ -19,11 +20,12 @@ const skeletonStyle = css({
   backgroundImage:
     "linear-gradient(90deg, var(--ui-skeleton-bg) 25%, var(--ui-skeleton-shimmer) 50%, var(--ui-skeleton-bg) 75%)",
   backgroundSize: "200% 100%",
-  animation: "ui-skeleton-shimmer var(--ui-skeleton-duration) var(--ui-skeleton-easing) infinite",
-  "@keyframes ui-skeleton-shimmer": {
-    "0%": { backgroundPosition: "200% 0" },
-    "100%": { backgroundPosition: "-200% 0" },
-  },
+})
+
+const skeletonShimmer = shimmer({
+  duration: "var(--ui-skeleton-duration)",
+  easing: "var(--ui-skeleton-easing)",
+  iterations: "infinite",
 })
 
 export interface SkeletonProps {
@@ -38,6 +40,6 @@ export function Skeleton(handle: Handle<SkeletonProps>) {
     // it names nothing to assistive tech — the region it sits in is what
     // should carry the loading announcement, once, rather than one per
     // placeholder.
-    return <div aria-hidden="true" mix={[skeletonStyle, mix]} />
+    return <div aria-hidden="true" mix={[skeletonStyle, skeletonShimmer, mix]} />
   }
 }

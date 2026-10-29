@@ -134,7 +134,7 @@ No new package subpath: `motion/` is internal to the `remix` layer, reached rela
 - Consumes: `css` from `../css.ts` (same-layer relative import, allowed).
 - Produces: `shake(timing)`
 
-- [ ] **Step 1: Write the failing test** in `src/remix/motion/motion.test.ts`. Render a probe element mixing each factory with literal token refs (e.g. `shake({ duration: "var(--ui-probe-duration)", easing: "var(--ui-probe-easing)" })`) through `renderToHtml` + `stylesOf`, and assert:
+- [x] **Step 1: Write the failing test** in `src/remix/motion/motion.test.ts`. Render a probe element mixing each factory with literal token refs (e.g. `shake({ duration: "var(--ui-probe-duration)", easing: "var(--ui-probe-easing)" })`) through `renderToHtml` + `stylesOf`, and assert:
   - Each block contains its `@keyframes ui-motion-*` name.
   - Each `animation` value contains the passed duration and easing refs and no literal `ms` or `cubic-bezier`.
   - The `animation` shorthand is a single `animation` property (completing instantly at `0ms` is what the reduced-motion reset relies on).
@@ -150,12 +150,12 @@ expect(styles).not.toContain("cubic-bezier")
 expect(styles).not.toContain("@starting-style")
 ```
 
-- [ ] **Step 2: Run it to verify it fails.**
+- [x] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/motion/motion.test.ts`
 Expected: FAIL — module does not exist.
 
-- [ ] **Step 3: Implement `shake`, `pop`, `drawCheck`, `dissolve`, `shimmer` in `src/remix/motion/motion.ts`.** One factory per effect; keyframe bodies:
+- [x] **Step 3: Implement `shake`, `pop`, `drawCheck`, `dissolve`, `shimmer` in `src/remix/motion/motion.ts`.** One factory per effect; keyframe bodies:
   - `shake`: horizontal translate decay (`translateX(-4px)` to `0`).
   - `pop`: `scale` 0.6→1 on the spring easing the caller passes.
   - `drawCheck`: `stroke-dashoffset` for an SVG check path.
@@ -164,18 +164,18 @@ Expected: FAIL — module does not exist.
   `shimmer` only owns the sweep (background-position + keyframes). Whatever wears it supplies its own `backgroundImage`/`backgroundSize` from tokens: `Skeleton` keeps its gradient on `--ui-skeleton-bg`/`--ui-skeleton-shimmer`; the playground's shimmer text (Task J) uses a page-local `css()` block with `backgroundImage: linear-gradient(90deg, var(--ink-muted) 25%, var(--ink) 50%, var(--ink-muted) 75%)`, `backgroundSize: 200% 100%`, `backgroundClip: text`, `color: transparent`, and timing from `var(--dur-slow)`/`var(--ease-in-out-smooth)` — primitives only, no literals.
   Each factory takes timing strings
 
-- [ ] **Step 3b: Move Skeleton onto the shared keyframes and add the literal guard.**
+- [x] **Step 3b: Move Skeleton onto the shared keyframes and add the literal guard.**
   - `skeleton.tsx` drops its local `@keyframes ui-skeleton-shimmer` and mixes `shimmer({ duration: "var(--ui-skeleton-duration)", easing: "var(--ui-skeleton-easing)" })`; its test changes `@keyframes ui-skeleton-shimmer` to `@keyframes ui-motion-shimmer` and still asserts the `infinite` iteration (the mixin takes an optional `iterations`, default 1, so Skeleton passes `"infinite"`).
   - Create `src/remix/motion/no-literals.test.ts` (see *Verify 3*): render every mixin and `Skeleton`, `stylesOf(...)`, and `expect(styles).not.toMatch(/\b\d+(\.\d+)?m?s\b/)` / `not.toContain("cubic-bezier")`. Tasks C–H each add their component to the list in their own Step 1.
 
-- [ ] **Step 4: Run the test to verify it passes.**
+- [x] **Step 4: Run the test to verify it passes.**
 
 Run: `bun test src/remix/motion/motion.test.ts src/remix/motion/no-literals.test.ts src/remix/skeleton/skeleton.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Write `src/remix/motion/README.md`.** Keyframes are shared because sharing them is safe; timing tokens are per-component because retuning is per-component; names (`view-transition-name`) are minted in `names.ts` using the `overlay()` pattern (verbatim, `--` part delimiter) because sharing names throws.
+- [x] **Step 5: Write `src/remix/motion/README.md`.** Keyframes are shared because sharing them is safe; timing tokens are per-component because retuning is per-component; names (`view-transition-name`) are minted in `names.ts` using the `overlay()` pattern (verbatim, `--` part delimiter) because sharing names throws.
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add src/remix/motion/ src/remix/skeleton/ && git commit -m "feat(motion): shared

@@ -15,14 +15,19 @@ describe("Skeleton", () => {
     expect(markup).toContain('aria-hidden="true"')
   })
 
-  it("declares an animation naming its own keyframes, duration and easing tokens", async () => {
+  it("declares an animation naming the shared keyframes, its duration and easing tokens", async () => {
     const html = await renderToHtml(<Skeleton />)
-    const block = blocksOn(html, "div")[0] ?? ""
+    const blocks = blocksOn(html, "div")
 
-    expect(block).toContain(
-      "animation: ui-skeleton-shimmer var(--ui-skeleton-duration) var(--ui-skeleton-easing) infinite",
-    )
-    expect(block).toContain("@keyframes ui-skeleton-shimmer")
+    expect(
+      blocks.some((block) =>
+        block.includes(
+          "animation: ui-motion-shimmer var(--ui-skeleton-duration) var(--ui-skeleton-easing) infinite;",
+        ),
+      ),
+    ).toBe(true)
+    expect(blocks.some((block) => block.includes("@keyframes ui-motion-shimmer"))).toBe(true)
+    expect(stylesOf(html)).not.toContain("@keyframes ui-skeleton-shimmer")
   })
 
   it("reads only its own tokens and structural keywords", async () => {

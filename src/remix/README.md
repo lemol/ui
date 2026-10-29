@@ -273,6 +273,9 @@ frame's. A destination's own hue is `--ui-tabbar-mark-ink-current` set on
 its item, and a host that marks the pressed item `data-pending` while it
 navigates, and an ancestor `data-navigating`, moves the pill at once.
 
+A badge pops in when it appears, timed by `ui-tabbar-badge-pop-duration` and
+`-easing`.
+
 ### `Tabs`
 
 Tabs as route links (interactivity.md, "Not in scope"): each tab an `<a>` to

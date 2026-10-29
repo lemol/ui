@@ -569,7 +569,7 @@ Page sections (each: `Eyebrow` + `Heading level={2}` + live components + `Text t
 8. **Stacked**: two toasts with minted transition names, stating plainly that the stack shift is inert until a same-document `startViewTransition` caller exists (same gap as Tabs).
 9. **Press**: `Button` scale press feedback beside `Switch` toggle feedback.
 10. **Menu**: `Menu`/`Popover` entry morph with `interpolate-size` deferral note.
-11. **Transitions**: same- vs cross-document support table + `@view-transition` opt-in code snippet.
+11. **Transitions**: same- vs cross-document support note (prose) + `@view-transition` opt-in code snippet.
 
 - [x] **Step 1: Write the failing tests.**
   - `src/design/css/reset.test.ts`: `:root[data-motion="reduce"]` zeroes every `--dur-*` token with `!important`.
@@ -583,7 +583,7 @@ Expected: FAIL.
 
 - [x] **Step 3: Implement.**
   - Update `reset.ts` with `:root[data-motion="reduce"]`.
-  - Update `Document` prop and attribute preservation.
+  - Add the `Document` `motion` prop and `data-motion` attribute (deliberately not preserved on a blank value).
   - Add `motion` to `pageQuery`, controller actions, and `switchers.tsx` (`Full`/`Reduce`).
   - Create `motion.tsx` page with all 11 demo sections and link it in `home.tsx`.
 

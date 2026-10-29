@@ -26,10 +26,10 @@ interface PageQuery {
 }
 
 /**
- * Every page reads the same five axes. Both variant params are allow-listed
+ * Every page reads the same five axes. The variant params (scheme, density, motion) are allow-listed
  * rather than passed through: an attribute value no selector matches is a
  * silent no-op, so an unrecognised one renders nothing rather than looking
- * like it did something. `scheme=system` and `density=default` are the
+ * like it did something. `scheme=system`, `density=default` and `motion=full` are the
  * switchers' explicit spellings of unset — a submit button always sends its
  * own name/value, so "back to the default" cannot be a dropped param.
  */

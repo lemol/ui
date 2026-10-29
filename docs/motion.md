@@ -122,7 +122,7 @@ unusable without motion, the interaction is the problem.
 `-draw`, `-dissolve` and `-shimmer`. A keyframe body names no token, so one
 definition serves every consumer, and each component times it with its own
 duration and easing tokens, which default to `--dur-*` and `--ease-*` and so are
-zeroed by the reset below. Reduced motion needs no second rule: a zero-duration
+zeroed by the reset above. Reduced motion needs no second rule: a zero-duration
 animation completes at once.
 
 ```ts

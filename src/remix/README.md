@@ -223,7 +223,9 @@ a list that does not move rather than one that never appears. The picker's
 pointer and the prompt's ink wait for `:enabled`: they sit in the later
 sub-layer, and unconditional they would beat the disabled cursor and ink.
 
-Forty-four tokens in `field/tokens.ts`. Field styles no focus ring, as
+Forty-eight tokens in `field/tokens.ts`, four of them motion: an error message
+shakes in and the clear button pops, timed by `ui-field-error-*` and
+`ui-field-clear-*` duration and easing. Field styles no focus ring, as
 `Button` does not: the reset owns it, and it applies because no component
 competes with it. **`mix` reaches the wrapper, not the control** — a property
 of the control goes through its token.
@@ -325,11 +327,11 @@ most common badge says `Draft` rather than anything semantic.
 
 Every tone is a `<tone>-subtle` fill with `<tone>` as ink. That pair is the
 second contrast promise in [design-system.md](../../docs/design-system.md),
-and `mini`'s theme test holds it. No hover and no transition: the schema gives
-status colours no `-hover` arm. No size axis: `schema.sizing` names two
+and `mini`'s theme test holds it. No hover: the schema gives status colours no `-hover` arm. A badge
+that is inserted pops in, timed by `ui-badge-pop-duration` and `-easing`. No size axis: `schema.sizing` names two
 control heights and a badge is not a control.
 
-Twenty-three tokens in `badge/tokens.ts`.
+Twenty-five tokens in `badge/tokens.ts`.
 
 ### `viewTransitionName()`
 

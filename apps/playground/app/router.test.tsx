@@ -427,6 +427,12 @@ describe("the motion route", () => {
   it("reduces motion from the query string on every page, and ignores what it does not know", async () => {
     expect(htmlTag(await html("/pages/motion?motion=reduce"))).toContain('data-motion="reduce"')
     expect(htmlTag(await html("/c/button?motion=reduce"))).toContain('data-motion="reduce"')
+    for (const path of ["/", "/pages/dashboard", "/spa", "/spa?nojs", "/c/nope"]) {
+      const sep = path.includes("?") ? "&" : "?"
+
+      expect(htmlTag(await html(`${path}${sep}motion=reduce`))).toContain('data-motion="reduce"')
+    }
+
     expect(htmlTag(await html("/pages/motion?motion=full"))).not.toContain("data-motion=")
     expect(htmlTag(await html("/pages/motion?motion=slow"))).not.toContain("data-motion=")
   })

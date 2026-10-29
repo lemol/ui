@@ -132,7 +132,7 @@ No new package subpath: `motion/` is internal to the `remix` layer, reached rela
 
 **Interfaces:**
 - Consumes: `css` from `../css.ts` (same-layer relative import, allowed).
-- Produces: `shake(timing)`
+- Produces: `shake(timing)`, `pop`, `drawCheck`, `dissolve`, `shimmer` (each `(timing: MotionTiming) => [keyframes, animation]`), plus `keyframes`, `animation()` and `motionKeywords`
 
 - [x] **Step 1: Write the failing test** in `src/remix/motion/motion.test.ts`. Render a probe element mixing each factory with literal token refs (e.g. `shake({ duration: "var(--ui-probe-duration)", easing: "var(--ui-probe-easing)" })`) through `renderToHtml` + `stylesOf`, and assert:
   - Each block contains its `@keyframes ui-motion-*` name.
@@ -162,7 +162,7 @@ Expected: FAIL — module does not exist.
   - `dissolve`: opacity + slight translate.
   - `shimmer`: background-position sweep `200% 0` to `-200% 0` — lifted verbatim from `src/remix/skeleton/skeleton.tsx` (`@keyframes ui-skeleton-shimmer`, same body). The keyframes move to `motion.ts` as `ui-motion-shimmer`; `Skeleton` consumes the mixin (its `animation` keeps reading `--ui-skeleton-duration`/`--ui-skeleton-easing`), and its test is updated for the renamed keyframes. One definition, two consumers.
   `shimmer` only owns the sweep (background-position + keyframes). Whatever wears it supplies its own `backgroundImage`/`backgroundSize` from tokens: `Skeleton` keeps its gradient on `--ui-skeleton-bg`/`--ui-skeleton-shimmer`; the playground's shimmer text (Task J) uses a page-local `css()` block with `backgroundImage: linear-gradient(90deg, var(--ink-muted) 25%, var(--ink) 50%, var(--ink-muted) 75%)`, `backgroundSize: 200% 100%`, `backgroundClip: text`, `color: transparent`, and timing from `var(--dur-slow)`/`var(--ease-in-out-smooth)` — primitives only, no literals.
-  Each factory takes timing strings
+  Each factory takes a `MotionTiming` (`{ duration, easing, iterations? }` as `var()` strings) and returns a `[keyframes, animation]` tuple
 
 - [x] **Step 3b: Move Skeleton onto the shared keyframes and add the literal guard.**
   - `skeleton.tsx` drops its local `@keyframes ui-skeleton-shimmer` and mixes `shimmer({ duration: "var(--ui-skeleton-duration)", easing: "var(--ui-skeleton-easing)" })`; its test changes `@keyframes ui-skeleton-shimmer` to `@keyframes ui-motion-shimmer` and still asserts the `infinite` iteration (the mixin takes an optional `iterations`, default 1, so Skeleton passes `"infinite"`).
@@ -178,7 +178,7 @@ Expected: PASS.
 - [x] **Step 6: Commit.**
 
 ```bash
-git add src/remix/motion/ src/remix/skeleton/ && git commit -m "feat(motion): shared
+git add src/remix/motion/ src/remix/skeleton/ && git commit -m "feat(motion): shared keyframes
 
 Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 ```
@@ -610,17 +610,17 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 **Interfaces:**
 - Consumes: everything above. Produces: nothing.
 
-- [ ] **Step 1: Update `docs/motion.md`.** Document shared keyframes in `motion.ts`; minted transition names in `names.ts` (`viewTransitionName`, verbatim, `--` delimiter); cross-document opt-in (`viewTransitions: "auto"`, support matrix with Firefox exclusion); manual `data-motion="reduce"` override; deferred items (same-document caller, menu size morph `interpolate-size`, client-side retrigger).
-- [ ] **Step 2: Update `src/remix/README.md`.** Document `viewTransitionName` beside `overlay()`; extend reduced-motion notes to new component animations; document Tabs `name` and Toaster stacking names.
-- [ ] **Step 3: Check `apps/playground/README.md` for page list.** If it lists pages, add Motion; otherwise skip.
-- [ ] **Step 4: Run the full focused test set and static checks.**
+- [x] **Step 1: Update `docs/motion.md`.** Document shared keyframes in `motion.ts`; minted transition names in `names.ts` (`viewTransitionName`, verbatim, `--` delimiter); cross-document opt-in (`viewTransitions: "auto"`, support matrix with Firefox exclusion); manual `data-motion="reduce"` override; deferred items (same-document caller, menu size morph `interpolate-size`, client-side retrigger).
+- [x] **Step 2: Update `src/remix/README.md`.** Document `viewTransitionName` beside `overlay()`; extend reduced-motion notes to new component animations; document Tabs `name` and Toaster stacking names.
+- [x] **Step 3: Check `apps/playground/README.md` for page list.** If it lists pages, add Motion; otherwise skip.
+- [x] **Step 4: Run the full focused test set and static checks.**
 
 Run: `bun test src/remix/motion/ src/remix/field/field.test.tsx src/remix/copy-button/ src/remix/runtime.test.ts src/remix/tokens.test.ts src/remix/badge/ src/remix/tab-bar/ src/remix/button/button.test.tsx src/remix/tabs/tabs.test.tsx src/remix/toaster/toaster.test.tsx src/design/css/ src/remix/theme-style.test.tsx src/mini/document.test.tsx apps/playground/app/router.test.tsx`
 Then: `oxlint`
 Then: `bun run typecheck`
 Expected: all green.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add docs/motion.md src/remix/README.md apps/playground/README.md && git commit -m "docs(motion): the M5 polish layer, minted names and the toggle

@@ -25,6 +25,7 @@ resolve a stale store snapshot instead of the working tree (see
 | `/` | the catalogue index: every demo by name, the recipes, the hydration probe |
 | `/c/:component` | one component's demo, by its name in the demo registry |
 | `/pages/dashboard` | one composed page recipe: stats, tasks, settings, a dialog |
+| `/pages/motion` | every micro-interaction on one page, with its degradation note |
 | `/spa/*` | the client-rendered twin: the same demos through the SPA router |
 | `/assets/*` | the asset server |
 
@@ -32,7 +33,7 @@ Knobs are query params and a form: `?tone=primary&size=sm` re-renders on the
 server, beside a preview of the one combination under test. Button, badge, text
 and heading have knobs; the rest enumerate their states in the demo already.
 
-Four query switches, each a full proof of one axis with no client state — and
+Five query switches, each a full proof of one axis with no client state — and
 each a visible GET form in the header, so switching one preserves the rest:
 
 | Query | |
@@ -41,6 +42,7 @@ each a visible GET form in the header, so switching one preserves the rest:
 | `?compat` | forces the Invoker Commands backfill on over native support |
 | `?scheme=dark` / `?scheme=light` (`=system` is unset) | beats the media query |
 | `?density=compact` (`=default` is unset) | retunes every control |
+| `?motion=reduce` (`=full` is unset) | zeroes every duration token, as the system preference does |
 
 `?nojs` is the premise these packages are built on, made checkable: a page is
 finished before a script runs. It renders interactive markup *dead* rather than

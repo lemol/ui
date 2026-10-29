@@ -9,5 +9,5 @@ Shared keyframes (`motion.ts`) and minted view-transition names (`names.ts`).
 - **Names are minted in `names.ts` because sharing a name throws.** Two elements
   with one `view-transition-name` abort a transition, so `viewTransitionName`
   refuses what it cannot keep unique or valid.
-- `no-literals.test.tsx` renders every component the system touches and fails on
+- `no-literals.test.ts` renders every component the system touches and fails on
   a literal duration or curve.

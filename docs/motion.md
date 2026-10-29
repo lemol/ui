@@ -103,22 +103,65 @@ The consequence is deliberate: CSS that hard-codes a duration keeps animating.
 That is a violation of the token contract, and finding it this way beats
 masking it.
 
+### The manual override
+
+`data-motion="reduce"` on the root element zeroes the same tokens, for a page
+that chooses reduced motion rather than inheriting it (`reducedMotionOverrideCss`
+in `reset.ts`, emitted right after the media query). The server owns it:
+`Document`'s `motion="reduce"` renders it, and it is deliberately absent from
+`data-rmx-preserve-attrs` because no script sets it and preserving a blank would
+keep a stale `reduce`. The playground reads `?motion=reduce`, so the Motion
+switch and `/pages/motion` show every interaction both ways.
+
 Do not fight that media query from inside a component. If an interaction is
 unusable without motion, the interaction is the problem.
 
+## Shared keyframes
+
+`src/remix/motion/motion.ts` owns five `@keyframes`: `ui-motion-shake`, `-pop`,
+`-draw`, `-dissolve` and `-shimmer`. A keyframe body names no token, so one
+definition serves every consumer, and each component times it with its own
+duration and easing tokens, which default to `--dur-*` and `--ease-*` and so are
+zeroed by the reset below. Reduced motion needs no second rule: a zero-duration
+animation completes at once.
+
+```ts
+const [keyframes, animation] = shake({ duration: "var(--ui-field-error-duration)", easing: "var(--ui-field-error-easing)" })
+```
+
+A factory returns `[keyframes, animation]`. `@keyframes` only hoists at a
+block's top level, so a state-gated animation mixes the keyframes block and
+puts `animation` in its own state rule. `keyframes` and `animation(name,
+timing)` are the raw pieces; `motionKeywords` lists every value a keyframe
+body uses, which each component's contract test admits. Factories are called at
+module scope, because `componentStyles()` records only module-scope styles.
+
+`src/remix/motion/no-literals.test.ts` renders every component the system
+touches and fails on a literal duration or curve.
+
 ## View transitions
 
-Two distinct features with different support, both opt-in CSS with no
-JavaScript.
+Two distinct features with different support. Cross-document is opt-in CSS.
+Same-document needs a JavaScript caller of `document.startViewTransition()`,
+which `remix` 3.1.0 does not ship; nothing here calls it, so the names below
+are minted and inert until a caller exists.
 
 **Same-document** — covers **Remix frame navigation**, since a frame response
-swaps DOM in place. Cross-browser: Chrome 111, Safari 18, Firefox 144.
+swaps DOM in place. Cross-browser: Chrome 111, Safari 18, Firefox 144. The
+`view-transition-name` rules are in place (Tabs' indicator, each toast) and wait
+on a caller.
 
 **Cross-document** — covers full document loads:
 
 ```css
 @view-transition { navigation: auto; }
 ```
+
+It is emitted only when asked: `<ThemeStyle viewTransitions="auto" />`, or
+`emitTokensCss(theme, { viewTransitions: "auto" })`. Absent, the sheet is
+byte-identical to before. The emitted block also times the pseudo-elements on
+`--dur-base` and `--ease-in-out-smooth`, so the reset zeroes them. The UA's own
+root crossfade is not covered by the tokens.
 
 Chrome 126+, Safari 18.2+, and **not in stable Firefox**. MDN lists
 `@view-transition` as limited availability, explicitly not Baseline; treat 2026
@@ -134,6 +177,24 @@ render two cards with the same name and the whole page's transition dies.
 This is the same failure class as `commandfor`, and it gets the same treatment —
 names are minted and scoped by the component, never hand-written. See the
 `overlay()` pattern in [interactivity.md](interactivity.md).
+
+`viewTransitionName(id, part?)` in `src/remix/motion/names.ts` returns the name
+verbatim or throws: `id--part` joins with `--`, which is reserved so a stem and
+a part cannot be re-split into another pair's name, and a bare reserved keyword
+(`none`, `auto`, `inherit`, …) is refused because `none` would mean "no name".
+The name rides in the element's `style` attribute rather than a `css()` block,
+as FacetFilter's anchor name does, since a per-render block would escape
+`componentStyles()`. `Tabs` takes `name` and gives the current tab
+`<name>--indicator`; `toast(name)` mints `<name>--toast` where it is written.
+
+## Deferred
+
+- **A same-document caller**, so Tabs' indicator and the toast stack can
+  actually morph.
+- **Menu size morph**, which needs `interpolate-size`.
+- **Client-side retrigger**: a pop or shake plays when the element is inserted,
+  so it replays on every page load and frame swap, and does not replay when a
+  count changes in place.
 
 ## Adding a transition
 

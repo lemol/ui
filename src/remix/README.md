@@ -283,7 +283,10 @@ scrolls sideways rather than wrapping, and a scroller clips whatever paints
 past its edge, so a tab draws the reset's focus ring inside its own edge,
 inset by `--ui-tabs-ring-inset` (the ring's width), and the `line` rule is an
 inset shadow the tabs paint over rather than a border no tab could reach.
-Twenty-three tokens in `tabs/tokens.ts`.
+`name` (optional) gives the current tab `view-transition-name:
+<name>--indicator` through `viewTransitionName()`, so a caller can morph the
+indicator; without a same-document `startViewTransition` caller it is inert
+(see [motion.md](../../docs/motion.md)). Twenty-three tokens in `tabs/tokens.ts`.
 
 ### `Kbd`
 
@@ -327,6 +330,16 @@ status colours no `-hover` arm. No size axis: `schema.sizing` names two
 control heights and a badge is not a control.
 
 Twenty-three tokens in `badge/tokens.ts`.
+
+### `viewTransitionName()`
+
+Beside `overlay()` for the same reason: a hand-written `view-transition-name`
+shared by two visible elements aborts the whole transition, so
+`viewTransitionName(id, part?)` (`motion/names.ts`) returns `id` or `id--part`
+verbatim or throws, refusing `--` inside either half and a bare reserved
+keyword. The shared keyframes live beside it in `motion/motion.ts`
+(`shake`, `pop`, `drawCheck`, `dissolve`, `shimmer`), each a `[keyframes,
+animation]` pair timed by the consumer's own tokens.
 
 ### `Dialog` and `overlay()`
 
@@ -497,6 +510,10 @@ would never fire. `runtime.ts` imports `scheduleDismiss` and a shared
 attribute-name constant from `toaster/`, both plain and JSX-free, so the
 runtime file itself stays free of the component library it dispatches for.
 
+`toast(name)` also mints `<name>--toast` with `viewTransitionName()`, in the
+shell's `style` attribute, so each toast in a stack has its own name; it throws
+at `toast()` for a bad id, and does nothing until a same-document caller exists.
+
 Entry and exit follow `Dialog`'s and `Popover`'s pattern exactly. Thirty
 tokens in `toaster/tokens.ts`: a shell, a close button, and five tones each
 carrying the `<tone>` on `<tone>-subtle` pair.
@@ -627,7 +644,10 @@ styled shell.
 or at another element (copying its `textContent` with `for`) — the same
 one-variable-used-twice reasoning as `overlay()`'s minted id, since `id` is
 both the element's own id and, absent `for`, its `commandfor` target. Renders
-a plain `Button`, so it reads `--ui-btn-*` and declares no tokens of its own.
+a `Button` holding two stacked labels in one grid cell: the button's own text
+and, once `--copy` has run, the confirm text with a drawn check, dissolving
+between them on `--ui-copy-confirm-duration`/`-easing`. It reads `--ui-btn-*`
+and adds `--ui-copy-confirm-duration`, `-easing`, `-gap` and `--ui-copy-check-size`.
 
 `Button` gained an `id` prop for this — optional, and every other M1 use is
 unaffected. `--copy`'s handler (`runtime.ts`) writes the clipboard, then
@@ -689,7 +709,9 @@ Ten tokens in `pagination/tokens.ts`.
 
 ### `Spinner` and `Skeleton`
 
-Pure CSS animation, no JS, and neither carries a component-local
+Pure CSS animation, no JS (the new micro-interactions on Field, CopyButton,
+Badge, TabBar and Button read the same way: their durations are `--ui-*`
+tokens defaulting to `--dur-*`, so the reset zeroes them too), and neither carries a component-local
 `prefers-reduced-motion` query: each reads `--dur-slow` through its own
 `-duration` token, and the global reset (`design/css/reset.ts`) zeroes every
 `--dur-*` token under `prefers-reduced-motion: reduce`, so a zero-duration

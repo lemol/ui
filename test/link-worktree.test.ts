@@ -122,6 +122,7 @@ describe("proof/link-worktree.ts", () => {
 
     // Second run changes nothing: same inodes and mtimes, not a delete-and-relink
     const linkPaths = [wtPlain, wtPkg, wtTool]
+
     const identity = (path: string) => {
       const stat = lstatSync(path)
 

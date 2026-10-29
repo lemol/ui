@@ -1,6 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { headingScale, primitiveNames, schema } from "../tokens.ts"
-import { reducedMotionCss, resetCss, unlayeredCss } from "./reset.ts"
+import { reducedMotionCss, reducedMotionOverrideCss, resetCss, unlayeredCss } from "./reset.ts"
 
 const durationNames = schema.motion.filter((name) => name.startsWith("dur-"))
 
@@ -84,5 +84,17 @@ describe("the reduced-motion reset", () => {
 
   it("scopes itself to the reduce preference", () => {
     expect(reducedMotionCss.startsWith("@media (prefers-reduced-motion: reduce) {")).toBe(true)
+  })
+})
+
+describe("the manual reduced-motion override", () => {
+  it("zeroes every duration the media query does, under data-motion=reduce", () => {
+    const zeroed = [...reducedMotionOverrideCss.matchAll(/--([\w-]+): 0ms !important;/g)].map(
+      (match) => match[1] ?? "",
+    )
+
+    expect(reducedMotionOverrideCss.startsWith(':root[data-motion="reduce"] {')).toBe(true)
+    expect(zeroed).toEqual([...durationNames])
+    expect(reducedMotionOverrideCss.match(/\{/g)).toHaveLength(1)
   })
 })

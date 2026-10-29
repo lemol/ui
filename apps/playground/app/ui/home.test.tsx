@@ -14,6 +14,7 @@ describe("HomePage", () => {
     expect(page).toContain("Skip to content")
     expect(page).toContain('href="/c/button"')
     expect(page).toContain('href="/pages/dashboard"')
+    expect(page).toContain('href="/pages/motion"')
     expect(page).toContain('href="/spa"')
   })
 

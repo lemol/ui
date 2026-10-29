@@ -135,3 +135,17 @@ export const reducedMotionCss = `@media (prefers-reduced-motion: reduce) {
 ${durationNames.map((name) => `    --${name}: 0ms !important;`).join("\n")}
   }
 }`
+
+/**
+ * The manual twin of the media query, for a page that chooses reduced motion
+ * rather than inheriting it: `data-motion="reduce"` on the root element, set by
+ * the server (`Document`'s `motion`), never by a script.
+ *
+ * The same zeroing, the same !important and for the same reason, and its own
+ * block rather than a second selector in the media query's: a media query
+ * cannot take an attribute selector in its prelude, and a grouped list would
+ * make one rule of two conditions.
+ */
+export const reducedMotionOverrideCss = `:root[data-motion="reduce"] {
+${durationNames.map((name) => `  --${name}: 0ms !important;`).join("\n")}
+}`

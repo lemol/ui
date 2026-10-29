@@ -1,5 +1,6 @@
 import { describe, expect, it } from "bun:test"
 import { demos } from "../../../src/remix/demos.ts"
+import { markupOf, stylesOf } from "../../../test/styles.ts"
 import { createPlaygroundRouter } from "./router.ts"
 
 /**
@@ -24,6 +25,7 @@ describe("the home route", () => {
     expect(page).toContain("Skip to content")
     expect(page).toContain('href="/c/button"')
     expect(page).toContain('href="/pages/dashboard"')
+    expect(page).toContain('href="/pages/motion"')
     expect(page).toContain('href="/spa"')
   })
 
@@ -46,6 +48,7 @@ describe("the home route", () => {
     expect(page).toContain('name="density"')
     expect(page).toContain('name="nojs"')
     expect(page).toContain('name="compat"')
+    expect(page).toContain('name="motion"')
   })
 
   // The runtime turns a same-origin GET form into a client navigation, which
@@ -63,7 +66,8 @@ describe("the home route", () => {
       return form.slice(0, form.indexOf(">")).includes("data-rmx-document")
     }
 
-    expect(["scheme", "density", "nojs", "compat"].map(opensDocument)).toEqual([
+    expect(["scheme", "density", "nojs", "compat", "motion"].map(opensDocument)).toEqual([
+      true,
       true,
       true,
       true,
@@ -367,5 +371,63 @@ describe("the SPA route", () => {
 
   it("rejects paths deeper than one demo", async () => {
     expect((await get("/spa/button/extra?nojs")).status).toBe(404)
+  })
+})
+
+describe("the motion route", () => {
+  it("renders a section per micro-interaction", async () => {
+    const response = await get("/pages/motion")
+
+    expect(response.status).toBe(200)
+    const page = await response.text()
+
+    for (const section of [
+      "Confirm",
+      "Invalid",
+      "Counts",
+      "Notification",
+      "Search",
+      "Loading",
+      "Tabs",
+      "Stacked",
+      "Press",
+      "Menu",
+      "Transitions",
+    ]) {
+      expect(page).toContain(`>${section}</h2>`)
+    }
+  })
+
+  it("shows every shared motion and a minted name", async () => {
+    const page = await html("/pages/motion")
+
+    for (const name of ["shake", "pop", "draw", "dissolve", "shimmer"]) {
+      expect(stylesOf(page)).toContain(`@keyframes ui-motion-${name}`)
+    }
+
+    expect(markupOf(page)).toContain("view-transition-name: motion-views--indicator")
+  })
+
+  it("spends no literal duration or curve in any component style", async () => {
+    // stylesOf reads data-rmx-style blocks only: the token sheet's primitives and the reset's 0ms are not component styles.
+    const styles = stylesOf(await html("/pages/motion"))
+
+    expect(styles).not.toBe("")
+    expect(styles).not.toMatch(/\b\d+(\.\d+)?m?s\b/)
+    expect(styles).not.toContain("cubic-bezier")
+  })
+
+  it("works with the no-JS toggle on", async () => {
+    const page = await html("/pages/motion?nojs")
+
+    expect(page).not.toContain("<script")
+    expect(page).toContain(">Confirm</h2>")
+  })
+
+  it("reduces motion from the query string on every page, and ignores what it does not know", async () => {
+    expect(htmlTag(await html("/pages/motion?motion=reduce"))).toContain('data-motion="reduce"')
+    expect(htmlTag(await html("/c/button?motion=reduce"))).toContain('data-motion="reduce"')
+    expect(htmlTag(await html("/pages/motion?motion=full"))).not.toContain("data-motion=")
+    expect(htmlTag(await html("/pages/motion?motion=slow"))).not.toContain("data-motion=")
   })
 })

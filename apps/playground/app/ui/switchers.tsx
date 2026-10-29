@@ -32,7 +32,7 @@ export interface PlaygroundSwitchersProps {
 }
 
 /**
- * The scheme, density, script and compat switches as GET forms, so every
+ * The scheme, density, script, compat and motion switches as GET forms, so every
  * axis works with no client JavaScript — the same mechanism as the knobs.
  *
  * Each option is its own submit button, which is what makes a switch one
@@ -53,6 +53,7 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
     const density = params.get("density") ?? "default"
     const scripts = !params.has("nojs")
     const compat = params.has("compat")
+    const reduced = params.get("motion") === "reduce"
 
     return (
       <div mix={bar}>
@@ -160,6 +161,33 @@ export function PlaygroundSwitchers(handle: Handle<PlaygroundSwitchersProps>) {
               type="submit"
             >
               On
+            </Button>
+          </div>
+        </form>
+
+        {/* The attribute is rendered by the server, so an in-place swap would
+            keep the last one: a fresh document, like scheme and density. */}
+        <form action={pathname} data-rmx-document method="get">
+          <div mix={group}>
+            <span mix={label}>Motion</span>
+            <HiddenFields except={["motion"]} params={params} />
+            <Button
+              name="motion"
+              size="sm"
+              tone={!reduced ? "primary" : "ghost"}
+              type="submit"
+              value="full"
+            >
+              Full
+            </Button>
+            <Button
+              name="motion"
+              size="sm"
+              tone={reduced ? "primary" : "ghost"}
+              type="submit"
+              value="reduce"
+            >
+              Reduce
             </Button>
           </div>
         </form>

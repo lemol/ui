@@ -58,6 +58,7 @@ export function HomePage(handle: Handle<HomePageProps>) {
               <LinkButton href="/pages/dashboard" tone="primary">
                 Dashboard
               </LinkButton>
+              <LinkButton href="/pages/motion">Motion</LinkButton>
               <LinkButton href="/spa">SPA demo</LinkButton>
             </Row>
             <Text tone="muted">

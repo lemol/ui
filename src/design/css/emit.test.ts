@@ -40,6 +40,9 @@ describe("the sheet", () => {
     expect(at("@layer base {")).toBeGreaterThan(at("@media (pointer: coarse)"))
     expect(at("[hidden] {")).toBeGreaterThan(at("@layer base {"))
     expect(at("@media (prefers-reduced-motion: reduce)")).toBeGreaterThan(at("[hidden] {"))
+    expect(at(':root[data-motion="reduce"]')).toBeGreaterThan(
+      at("@media (prefers-reduced-motion: reduce)"),
+    )
   })
 
   it("guards the media block so a manual choice beats the system preference", () => {

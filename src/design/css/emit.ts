@@ -1,7 +1,7 @@
 import type { Theme } from "../theme.ts"
 import { primitiveNames } from "../tokens.ts"
 import { layerStatement } from "./layers.ts"
-import { reducedMotionCss, resetCss, unlayeredCss } from "./reset.ts"
+import { reducedMotionCss, reducedMotionOverrideCss, resetCss, unlayeredCss } from "./reset.ts"
 
 export interface EmitOptions<C extends string = never> {
   /** Every component's token record, aggregated by the package that owns the components. */
@@ -184,7 +184,7 @@ export function emitTokensCss<C extends string = never>(
     parts.push(mediaRule("(pointer: coarse)", ":root, :root[data-density]", touch))
   }
 
-  parts.push(resetCss, unlayeredCss, reducedMotionCss)
+  parts.push(resetCss, unlayeredCss, reducedMotionCss, reducedMotionOverrideCss)
 
   if (options?.viewTransitions === "auto") parts.push(viewTransitionCss)
 

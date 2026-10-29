@@ -4,6 +4,7 @@ export const routes = route({
   home: get("/"),
   component: get("/c/:component"),
   dashboard: get("/pages/dashboard"),
+  motion: get("/pages/motion"),
   spa: get("/spa(/*path)"),
   assets: get("/assets/*path"),
 })

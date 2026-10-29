@@ -7,6 +7,7 @@ import { routes } from "../routes.ts"
 import { CataloguePage, UnknownComponentPage } from "../ui/catalogue.tsx"
 import { DashboardPage } from "../ui/dashboard.tsx"
 import { HomePage } from "../ui/home.tsx"
+import { MotionPage } from "../ui/motion.tsx"
 import { SpaLoading, SpaNoJs } from "../ui/spa.tsx"
 
 const browserEntry = path.resolve(import.meta.dirname, "public/entry.ts")
@@ -19,12 +20,13 @@ interface PageQuery {
   scripts: boolean
   scheme: "light" | "dark" | undefined
   density: "compact" | undefined
+  motion: "reduce" | undefined
   /** Path plus query string, for the switchers and knobs to preserve. */
   location: string
 }
 
 /**
- * Every page reads the same four axes. Both variant params are allow-listed
+ * Every page reads the same five axes. Both variant params are allow-listed
  * rather than passed through: an attribute value no selector matches is a
  * silent no-op, so an unrecognised one renders nothing rather than looking
  * like it did something. `scheme=system` and `density=default` are the
@@ -35,11 +37,13 @@ function pageQuery(url: URL): PageQuery {
   const params = url.searchParams
   const scheme = params.get("scheme")
   const density = params.get("density")
+  const motion = params.get("motion")
 
   return {
     scripts: !params.has("nojs"),
     scheme: scheme === "dark" || scheme === "light" ? scheme : undefined,
     density: density === "compact" ? density : undefined,
+    motion: motion === "reduce" ? motion : undefined,
     location: `${url.pathname}${url.search}`,
   }
 }
@@ -64,6 +68,7 @@ export default createController(routes, {
         <Document
           boot={query.scripts}
           density={query.density}
+          motion={query.motion}
           entry={query.scripts ? await assetServer.getScriptEntry(browserEntry) : null}
           scheme={query.scheme}
           site={site}
@@ -89,6 +94,7 @@ export default createController(routes, {
           <Document
             boot={query.scripts}
             density={query.density}
+            motion={query.motion}
             entry={query.scripts ? await assetServer.getScriptEntry(browserEntry) : null}
             scheme={query.scheme}
             site={site}
@@ -104,6 +110,7 @@ export default createController(routes, {
         <Document
           boot={query.scripts}
           density={query.density}
+          motion={query.motion}
           entry={query.scripts ? await assetServer.getScriptEntry(browserEntry) : null}
           scheme={query.scheme}
           site={site}
@@ -122,12 +129,32 @@ export default createController(routes, {
         <Document
           boot={query.scripts}
           density={query.density}
+          motion={query.motion}
           entry={query.scripts ? await assetServer.getScriptEntry(browserEntry) : null}
           scheme={query.scheme}
           site={site}
           title="Dashboard"
         >
           <DashboardPage location={query.location} />
+        </Document>,
+      )
+    },
+
+    /** Every micro-interaction on one page, with the reduced-motion switch in reach. */
+    async motion(context) {
+      const query = pageQuery(context.url)
+
+      return context.render(
+        <Document
+          boot={query.scripts}
+          density={query.density}
+          entry={query.scripts ? await assetServer.getScriptEntry(browserEntry) : null}
+          motion={query.motion}
+          scheme={query.scheme}
+          site={site}
+          title="Motion"
+        >
+          <MotionPage location={query.location} />
         </Document>,
       )
     },
@@ -153,6 +180,7 @@ export default createController(routes, {
           <Document
             boot
             density={query.density}
+            motion={query.motion}
             entry={await assetServer.getScriptEntry(spaEntry)}
             scheme={query.scheme}
             site={site}
@@ -182,6 +210,7 @@ export default createController(routes, {
         <Document
           boot={false}
           density={query.density}
+          motion={query.motion}
           entry={null}
           scheme={query.scheme}
           site={site}

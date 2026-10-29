@@ -110,6 +110,16 @@ describe("Document", () => {
     expect(chosen).toContain('data-density="compact"')
   })
 
+  it("renders a reduced-motion choice the server made, and never preserves a blank one", async () => {
+    const unset = htmlTag(await renderToHtml(<Document title="T" />))
+
+    expect(unset).not.toContain("data-motion=")
+    expect(unset).toContain('data-rmx-preserve-attrs="data-scheme data-density"')
+    expect(htmlTag(await renderToHtml(<Document motion="reduce" title="T" />))).toContain(
+      'data-motion="reduce"',
+    )
+  })
+
   it("declares a language, defaulting to en", async () => {
     expect(htmlTag(await renderToHtml(<Document title="Tasks" />))).toContain('lang="en"')
     expect(htmlTag(await renderToHtml(<Document lang="pt" title="Tasks" />))).toContain('lang="pt"')

@@ -571,28 +571,28 @@ Page sections (each: `Eyebrow` + `Heading level={2}` + live components + `Text t
 10. **Menu**: `Menu`/`Popover` entry morph with `interpolate-size` deferral note.
 11. **Transitions**: same- vs cross-document support table + `@view-transition` opt-in code snippet.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - `src/design/css/reset.test.ts`: `:root[data-motion="reduce"]` zeroes every `--dur-*` token with `!important`.
   - `src/mini/document.test.tsx`: `motion="reduce"` renders `data-motion="reduce"`.
   - `apps/playground/app/router.test.tsx`: `?motion=reduce` sets `data-motion="reduce"` on `<html>`; assert no literals in component style blocks (`stylesOf()` / `data-rmx-style` blocks only, excluding `:root` token definitions and the reset) on `/pages/motion`.
 
-- [ ] **Step 2: Run them to verify they fail.**
+- [x] **Step 2: Run them to verify they fail.**
 
 Run: `bun test src/design/css/reset.test.ts src/mini/document.test.tsx apps/playground/app/router.test.tsx`
 Expected: FAIL.
 
-- [ ] **Step 3: Implement.**
+- [x] **Step 3: Implement.**
   - Update `reset.ts` with `:root[data-motion="reduce"]`.
   - Update `Document` prop and attribute preservation.
   - Add `motion` to `pageQuery`, controller actions, and `switchers.tsx` (`Full`/`Reduce`).
   - Create `motion.tsx` page with all 11 demo sections and link it in `home.tsx`.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/design/css/reset.test.ts src/mini/document.test.tsx apps/playground/app/router.test.tsx apps/playground/app/ui/home.test.tsx apps/playground/app/ui/catalogue.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/design/css/ src/mini/document.tsx src/mini/document.test.tsx apps/playground/ && git commit -m "feat(playground): motion page and reduced-motion toggle

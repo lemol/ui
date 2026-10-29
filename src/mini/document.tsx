@@ -63,6 +63,13 @@ export interface DocumentProps {
    */
   scheme?: "light" | "dark" | undefined
   density?: "compact" | undefined
+  /**
+   * `reduce` renders `data-motion="reduce"`, zeroing every duration token as
+   * the media query does for a visitor who asked the system. Server-owned like
+   * the scheme, and unlike it never named in `data-rmx-preserve-attrs`: no
+   * script sets it, and preserving a blank would keep a stale `reduce`.
+   */
+  motion?: "reduce" | undefined
   /** Defaults to `miniTheme`. An app extending it passes the extension here. */
   theme?: Theme<ComponentTokenName> | undefined
   /** `<html lang>`. Defaults to `en`. */
@@ -116,6 +123,7 @@ export function Document(handle: Handle<DocumentProps>) {
       boot = true,
       scheme,
       density,
+      motion,
       theme = miniTheme,
       lang = "en",
       head,
@@ -134,6 +142,7 @@ export function Document(handle: Handle<DocumentProps>) {
     return (
       <html
         data-density={density}
+        data-motion={motion}
         data-rmx-preserve-attrs={blank.length === 0 ? undefined : blank.join(" ")}
         data-scheme={scheme}
         id={documentRootId}

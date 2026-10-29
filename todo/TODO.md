@@ -1,7 +1,5 @@
 # ui
 
-- [ ] [45 - link-worktree's rerun test pins that it changes nothing](./45-link-worktree-s-rerun-test-pins-that-it-changes-nothing.md)
-
 ## M1 — Foundation and contract proof
 
 ## M2 — Catalogue

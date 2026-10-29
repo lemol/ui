@@ -197,7 +197,7 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 - Produces: `viewTransitionName(id: string, part?: string): string` for Tasks G–H — extending the `overlay()` pattern to transition names. Components pass their already-minted id (`overlay()`/`popover()`/`toast()` ids, `Field`'s name stem, `Tabs`' `name` stem) plus an optional part (`"indicator"`, `"surface"`, `"toast"`), and never write the name themselves.
 - Following `src/remix/dialog/overlay.tsx`, `id` and `part` are used verbatim or refused, never rewritten: the factory throws an `Error` whose message names the offending argument and value when `id`/`part` contains `--`, when `id` is empty, when `part` is `""`, or when either fails `/^[A-Za-z_][A-Za-z0-9_-]*$/`. With `--` banned from both inputs, the joined string splits back to exactly one `(id, part)` pair, so no two distinct pairs collide.
 
-- [ ] **Step 1: Write the failing test** in `src/remix/motion/names.test.ts`. Assert:
+- [x] **Step 1: Write the failing test** in `src/remix/motion/names.test.ts`. Assert:
   - `viewTransitionName("new-task", "dialog")` returns `"new-task--dialog"`; `viewTransitionName("saved")` returns `"saved"`.
   - Non-collision of single-dash splits: `("new", "task-dialog")` ≠ `("new-task", "dialog")`; `("a-b", "c")` ≠ `("a", "b-c")`.
   - Refusals, each `toThrow` with a message containing the offending value: `("a--b", "c")`, `("a", "b--c")`, `("x--toast")`, `("")`, `("x", "")`, `("1st")`, `("my toast")`.
@@ -211,12 +211,12 @@ expect(() => viewTransitionName("a--b", "c")).toThrow("a--b")
 expect(() => viewTransitionName("x", "")).toThrow()
 ```
 
-- [ ] **Step 2: Run it to verify it fails.**
+- [x] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/motion/names.test.ts`
 Expected: FAIL — module does not exist.
 
-- [ ] **Step 3: Implement `viewTransitionName(id: string, part?: string): string` in `src/remix/motion/names.ts`.**
+- [x] **Step 3: Implement `viewTransitionName(id: string, part?: string): string` in `src/remix/motion/names.ts`.**
   ```ts
   const ident = /^[A-Za-z_][A-Za-z0-9_-]*$/
 
@@ -238,14 +238,14 @@ Expected: FAIL — module does not exist.
   ```
   Verbatim or refused, never rewritten — `overlay()`'s contract. `--` is reserved as the join, so stem and part cannot be re-split.
 
-- [ ] **Step 4: Export it from `src/remix/index.ts`** beside `overlay`.
+- [x] **Step 4: Export it from `src/remix/index.ts`** beside `overlay`.
 
-- [ ] **Step 5: Run the tests to verify they pass.**
+- [x] **Step 5: Run the tests to verify they pass.**
 
 Run: `bun test src/remix/motion/names.test.ts`
 Expected: PASS.
 
-- [ ] **Step 6: Commit.**
+- [x] **Step 6: Commit.**
 
 ```bash
 git add src/remix/motion/names.ts src/remix/motion/names.test.ts src/remix/index.ts && git commit -m "feat(motion): mint view-transition-names like commandfor ids

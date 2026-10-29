@@ -79,6 +79,7 @@ export {
   menu,
 } from "./menu/menu.tsx"
 export { Meter, type MeterProps, Progress, type ProgressProps } from "./meter/meter.tsx"
+export { viewTransitionName } from "./motion/names.ts"
 export { type PageRangeItem, pageRange } from "./pagination/page-range.ts"
 export {
   currentPageOf,

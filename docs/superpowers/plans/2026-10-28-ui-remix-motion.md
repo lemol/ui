@@ -399,24 +399,24 @@ Co-Authored-By: Claude Opus 5.5 <noreply@anthropic.com>"
 
 No new tokens: press is a transition on the existing `ui-btn-transition-duration`/`ui-btn-transition-easing`.
 
-- [ ] **Step 1: Write the failing test** in `src/remix/button/button.test.tsx`.
+- [x] **Step 1: Write the failing test** in `src/remix/button/button.test.tsx`.
   - In `button.test.tsx`, the test is `reads only its own tokens and structural keywords` (line 56). Its `keywords` set carries declarations that are neither colour, length, duration, nor weight.
   - Assert `buttonBase` transitions `scale` alongside its current properties (`transitionProperty: "background, border-color, color, scale"`), and that an `&:active` rule sets `scale: 0.97`.
   - Add `0.97` (a dimensionless transform scale ratio, not a colour, length, duration, or weight) and `"background, border-color, color, scale"` (the widened transition property list) to `keywords` in `button.test.tsx` with their inline argument.
 
-- [ ] **Step 2: Run it to verify it fails.**
+- [x] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/button/button.test.tsx`
 Expected: FAIL — `scale` not in transition, no `:active` rule.
 
-- [ ] **Step 3: Implement.** In `buttonBase`, add `scale` to `transitionProperty`; add `&:active:not(:disabled)` with `scale: "0.97"` in the same block.
+- [x] **Step 3: Implement.** In `buttonBase`, add `scale` to `transitionProperty`; add `&:active:not(:disabled)` with `scale: "0.97"` in the same block.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/button/button.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/button/ && git commit -m "feat(button): press feedback on scale

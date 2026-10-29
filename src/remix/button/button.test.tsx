@@ -29,7 +29,10 @@ const keywords = new Set([
   "none",
   "pointer",
   "not-allowed",
-  "background, border-color, color",
+  // The press: the widened transition list, and a unitless press ratio — not
+  // a colour, length, duration or weight.
+  "background, border-color, color, scale",
+  "0.97",
 ])
 
 describe("Button", () => {
@@ -99,6 +102,13 @@ describe("Button", () => {
 
   it("styles no focus ring, leaving the reset's to apply", async () => {
     expect(stylesOf(await renderToHtml(<Button>Save</Button>))).not.toContain("outline")
+  })
+
+  it("presses down on scale, on the transition tokens it already reads", async () => {
+    const styles = stylesOf(await renderToHtml(<Button>Save</Button>))
+
+    expect(styles).toContain("transition-property: background, border-color, color, scale;")
+    expect(styles).toMatch(/&:active:not\(:disabled\) \{\s*scale: 0\.97;\s*\}/)
   })
 
   it("adds through mix a property it does not declare itself", async () => {
@@ -173,11 +183,15 @@ describe("Button", () => {
     // layer again. Asserting buttonBase's own block (the one carrying the
     // shared, tone-independent declarations) does NOT also carry `:disabled`
     // is what stops that split from reintroducing itself unnoticed.
+    //
+    // `&:disabled` the rule, not the `:disabled` substring: the press guard
+    // `&:active:not(:disabled)` lives in this same block and must not trip
+    // this assertion.
     const blocks = styleBlocksOf(await renderToHtml(<Button>Save</Button>))
     const baseBlock = blocks.find((block) => block.includes("inline-flex"))
 
     expect(baseBlock).toBeDefined()
-    expect(baseBlock).not.toContain(":disabled")
+    expect(baseBlock).not.toContain("&:disabled")
   })
 
   it("renders an invocation as the attribute pair, and nothing when absent", async () => {

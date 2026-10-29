@@ -39,9 +39,10 @@ const buttonBase = css({
   // to a gradient, and background-color drops a gradient value as invalid.
   // Naming the shorthand here means gradients do not interpolate, so a
   // gradient skin swaps instantly on hover while the flat default transitions.
-  transitionProperty: "background, border-color, color",
+  transitionProperty: "background, border-color, color, scale",
   transitionDuration: "var(--ui-btn-transition-duration)",
   transitionTimingFunction: "var(--ui-btn-transition-easing)",
+  "&:active:not(:disabled)": { scale: "0.97" },
   // No outline anywhere in here. The reset's :where(:focus-visible) rule owns
   // the focus ring, and it applies precisely because nothing here competes
   // with it. A per-component ring is how a focus ring drifts.

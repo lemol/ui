@@ -5,6 +5,7 @@ import { buttonTokens } from "./button/tokens.ts"
 import { calloutTokens } from "./callout/tokens.ts"
 import { checkboxTokens } from "./checkbox/tokens.ts"
 import { commandPaletteTokens } from "./command-palette/tokens.ts"
+import { copyTokens } from "./copy-button/tokens.ts"
 import { dialogTokens } from "./dialog/tokens.ts"
 import { disclosureTokens } from "./disclosure/tokens.ts"
 import { eyebrowTokens } from "./eyebrow/tokens.ts"
@@ -43,6 +44,7 @@ export const componentTokens = {
   ...calloutTokens,
   ...checkboxTokens,
   ...commandPaletteTokens,
+  ...copyTokens,
   ...dialogTokens,
   ...disclosureTokens,
   ...eyebrowTokens,

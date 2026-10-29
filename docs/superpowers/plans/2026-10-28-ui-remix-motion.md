@@ -316,29 +316,29 @@ The component and runtime changes:
 - In `src/remix/runtime.ts`: `--copy` no longer writes `source.textContent` (it would destroy the SVG and label nodes the animation needs). It sets the attribute and `aria-hidden` states above; the revert timer reverses them, so a second copy re-triggers the animation. The `data-copy-original-label` bookkeeping goes away with the text swap.
 - Where a consumer renders a `CopyButton` without the spans (none in-tree), the runtime falls back to the old `textContent` swap.
 
-- [ ] **Step 1: Write the failing tests.**
+- [x] **Step 1: Write the failing tests.**
   - Component test in `copy-button.test.tsx`: render `CopyButton`, assert the checkmark SVG path and label wrapper are present; assert a `[data-copy-confirmed]` rule whose `animation` names `ui-motion-draw` with `ui-copy-confirm-*` tokens, and confirm label dissolves via `dissolve`.
   - Runtime behaviour in `test/browser/copy-button.browser.test.ts` (`src/remix/runtime.test.ts` has no DOM — its only case is `does nothing where there is no document`, so nothing is added there). Rewrite the three `textContent` assertions: after a click, `getByRole("button", { name: "Copied!" })` resolves and `[data-copy-confirmed]` is present; after the revert, `getByRole("button", { name: "Copy API key" })` resolves and the attribute is gone; a second click before the revert keeps `Copied!` as the name and records two writes.
   - Add `copy-button` to the rendered-CSS guard `src/remix/motion/no-literals.test.ts` (Task A).
 
-- [ ] **Step 2: Run them to verify they fail.**
+- [x] **Step 2: Run them to verify they fail.**
 
 Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/tokens.test.ts src/remix/motion/no-literals.test.ts`, then `bun test test/browser/copy-button.browser.test.ts` (needs `bunx playwright install chromium`).
 Expected: FAIL.
 
-- [ ] **Step 3: Implement.**
+- [x] **Step 3: Implement.**
   - Create `src/remix/copy-button/tokens.ts` with `ui-copy-confirm-duration` and `ui-copy-confirm-easing`.
   - In `copy-button.tsx`, render checkmark SVG and confirm label span; mix `drawCheck` and `dissolve` under `&[data-copy-confirmed]`.
   - In `runtime.ts`, `--copy` sets `data-copy-confirmed` and the `aria-hidden` swap; the revert timer reverses both.
   - In `tokens.ts`, aggregate `copyTokens`.
   - In `tokens.test.ts`, add `"ui-copy"` to the prefix list.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/copy-button/copy-button.test.tsx src/remix/tokens.test.ts src/remix/motion/no-literals.test.ts` and `bun test test/browser/copy-button.browser.test.ts`.
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/copy-button/ src/remix/runtime.ts test/browser/copy-button.browser.test.ts src/remix/motion/no-literals.test.ts && git commit -m "feat(copy-button): confirm check and dissolve

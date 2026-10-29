@@ -18,26 +18,25 @@ const stubClipboard = (page: import("playwright").Page): Promise<void> =>
     })
   })
 
-test("copies the literal value and swaps the label, then reverts", async () => {
+const written = (page: import("playwright").Page) =>
+  page.evaluate(() => (window as unknown as { written: string[] }).written)
+
+test("copies the literal value, swaps the accessible label, then reverts", async () => {
   await withPage(async (page, baseUrl) => {
     await page.goto(`${baseUrl}/c/copyButton`)
     await stubClipboard(page)
 
-    const button = page.getByRole("button", { name: "Copy API key" })
+    const button = page.locator("#api-key-copy")
 
     await button.click()
+    expect(await written(page)).toEqual(["sk_live_4242424242424242"])
+    await page.getByRole("button", { name: "Copied!", exact: true }).waitFor()
+    expect(await button.getAttribute("data-copy-confirmed")).not.toBeNull()
+    // The check survived the swap: nothing rewrote the button's text.
+    expect(await button.locator("svg path").count()).toBe(1)
 
-    expect(await page.evaluate(() => (window as unknown as { written: string[] }).written)).toEqual(
-      ["sk_live_4242424242424242"],
-    )
-    await page.waitForFunction(
-      () => document.getElementById("api-key-copy")?.textContent === "Copied!",
-    )
-
-    await page.waitForFunction(
-      () => document.getElementById("api-key-copy")?.textContent === "Copy API key",
-      { timeout: 5000 },
-    )
+    await page.getByRole("button", { name: "Copy API key", exact: true }).waitFor({ timeout: 5000 })
+    expect(await button.getAttribute("data-copy-confirmed")).toBeNull()
   })
 })
 
@@ -59,22 +58,29 @@ test("retriggering before the revert resets it instead of racing it", async () =
     await page.goto(`${baseUrl}/c/copyButton`)
     await stubClipboard(page)
 
-    const button = page.getByRole("button", { name: "Copy API key" })
+    const button = page.locator("#api-key-copy")
 
     await button.click()
-    await page.waitForFunction(
-      () => document.getElementById("api-key-copy")?.textContent === "Copied!",
-    )
-    // Second click while still showing the confirmation: the label must not
-    // flip back to the original mid-copy, and clicking again still counts
-    // as a real copy.
+    await page.getByRole("button", { name: "Copied!", exact: true }).waitFor()
     await button.click()
-    expect(await page.evaluate(() => (window as unknown as { written: string[] }).written)).toEqual(
-      ["sk_live_4242424242424242", "sk_live_4242424242424242"],
+    expect(await written(page)).toEqual(["sk_live_4242424242424242", "sk_live_4242424242424242"])
+    expect(await page.getByRole("button", { name: "Copied!", exact: true }).count()).toBe(1)
+  })
+})
+
+test("swaps a bare invoker's own text, which has no labels to toggle", async () => {
+  await withPage(async (page, baseUrl) => {
+    await page.goto(`${baseUrl}/c/copyButton`)
+    await stubClipboard(page)
+    await page.evaluate(() =>
+      document.body.insertAdjacentHTML(
+        "beforeend",
+        '<button id="raw" command="--copy" commandfor="raw" data-copy-value="v">Raw</button>',
+      ),
     )
-    expect(await page.evaluate(() => document.getElementById("api-key-copy")?.textContent)).toBe(
-      "Copied!",
-    )
+    await page.locator("#raw").click()
+    await page.waitForFunction(() => document.getElementById("raw")?.textContent === "Copied!")
+    expect(await written(page)).toEqual(["v"])
   })
 })
 

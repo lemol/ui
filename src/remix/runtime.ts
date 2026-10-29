@@ -108,10 +108,15 @@ const pendingCopyReverts = new WeakMap<Element, () => void>()
 
 /**
  * Writes `target`'s text (or its own `data-copy-value`, when `CopyButton`
- * has no separate `for` target) to the clipboard, then swaps `source`'s own
- * label for its `data-copy-confirm-label` and back — reusing
- * `scheduleDismiss`'s one-shot-timer shape rather than a second
- * implementation, per the M2 plan's own note for this command.
+ * has no separate `for` target) to the clipboard, then confirms on `source`
+ * and reverts, reusing `scheduleDismiss`'s one-shot-timer shape rather than a
+ * second implementation, per the M2 plan's own note for this command.
+ *
+ * A `CopyButton` holds an idle and a confirm label: confirming sets
+ * `data-copy-confirmed` (the stylesheet cross-fades them) and swaps which one
+ * is `aria-hidden`, so nothing in the button is rewritten. Any other invoker
+ * has no labels to toggle, so its own text is swapped for its
+ * `data-copy-confirm-label` and back.
  */
 registerCommand("--copy", ({ source, target }) => {
   if (!(source instanceof HTMLButtonElement)) return
@@ -121,10 +126,32 @@ registerCommand("--copy", ({ source, target }) => {
   void navigator.clipboard.writeText(text)
 
   pendingCopyReverts.get(source)?.()
+
+  const idle = source.querySelector('[data-copy-label="idle"]')
+  const confirm = source.querySelector('[data-copy-label="confirm"]')
+
+  if (idle !== null && confirm !== null) {
+    source.setAttribute("data-copy-confirmed", "")
+    idle.setAttribute("aria-hidden", "true")
+    confirm.removeAttribute("aria-hidden")
+
+    const cancelLabels = scheduleDismiss(COPY_CONFIRM_DURATION_MS, () => {
+      source.removeAttribute("data-copy-confirmed")
+      idle.removeAttribute("aria-hidden")
+      confirm.setAttribute("aria-hidden", "true")
+      pendingCopyReverts.delete(source)
+    })
+
+    pendingCopyReverts.set(source, cancelLabels)
+
+    return
+  }
+
   const original = source.dataset.copyOriginalLabel ?? source.textContent ?? ""
 
   source.dataset.copyOriginalLabel = original
   source.textContent = source.getAttribute("data-copy-confirm-label") ?? "Copied!"
+
   const cancel = scheduleDismiss(COPY_CONFIRM_DURATION_MS, () => {
     source.textContent = original
     delete source.dataset.copyOriginalLabel

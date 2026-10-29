@@ -89,6 +89,7 @@ describe("the component token aggregate", () => {
       "ui-btn",
       "ui-callout",
       "ui-checkbox",
+      "ui-copy",
       "ui-dialog",
       "ui-disclosure",
       "ui-eyebrow",

@@ -190,7 +190,7 @@ export function MotionPage(handle: Handle<MotionPageProps>) {
 
         <Section
           eyebrow="Field"
-          note="The clear button is the browser's own; Chrome and Safari draw it, and it dissolves in and out. Firefox draws none."
+          note="The clear button is the browser's own; Chrome fades it in and out, Safari fades it in and drops it on clear, Firefox draws none."
           title="Search"
         >
           <Field label="Search" name="motion-search" type="search" value="lemol" />

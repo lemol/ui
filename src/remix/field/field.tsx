@@ -304,13 +304,22 @@ const controlBase = css({
 
 /**
  * The clear button a search input draws, dissolved in and out on its own
- * tokens: a skin slowing the shake should not slow the clear. A vendor
- * pseudo-element, so an engine without it drops the rule whole, which is the
- * documented degradation.
+ * tokens: a skin slowing the shake should not slow the clear. It rests at
+ * `opacity: 0` while the input shows its placeholder, which is why a search
+ * Field always carries one (`" "` by default) — `:placeholder-shown` is the
+ * only selector that tracks the live value without script. Chromium hides the
+ * button with an inline `opacity: 0`, so it fades both ways; WebKit stops
+ * drawing it the frame the value empties, so there it fades in and leaves at
+ * once, an engine limit no author rule reaches. A vendor pseudo-element, so an
+ * engine without it drops the rule whole, which is the documented degradation.
  */
 const searchClear = css({
   "&::-webkit-search-cancel-button": {
+    opacity: 1,
     transition: `opacity ${clearTiming}`,
+  },
+  "&:placeholder-shown::-webkit-search-cancel-button": {
+    opacity: 0,
   },
 })
 
@@ -593,7 +602,7 @@ export function Field(handle: Handle<FieldProps>) {
               ]}
               name={name}
               pattern={props.pattern}
-              placeholder={props.placeholder}
+              placeholder={props.placeholder ?? (props.type === "search" ? " " : undefined)}
               readonly={props.readonly}
               required={required}
               step={props.step}

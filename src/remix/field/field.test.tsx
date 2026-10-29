@@ -981,23 +981,39 @@ describe("Field, as a select", () => {
   })
 
   it("dissolves a search field's clear button on its own tokens, and only on a search field", async () => {
-    const search = blocksOn(
-      await renderToHtml(<Field label="Find" name="q" type="search" />),
-      "input",
-    )
+    const html = await renderToHtml(<Field label="Find" name="q" type="search" />)
+    const search = blocksOn(html, "input")
 
-    const rule = search
-      .map((block) => ruleIn(block, "&::-webkit-search-cancel-button"))
-      .find((found) => found !== undefined)
+    const ruleOf = (selector: string) =>
+      search.map((block) => ruleIn(block, selector)).find((found) => found !== undefined)
 
-    expect(rule).toContain(
+    const shown = ruleOf("&::-webkit-search-cancel-button")
+    const resting = ruleOf("&:placeholder-shown::-webkit-search-cancel-button")
+
+    expect(shown).toContain("opacity: 1;")
+    expect(shown).toContain(
       "transition: opacity var(--ui-field-clear-duration) var(--ui-field-clear-easing);",
     )
+    expect(resting).toContain("opacity: 0;")
+    // :placeholder-shown needs a placeholder to match at all.
+    expect(markupOf(html)).toContain('placeholder=" "')
     expect(
       stylesOf(await renderToHtml(<Field label="Email" name="email" type="email" />)),
     ).not.toContain("search-cancel-button")
     expect(fieldTokens["ui-field-clear-duration"]).toStartWith("var(--dur-")
     expect(fieldTokens["ui-field-clear-easing"]).toStartWith("var(--ease-")
+  })
+
+  it("keeps a search field's own placeholder, and gives no other field one", async () => {
+    const own = await renderToHtml(
+      <Field label="Find" name="q" placeholder="Search docs" type="search" />,
+    )
+
+    const email = await renderToHtml(<Field label="Email" name="email" type="email" />)
+
+    expect(markupOf(own)).toContain('placeholder="Search docs"')
+    expect(markupOf(own)).not.toContain('placeholder=" "')
+    expect(markupOf(email)).not.toContain("placeholder=")
   })
 })
 

@@ -7,6 +7,10 @@
  * destination's colour and the rest of the bar stays neutral. A count and a
  * dot start `badge-nudge` past the mark's centre; a count rises
  * `badge-lift` over the pill's top edge, a dot sits `dot-top` below it.
+ *
+ * `badge-pop-duration`/`badge-pop-easing` time the count's and the dot's
+ * insertion pop from the shared `ui-motion-pop` keyframes. Both default to
+ * schema primitives, so the reduced-motion reset zeroes them.
  */
 export const tabBarTokens = {
   "ui-tabbar-height": "var(--sp-12)",
@@ -39,4 +43,6 @@ export const tabBarTokens = {
   "ui-tabbar-dot": "var(--accent)",
   "ui-tabbar-dot-size": "var(--sp-2)",
   "ui-tabbar-dot-top": "var(--sp-0)",
+  "ui-tabbar-badge-pop-duration": "var(--dur-fast)",
+  "ui-tabbar-badge-pop-easing": "var(--ease-spring)",
 } as const

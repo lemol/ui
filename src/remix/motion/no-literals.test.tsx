@@ -2,9 +2,11 @@ import { describe, expect, it } from "bun:test"
 import type { RemixNode } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import { stylesOf } from "../../../test/styles.ts"
+import { Badge } from "../badge/badge.tsx"
 import { CopyButton } from "../copy-button/copy-button.tsx"
 import { Field } from "../field/field.tsx"
 import { Skeleton } from "../skeleton/skeleton.tsx"
+import { TabBar } from "../tab-bar/tab-bar.tsx"
 import { dissolve, drawCheck, pop, shake, shimmer } from "./motion.ts"
 
 const literal = /\b\d+(\.\d+)?m?s\b/
@@ -18,6 +20,22 @@ const renders: Record<string, () => RemixNode> = {
   skeleton: () => <Skeleton />,
   copyButton: () => <CopyButton id="a" value="x" />,
   field: () => <Field error="e" label="Q" name="q" type="search" />,
+  badge: () => <Badge>3</Badge>,
+  tabBar: () => (
+    <TabBar
+      items={[
+        {
+          key: "a",
+          label: "A",
+          icon: <span>a</span>,
+          href: "/",
+          badge: { count: 2, label: "2" },
+          dot: "n",
+        },
+      ]}
+      label="Main"
+    />
+  ),
 }
 
 describe("motion, as rendered", () => {

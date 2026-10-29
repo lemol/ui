@@ -25,6 +25,10 @@
  * no border-width primitive and `allowedLiterals` in ../tokens.test.ts
  * already holds `1px` for Button's and Field's.
  *
+ * `pop-duration`/`pop-easing` time the insertion pop from the shared
+ * `ui-motion-pop` keyframes. Both default to schema primitives, so the
+ * reduced-motion reset zeroes them and the pop completes at once.
+ *
  * No transition and no hover: design-system.md rules that status colours get
  * no `-hover` arm, so there is no second state to animate to. No size axis:
  * Button has one because schema.sizing names control-h and control-h-sm, and
@@ -39,6 +43,8 @@ export const badgeTokens = {
   "ui-badge-font-weight": "var(--fw-medium)",
   "ui-badge-leading": "var(--lh-tight)",
   "ui-badge-border-width": "1px",
+  "ui-badge-pop-duration": "var(--dur-fast)",
+  "ui-badge-pop-easing": "var(--ease-spring)",
 
   // Neutral is the one tone with no semantic arms to name, so it reads the
   // surface vocabulary instead. `hairline` rather than `hairline-strong`: a

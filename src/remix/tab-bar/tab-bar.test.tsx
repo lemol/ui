@@ -1,12 +1,17 @@
 import { describe, expect, it } from "bun:test"
 import { renderToHtml } from "../../../test/render.ts"
-import { stylesOf, valuesOf } from "../../../test/styles.ts"
+import { markupOf, stylesOf, valuesOf } from "../../../test/styles.ts"
+import { motionKeywords } from "../motion/motion.ts"
 import { TabBarDemo } from "./tab-bar.demo.tsx"
 import { TabBar, tabBarBreakpoint, type TabBarItem } from "./tab-bar.tsx"
 import { tabBarTokens } from "./tokens.ts"
 
 /** Structural keywords TabBar declares; nothing here is a colour or a length a skin would retune. */
 const keywords = new Set([
+  // Motion: the shared keyframes' values, and the one animation TabBar times
+  // from its own badge-pop tokens.
+  ...motionKeywords,
+  "ui-motion-pop var(--ui-tabbar-badge-pop-duration) var(--ui-tabbar-badge-pop-easing)",
   "none",
   "block",
   "grid",
@@ -122,6 +127,22 @@ describe("TabBar", () => {
     const read = new Set([...styles.matchAll(/var\(--(ui-tabbar-[\w-]+)\)/g)].map((m) => m[1]))
 
     expect([...read].sort()).toEqual(Object.keys(tabBarTokens).sort())
+  })
+
+  it("pops its count and its dot in on insertion, on tokens reduced motion zeroes", async () => {
+    const html = await renderToHtml(<TabBar items={items} label="Main" />)
+    const popHash = [...html.matchAll(/<style data-rmx-style="([^"]*)">([\s\S]*?)<\/style>/g)].find(
+      ([, , block]) =>
+        block?.includes(
+          "animation: ui-motion-pop var(--ui-tabbar-badge-pop-duration) var(--ui-tabbar-badge-pop-easing);",
+        ),
+    )?.[1]
+
+    expect(popHash).toBeDefined()
+    // The fixture draws one count (3) and one dot; the zero count draws nothing.
+    expect(markupOf(html).match(new RegExp(`class="[^"]*\\b${popHash}\\b`, "g"))).toHaveLength(2)
+    expect(tabBarTokens["ui-tabbar-badge-pop-duration"]).toStartWith("var(--dur-")
+    expect(tabBarTokens["ui-tabbar-badge-pop-easing"]).toStartWith("var(--ease-")
   })
 
   it("has a demo that renders", async () => {

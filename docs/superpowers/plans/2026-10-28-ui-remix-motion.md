@@ -365,21 +365,21 @@ New tokens:
 "ui-tabbar-badge-pop-easing": "var(--ease-spring)",
 ```
 
-- [ ] **Step 1: Write the failing tests.** Badge: render with children, assert `animation: ui-motion-pop var(--ui-badge-pop-duration) var(--ui-badge-pop-easing)` in the badge's own block (property-disjoint from `badgeBase` and tone block). TabBar: render an item with a `badge`, assert the badge element's block names `ui-motion-pop` with `ui-tabbar-badge-pop-*` tokens; render an item with a `dot`, assert the same.
+- [x] **Step 1: Write the failing tests.** Badge: render with children, assert `animation: ui-motion-pop var(--ui-badge-pop-duration) var(--ui-badge-pop-easing)` in the badge's own block (property-disjoint from `badgeBase` and tone block). TabBar: render an item with a `badge`, assert the badge element's block names `ui-motion-pop` with `ui-tabbar-badge-pop-*` tokens; render an item with a `dot`, assert the same.
 
-- [ ] **Step 2: Run them to verify they fail.**
+- [x] **Step 2: Run them to verify they fail.**
 
 Run: `bun test src/remix/badge/badge.test.tsx src/remix/tab-bar/tab-bar.test.tsx`
 Expected: FAIL — no pop tokens, no animation.
 
-- [ ] **Step 3: Implement.** Mix `pop` into Badge and TabBar badge/dot elements. Insertion triggers the pop (frame navigation replacement); client-side mutations without replacement do not re-pop, which is documented.
+- [x] **Step 3: Implement.** Mix `pop` into Badge and TabBar badge/dot elements. Insertion triggers the pop (frame navigation replacement); client-side mutations without replacement do not re-pop, which is documented.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/badge/badge.test.tsx src/remix/tab-bar/tab-bar.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/badge/ src/remix/tab-bar/ && git commit -m "feat(badge): count and notification pop-in

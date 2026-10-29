@@ -5,6 +5,7 @@ import {
   type RemixNode,
 } from "remix/component"
 import { css } from "../css.ts"
+import { pop } from "../motion/motion.ts"
 
 /**
  * Four semantic tones and a neutral. The semantic four are the reason this
@@ -68,6 +69,16 @@ const toneStyles: Record<BadgeTone, CSSMixinDescriptor> = {
   info: toneStyle("info"),
 }
 
+/**
+ * The insertion pop, on the shared `ui-motion-pop` keyframes. Its own block,
+ * property-disjoint from the base and the tone: `animation` appears nowhere
+ * else here, so sub-layer order never decides the pop.
+ */
+const badgePop = pop({
+  duration: "var(--ui-badge-pop-duration)",
+  easing: "var(--ui-badge-pop-easing)",
+})
+
 export interface BadgeProps {
   tone?: BadgeTone | undefined
   /**
@@ -85,6 +96,6 @@ export function Badge(handle: Handle<BadgeProps>) {
   return () => {
     const { tone = "neutral", mix, children } = handle.props
 
-    return <span mix={[badgeBase, toneStyles[tone], mix]}>{children}</span>
+    return <span mix={[badgeBase, toneStyles[tone], badgePop, mix]}>{children}</span>
   }
 }

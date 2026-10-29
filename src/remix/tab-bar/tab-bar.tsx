@@ -1,5 +1,6 @@
 import { type Handle, type MixInput, type RemixNode } from "remix/component"
 import { css } from "../css.ts"
+import { pop } from "../motion/motion.ts"
 
 /**
  * Below this width a tab bar draws; above it the landmark leaves the page
@@ -168,6 +169,16 @@ const readStyle = css({
   overflow: "hidden",
 })
 
+/**
+ * The count's and the dot's insertion pop, on the shared `ui-motion-pop`
+ * keyframes. One tuple mixed onto both spans: two consumers sharing one
+ * keyframes block is safe, because a keyframe body names no token.
+ */
+const badgePop = pop({
+  duration: "var(--ui-tabbar-badge-pop-duration)",
+  easing: "var(--ui-tabbar-badge-pop-easing)",
+})
+
 function Item(handle: Handle<{ readonly item: TabBarItem }>) {
   return () => {
     const { item } = handle.props
@@ -178,11 +189,15 @@ function Item(handle: Handle<{ readonly item: TabBarItem }>) {
         <span data-tab-bar-mark="" mix={markStyle}>
           {item.icon}
           {badge === undefined ? null : (
-            <span aria-hidden="true" data-tone={badge.tone ?? "neutral"} mix={badgeStyle}>
+            <span
+              aria-hidden="true"
+              data-tone={badge.tone ?? "neutral"}
+              mix={[badgeStyle, badgePop]}
+            >
               {badge.count > 99 ? "99+" : badge.count}
             </span>
           )}
-          {item.dot === undefined ? null : <span aria-hidden="true" mix={dotStyle} />}
+          {item.dot === undefined ? null : <span aria-hidden="true" mix={[dotStyle, badgePop]} />}
         </span>
         {item.label}
         {badge === undefined ? null : <span mix={readStyle}>, {badge.label}</span>}

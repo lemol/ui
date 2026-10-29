@@ -2,12 +2,14 @@ import { describe, expect, it } from "bun:test"
 import { css } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import {
+  blocksOn,
   markupOf,
   sharedProperties,
   styleBlocksOf,
   stylesOf,
   valuesOf,
 } from "../../../test/styles.ts"
+import { motionKeywords } from "../motion/motion.ts"
 import { BadgeDemo } from "./badge.demo.tsx"
 import { Badge, type BadgeTone } from "./badge.tsx"
 import { badgeTokens } from "./tokens.ts"
@@ -20,7 +22,17 @@ const tones: BadgeTone[] = ["neutral", "success", "warning", "danger", "info"]
  * declares exactly these five, and Button's list is the precedent for the
  * shape — Eyebrow needs none because it declares nothing structural.
  */
-const keywords = new Set(["inline-flex", "center", "solid", "inherit", "nowrap"])
+const keywords = new Set([
+  // Motion: the shared keyframes' values, and the one animation Badge times
+  // from its own pop tokens.
+  ...motionKeywords,
+  "ui-motion-pop var(--ui-badge-pop-duration) var(--ui-badge-pop-easing)",
+  "inline-flex",
+  "center",
+  "solid",
+  "inherit",
+  "nowrap",
+])
 
 describe("Badge", () => {
   it("renders a span carrying its children", async () => {
@@ -118,14 +130,31 @@ describe("Badge", () => {
     expect(styles).toContain("background: var(--ui-badge-neutral-bg)")
   })
 
-  it("renders two blocks, disjoint by property", async () => {
-    // base and tone. Sub-layer order is neither source order nor stable
+  it("renders four blocks, disjoint by property", async () => {
+    // base, tone, and the pop's keyframes plus its animation. Sub-layer order
+    // is neither source order nor stable
     // across a client session, so two blocks that could both set `background`
     // would be correct only under the order observed today.
     const blocks = styleBlocksOf(await renderToHtml(<Badge tone="info">Beta</Badge>))
 
-    expect(blocks).toHaveLength(2)
+    expect(blocks).toHaveLength(4)
     expect(sharedProperties(blocks)).toEqual([])
+  })
+
+  it("pops in on insertion, on tokens reduced motion zeroes, disjoint from its other blocks", async () => {
+    const blocks = blocksOn(await renderToHtml(<Badge tone="info">3</Badge>), "span")
+
+    expect(
+      blocks.some((block) =>
+        block.includes(
+          "animation: ui-motion-pop var(--ui-badge-pop-duration) var(--ui-badge-pop-easing);",
+        ),
+      ),
+    ).toBe(true)
+    expect(blocks.some((block) => block.includes("@keyframes ui-motion-pop"))).toBe(true)
+    expect(sharedProperties(blocks)).toEqual([])
+    expect(badgeTokens["ui-badge-pop-duration"]).toStartWith("var(--dur-")
+    expect(badgeTokens["ui-badge-pop-easing"]).toStartWith("var(--ease-")
   })
 
   it("adds through mix a property it does not declare itself", async () => {

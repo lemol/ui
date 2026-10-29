@@ -1,6 +1,7 @@
 import { type Handle, type MixInput, type RemixNode } from "remix/component"
 import { css } from "../css.ts"
 import { givenProps } from "../form-control.ts"
+import { animation, keyframes } from "../motion/motion.ts"
 
 /**
  * `<selectedcontent>`, the element a customizable select clones its chosen
@@ -238,6 +239,16 @@ const invalidDeclarations = {
   borderColor: "var(--ui-field-invalid-border)",
 }
 
+// A server-invalid control shakes as it is inserted: frame navigation replaces
+// the control after a failed submission, so the shake is the round-trip signal.
+// `:user-invalid` does not shake, since blur is not that signal.
+const clearTiming = "var(--ui-field-clear-duration) var(--ui-field-clear-easing)"
+
+const errorTiming = {
+  duration: "var(--ui-field-error-duration)",
+  easing: "var(--ui-field-error-easing)",
+}
+
 /**
  * Everything every control shares, and every state it can be in.
  *
@@ -288,7 +299,19 @@ const controlBase = css({
     background: "var(--ui-field-readonly-bg)",
   },
   "&:user-invalid": invalidDeclarations,
-  '&[aria-invalid="true"]': invalidDeclarations,
+  '&[aria-invalid="true"]': { ...invalidDeclarations, animation: animation("shake", errorTiming) },
+})
+
+/**
+ * The clear button a search input draws, dissolved in and out on its own
+ * tokens: a skin slowing the shake should not slow the clear. A vendor
+ * pseudo-element, so an engine without it drops the rule whole, which is the
+ * documented degradation.
+ */
+const searchClear = css({
+  "&::-webkit-search-cancel-button": {
+    transition: `opacity ${clearTiming}`,
+  },
 })
 
 /**
@@ -507,7 +530,7 @@ export function Field(handle: Handle<FieldProps>) {
               id={stem}
               maxlength={props.maxlength}
               minlength={props.minlength}
-              mix={[controlBase, textareaBox]}
+              mix={[controlBase, keyframes.shake, textareaBox]}
               name={name}
               placeholder={props.placeholder}
               // camelCase, unlike the input branch's `readonly=`: remix/component's
@@ -529,7 +552,7 @@ export function Field(handle: Handle<FieldProps>) {
                 aria-invalid={invalid}
                 disabled={disabled}
                 id={stem}
-                mix={[controlBase, selectBox]}
+                mix={[controlBase, keyframes.shake, selectBox]}
                 name={name}
                 required={required}
               >
@@ -562,7 +585,12 @@ export function Field(handle: Handle<FieldProps>) {
               maxlength={props.maxlength}
               min={props.min}
               minlength={props.minlength}
-              mix={[controlBase, inputBox]}
+              mix={[
+                controlBase,
+                keyframes.shake,
+                inputBox,
+                ...(props.type === "search" ? [searchClear] : []),
+              ]}
               name={name}
               pattern={props.pattern}
               placeholder={props.placeholder}

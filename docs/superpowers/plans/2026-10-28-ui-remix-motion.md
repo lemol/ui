@@ -270,21 +270,21 @@ New tokens:
 "ui-field-error-easing": "var(--ease-out-quad)",
 ```
 
-- [ ] **Step 1: Write the failing test** in `src/remix/field/field.test.tsx`, beside the existing test `it("moves its list in and out as Popover's surface does, on tokens reduced motion zeroes")`. Render an invalid field and assert its control block's `animation` names `ui-motion-shake` with the two new tokens; render a `type="search"` field and assert a `::-webkit-search-cancel-button` rule transitioning `opacity` on the same tokens. Assert both token values start with `var(--dur-` / `var(--ease-` (the reduced-motion reset only zeroes tokens that read the schema).
+- [x] **Step 1: Write the failing test** in `src/remix/field/field.test.tsx`, beside the existing test `it("moves its list in and out as Popover's surface does, on tokens reduced motion zeroes")`. Render an invalid field and assert its control block's `animation` names `ui-motion-shake` with the two new tokens; render a `type="search"` field and assert a `::-webkit-search-cancel-button` rule transitioning `opacity` on the same tokens. Assert both token values start with `var(--dur-` / `var(--ease-` (the reduced-motion reset only zeroes tokens that read the schema).
 
-- [ ] **Step 2: Run it to verify it fails.**
+- [x] **Step 2: Run it to verify it fails.**
 
 Run: `bun test src/remix/field/field.test.tsx`
 Expected: FAIL — unknown tokens / missing animation.
 
-- [ ] **Step 3: Implement.** Mix `shake({ duration: "var(--ui-field-error-duration)", easing: "var(--ui-field-error-easing)" })` into the control's `[aria-invalid="true"]` rule (same block as the invalid border, keeping the co-location rule). Style the cancel button in its own block: `opacity` + `transition: opacity <tokens>`; unsupported engines drop the vendor pseudo-element rule whole, which is the documented degradation. The shake runs on insertion (frame navigation replaces the control, so it shakes after a failed submission round-trip); client-side typing does not re-trigger it, which is accepted and noted in the motion page.
+- [x] **Step 3: Implement.** Mix `shake({ duration: "var(--ui-field-error-duration)", easing: "var(--ui-field-error-easing)" })` into the control's `[aria-invalid="true"]` rule (same block as the invalid border, keeping the co-location rule). Style the cancel button in its own block: `opacity` + `transition: opacity <tokens>`; unsupported engines drop the vendor pseudo-element rule whole, which is the documented degradation. The shake runs on insertion (frame navigation replaces the control, so it shakes after a failed submission round-trip); client-side typing does not re-trigger it, which is accepted and noted in the motion page.
 
-- [ ] **Step 4: Run the tests.**
+- [x] **Step 4: Run the tests.**
 
 Run: `bun test src/remix/field/field.test.tsx`
 Expected: PASS.
 
-- [ ] **Step 5: Commit.**
+- [x] **Step 5: Commit.**
 
 ```bash
 git add src/remix/field/ && git commit -m "feat(field): error shake and search-cancel dissolve

@@ -15,11 +15,13 @@
  * `hint` and `error` share `message-size`. They are the same typographic role
  * at two inks, and a second token would only let them drift.
  *
- * The only transition tokens are the picker's. Button has them because it has
- * a hover; Field's controls have neither a hover nor a focus colour change, so
- * the only thing there to transition is the invalid border arriving on blur.
- * The list a customizable select draws is an overlay, and an overlay ships its
- * entry and exit.
+ * The transition and animation tokens are three pairs: the picker's, the
+ * error shake's and the search-clear dissolve's. Button has transition tokens
+ * because it has a hover; Field's controls have neither a hover nor a focus
+ * colour change. The list a customizable select draws is an overlay, and an
+ * overlay ships its entry and exit. The shake and the clear read separate
+ * pairs, so a skin slowing one does not slow the other; every duration reads
+ * a `--dur-*` primitive, which reduced motion zeroes.
  *
  * No focus ring, deliberately, and Button is the precedent: the reset's
  * `:where(:focus-visible)` rule owns it, and it applies precisely because no
@@ -53,6 +55,10 @@ export const fieldTokens = {
   // its semantic arms in full instead of deriving them with color-mix().
   "ui-field-invalid-border": "var(--danger-border)",
   "ui-field-invalid-bg": "var(--danger-subtle)",
+  "ui-field-error-duration": "var(--dur-fast)",
+  "ui-field-error-easing": "var(--ease-out-quad)",
+  "ui-field-clear-duration": "var(--dur-fast)",
+  "ui-field-clear-easing": "var(--ease-out-quad)",
 
   "ui-field-disabled-bg": "var(--surface-active)",
   "ui-field-disabled-ink": "var(--ink-subtle)",

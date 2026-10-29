@@ -9,6 +9,7 @@ import {
   topLevelPropertiesOf,
   valuesOf,
 } from "../../../test/styles.ts"
+import { motionKeywords } from "../motion/motion.ts"
 import { FieldDemo } from "./field.demo.tsx"
 import { Field, type FieldProps, fieldControls, fieldTypes } from "./field.tsx"
 import { fieldTokens } from "./tokens.ts"
@@ -40,6 +41,10 @@ const hostElement = (
  * here is a colour, a step off the space scale, a duration or a weight.
  */
 const keywords = new Set([
+  // Motion: the shared keyframes' values, and the one animation Field times
+  // from its own error tokens.
+  ...motionKeywords,
+  "ui-motion-shake var(--ui-field-error-duration) var(--ui-field-error-easing)",
   "flex",
   "column",
   "grid",
@@ -937,6 +942,62 @@ describe("Field, as a select", () => {
     // The reset zeroes every --dur-* token under prefers-reduced-motion, so a
     // duration read from one is a list that arrives still.
     expect(fieldTokens["ui-field-picker-transition-duration"]).toStartWith("var(--dur-")
+  })
+
+  it("shakes a server-invalid control on insertion, on tokens reduced motion zeroes", async () => {
+    const shake =
+      "animation: ui-motion-shake var(--ui-field-error-duration) var(--ui-field-error-easing);"
+
+    const renders = [
+      ["input", await renderToHtml(<Field error="Taken" label="Email" name="email" />)],
+      [
+        "textarea",
+        await renderToHtml(
+          <Field control="textarea" error="Too long" label="Notes" name="notes" />,
+        ),
+      ],
+      [
+        "select",
+        await renderToHtml(
+          <Field control="select" error="Pick one" label="Plan" name="plan">
+            <option value="a">A</option>
+          </Field>,
+        ),
+      ],
+    ] as const
+
+    for (const [tag, html] of renders) {
+      const blocks = blocksOn(html, tag)
+      const base =
+        blocks.find((block) => block.includes("border-color: var(--ui-field-border)")) ?? ""
+
+      expect(ruleIn(base, '&[aria-invalid="true"]')).toContain(shake)
+      expect(ruleIn(base, "&:user-invalid")).not.toContain("animation")
+      expect(blocks.some((block) => block.includes("@keyframes ui-motion-shake"))).toBe(true)
+    }
+
+    expect(fieldTokens["ui-field-error-duration"]).toStartWith("var(--dur-")
+    expect(fieldTokens["ui-field-error-easing"]).toStartWith("var(--ease-")
+  })
+
+  it("dissolves a search field's clear button on its own tokens, and only on a search field", async () => {
+    const search = blocksOn(
+      await renderToHtml(<Field label="Find" name="q" type="search" />),
+      "input",
+    )
+
+    const rule = search
+      .map((block) => ruleIn(block, "&::-webkit-search-cancel-button"))
+      .find((found) => found !== undefined)
+
+    expect(rule).toContain(
+      "transition: opacity var(--ui-field-clear-duration) var(--ui-field-clear-easing);",
+    )
+    expect(
+      stylesOf(await renderToHtml(<Field label="Email" name="email" type="email" />)),
+    ).not.toContain("search-cancel-button")
+    expect(fieldTokens["ui-field-clear-duration"]).toStartWith("var(--dur-")
+    expect(fieldTokens["ui-field-clear-easing"]).toStartWith("var(--ease-")
   })
 })
 

@@ -2,6 +2,7 @@ import { describe, expect, it } from "bun:test"
 import type { RemixNode } from "remix/component"
 import { renderToHtml } from "../../../test/render.ts"
 import { stylesOf } from "../../../test/styles.ts"
+import { Field } from "../field/field.tsx"
 import { Skeleton } from "../skeleton/skeleton.tsx"
 import { dissolve, drawCheck, pop, shake, shimmer } from "./motion.ts"
 
@@ -14,6 +15,7 @@ const renders: Record<string, () => RemixNode> = {
     <div mix={[shake(timing), pop(timing), drawCheck(timing), dissolve(timing), shimmer(timing)]} />
   ),
   skeleton: () => <Skeleton />,
+  field: () => <Field error="e" label="Q" name="q" type="search" />,
 }
 
 describe("motion, as rendered", () => {

@@ -2,8 +2,10 @@
 title: 'Build M5: the motion system'
 depends_on: [5]
 group: M5 — Motion system
+completed_at: 2026-10-29T08:44:13Z
+outcome: completed
 ---
-Execute [the M5 plan](../../docs/superpowers/plans/2026-10-28-ui-remix-motion.md), Tasks A–K in order, one commit per task as the plan writes them. The plan landed as ui:05 (7569b82) after four review rounds; nothing filed its execution, so the milestone had no build task.
+Execute [the M5 plan](../../../docs/superpowers/plans/2026-10-28-ui-remix-motion.md), Tasks A–K in order, one commit per task as the plan writes them. The plan landed as ui:05 (7569b82) after four review rounds; nothing filed its execution, so the milestone had no build task.
 
 **Why.** ui:05 was a planning task: it delivered the plan document and no code. M5 stays empty in `todo/TODO.md` until someone runs the plan.
 
@@ -14,3 +16,14 @@ Execute [the M5 plan](../../docs/superpowers/plans/2026-10-28-ui-remix-motion.md
 **Done when.** Every plan step is checked off, `bun run check` passes, and the plan's three Verify items hold on the rendered tree: no `@starting-style` dependence for keyframe motion, reduced motion zeroes everything through the reset, and no literal durations or curves in component styles.
 
 **Out of scope.** A same-document view-transition caller: `remix` 3.1.0 ships none (see the plan's Load-bearing findings). Live Tabs morphing, for the same reason.
+
+## Comments
+
+### @nzila at 2026-10-29 08:44:13 +00:00
+
+Done in 3 slices (split by the planner, plan#1):
+- motion-core        M5 core: shared keyframe mixins, viewTransitionName, Field shake/clear, CopyButton confirm           01M63B4MS7CP2GWSTAP9DQSM0J  landed d8db1c0
+- motion-components  M5 components: Badge/TabBar pop, Button press, Tabs and Toaster minted names, cross-document opt-in  01M63BQZ8FH9RD55Z7EJAHYRX6  landed 10308ae
+- motion-page        M5 page: reduced-motion toggle, /pages/motion, documents                                             01M63CJ8BFX8PFZ32PM18QH4BF  this change
+
+nzila run 01M63A8DC3F9DWY4DGAJZ4JSM9

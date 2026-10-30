@@ -4,8 +4,6 @@
 
 ## M2 — Catalogue
 
-- [ ] [53 - SegmentedControl's hard-coded-value sieve decomposes its calc()](./m2-catalogue/53-segmentedcontrol-s-hard-coded-value-sieve-decomposes-its.md)
-
 
 
 

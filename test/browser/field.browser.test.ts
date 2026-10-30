@@ -60,27 +60,54 @@ for (const width of [1440, 390]) {
         true,
       )
 
-      // The option spans the picker's content box. Include the picker chrome,
-      // not just the inset option, when checking its outer edges.
-      const viewportWidth = await page.evaluate(() => window.innerWidth)
-      const pickerBox = await option.evaluate((element) => {
-        const rect = element.getBoundingClientRect()
-        const picker = getComputedStyle(element.closest("select")!, "::picker(select)")
+      // Wait for the block-axis entry translate to settle before measuring.
+      await page.waitForFunction(() => {
+        const element = document.querySelector("select:open")
+
+        if (element === null) return false
+
+        const picker = getComputedStyle(element, "::picker(select)")
+
+        return picker.translate === "none" && picker.opacity === "1"
+      })
+
+      // The options span the picker's content box. Include the picker chrome,
+      // not just the inset options, when checking all four outer edges.
+      const viewport = await page.evaluate(() => ({
+        width: window.innerWidth,
+        height: window.innerHeight,
+      }))
+
+      const pickerBox = await select.evaluate((element) => {
+        const options = element.querySelectorAll("option")
+        const first = options[0]!.getBoundingClientRect()
+        const last = options[options.length - 1]!.getBoundingClientRect()
+        const picker = getComputedStyle(element, "::picker(select)")
 
         return {
           left:
-            rect.left -
+            first.left -
             Number.parseFloat(picker.paddingLeft) -
             Number.parseFloat(picker.borderLeftWidth),
           right:
-            rect.right +
+            first.right +
             Number.parseFloat(picker.paddingRight) +
             Number.parseFloat(picker.borderRightWidth),
+          top:
+            first.top -
+            Number.parseFloat(picker.paddingTop) -
+            Number.parseFloat(picker.borderTopWidth),
+          bottom:
+            last.bottom +
+            Number.parseFloat(picker.paddingBottom) +
+            Number.parseFloat(picker.borderBottomWidth),
         }
       })
 
       expect(pickerBox.left).toBeGreaterThanOrEqual(0)
-      expect(pickerBox.right).toBeLessThanOrEqual(viewportWidth)
+      expect(pickerBox.right).toBeLessThanOrEqual(viewport.width)
+      expect(pickerBox.top).toBeGreaterThanOrEqual(0)
+      expect(pickerBox.bottom).toBeLessThanOrEqual(viewport.height)
     })
   })
 }

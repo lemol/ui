@@ -226,12 +226,12 @@ sub-layer, and unconditional they would beat the disabled cursor and ink.
 Forty-nine tokens in `field/tokens.ts`, six of them motion in three pairs:
 the picker's entry and exit (`ui-field-picker-transition-*`), the shake a
 server-invalid control plays as it is inserted (`ui-field-error-*`), and the
- search clear button's opacity dissolve (`ui-field-clear-*`). A search Field
- defaults `placeholder` to `" "` so the clear dissolve has a state to run
- between, and a caller's own placeholder replaces it. Field styles no focus ring, as
-`Button` does not: the reset owns it, and it applies because no component
-competes with it. **`mix` reaches the wrapper, not the control** — a property
-of the control goes through its token.
+search clear button's opacity dissolve (`ui-field-clear-*`). A search Field
+defaults `placeholder` to `" "` so the clear dissolve has a state to run
+between, and a caller's own placeholder replaces it. Field styles no focus
+ring, as `Button` does not: the reset owns it, and it applies because no
+component competes with it. **`mix` reaches the wrapper, not the control** —
+a property of the control goes through its token.
 
 ### `FacetFilter`
 

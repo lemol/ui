@@ -31,6 +31,12 @@ const referencesOf = (value: string): string[] =>
  * True for a value that is entirely tokens, keywords and calc() arithmetic —
  * the check `dialog.test.tsx` uses for its own `enter-offset` translate, and
  * the one this component's own `calc()` thumb-travel distance needs too.
+ *
+ * A calc() is decomposed rather than waved through, so
+ * `calc(var(--ui-switch-track-inset) + 4px)` is still an offender. What may
+ * be left of one is `calc`, its operators, parentheses and commas, and a
+ * `* 2` doubling for the thumb travel's two insets. Any other digit or
+ * percent sign survives the sieve and makes the value unclean.
  */
 const isCleanValue = (value: string): boolean => {
   if (keywords.has(value)) return true
@@ -41,7 +47,10 @@ const isCleanValue = (value: string): boolean => {
 
   if (!references.every((name) => name.startsWith("ui-switch-"))) return false
 
-  const rest = value.replace(/var\(--[\w-]+\)/g, "").replace(/calc|[()+\-*/,\s%\d]/g, "")
+  const rest = value
+    .replace(/var\(--[\w-]+\)/g, "")
+    .replace(/\* 2\b/g, "")
+    .replace(/calc|[()+\-*/,\s]/g, "")
 
   return rest === ""
 }
@@ -143,6 +152,17 @@ describe("Switch", () => {
     const offenders = valuesOf(stylesOf(html)).filter((value) => !isCleanValue(value))
 
     expect(offenders).toEqual([])
+  })
+
+  it("flags a stray literal inside a calc() and clears the thumb's own travel", () => {
+    expect(isCleanValue("calc(var(--ui-switch-x) * 3)")).toBe(false)
+    expect(isCleanValue("calc(var(--ui-switch-x) + 50%)")).toBe(false)
+    expect(isCleanValue("calc(var(--ui-switch-x) + 4px)")).toBe(false)
+    expect(
+      isCleanValue(
+        "calc(var(--ui-switch-track-width) - var(--ui-switch-thumb-size) - var(--ui-switch-track-inset) * 2)",
+      ),
+    ).toBe(true)
   })
 
   it("reads every token it declares, and declares every one it reads", async () => {

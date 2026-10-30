@@ -54,6 +54,14 @@ const referencesOf = (value: string): string[] =>
  * shorthand names properties and the `allow-discrete` keyword beside its
  * tokens, so a generic value check reads it as a literal — and the point of
  * checking it is the pair of declarations, not the vocabulary inside one.
+ *
+ * A calc() is decomposed rather than waved through, so
+ * `calc(var(--ui-dialog-inset) + 4px)` is still an offender. What may be
+ * left of one is `min`, `calc`, its operators, parentheses and commas, a
+ * `100%` span, a `100dvh` viewport span, a `* 2` doubling, a `* -1`
+ * negation, a bare zero, and the `env(safe-area-inset-top/bottom)` insets
+ * the sheet adds at its head and foot. Any other digit or percent sign
+ * survives the sieve and makes the value an offender.
  */
 const offendersIn = (styles: string): string[] =>
   [...styles.matchAll(/([\w-]+)\s*:\s*([^;{}]+)[;}]/g)]
@@ -70,8 +78,11 @@ const offendersIn = (styles: string): string[] =>
 
       const rest = value
         .replace(/var\(--[\w-]+\)/g, "")
-        .replace(/env\(safe-area-inset-(?:top|bottom)\)|dvh/g, "")
-        .replace(/min|calc|[()+\-*/,\s%\d]/g, "")
+        .replace(
+          /env\(safe-area-inset-(?:top|bottom)\)|\* -1\b|\* 2\b|(?<![\d.])100%|100dvh|\b0\b/g,
+          "",
+        )
+        .replace(/min|calc|[()+\-*/\s,]/g, "")
 
       return rest !== ""
     })
@@ -127,6 +138,27 @@ describe("DialogPanel", () => {
 
   it("reads only its own tokens and structural keywords", async () => {
     expect(offendersIn(ownStyles(await renderToHtml(panel())))).toEqual([])
+  })
+
+  it("flags a stray literal inside a calc() and clears the panel's own values", () => {
+    const declared = (value: string): string => `.x{width: ${value};}`
+
+    expect(offendersIn(declared("calc(var(--ui-dialog-x) * 3)"))).toHaveLength(1)
+    expect(offendersIn(declared("calc(var(--ui-dialog-x) + 50%)"))).toHaveLength(1)
+    expect(offendersIn(declared("calc(var(--ui-dialog-x) + 4px)"))).toHaveLength(1)
+    expect(
+      offendersIn(
+        declared("min(var(--ui-dialog-max-inline-size), calc(100% - var(--ui-dialog-inset) * 2))"),
+      ),
+    ).toEqual([])
+    expect(offendersIn(declared("calc(100% - var(--ui-dialog-inset) * 2)"))).toEqual([])
+    expect(offendersIn(declared("0 calc(var(--ui-dialog-enter-offset) * -1)"))).toEqual([])
+    expect(
+      offendersIn(declared("calc(100dvh - var(--ui-sheet-inset) - env(safe-area-inset-top))")),
+    ).toEqual([])
+    expect(
+      offendersIn(declared("calc(var(--ui-dialog-pad) + env(safe-area-inset-bottom))")),
+    ).toEqual([])
   })
 
   it("reads every token it declares, and declares every one it reads", async () => {

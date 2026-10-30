@@ -60,16 +60,27 @@ for (const width of [1440, 390]) {
         true,
       )
 
-      // The open picker stays inside the viewport at this width.
+      // The option spans the picker's content box. Include the picker chrome,
+      // not just the inset option, when checking its outer edges.
       const viewportWidth = await page.evaluate(() => window.innerWidth)
       const pickerBox = await option.evaluate((element) => {
         const rect = element.getBoundingClientRect()
+        const picker = getComputedStyle(element.closest("select")!, "::picker(select)")
 
-        return { left: rect.left, right: rect.right }
+        return {
+          left:
+            rect.left -
+            Number.parseFloat(picker.paddingLeft) -
+            Number.parseFloat(picker.borderLeftWidth),
+          right:
+            rect.right +
+            Number.parseFloat(picker.paddingRight) +
+            Number.parseFloat(picker.borderRightWidth),
+        }
       })
 
       expect(pickerBox.left).toBeGreaterThanOrEqual(0)
-      expect(pickerBox.right).toBeLessThanOrEqual(viewportWidth + 1)
+      expect(pickerBox.right).toBeLessThanOrEqual(viewportWidth)
     })
   })
 }

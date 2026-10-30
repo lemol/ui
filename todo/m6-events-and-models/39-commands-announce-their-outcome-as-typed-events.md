@@ -21,3 +21,11 @@ depends_on: [38]
 **Done when.** The named consumer listens to the event instead of its workaround, and `bun run check` passes.
 
 **Out of scope.** Events for commands with no consumer; a cancellable *before* event.
+
+## Comments
+
+### @nzila at 2026-10-30 17:52:18 +00:00
+
+Abandoned by api: needs me
+
+nzila run 01M66QY9XB4R4H8545TA6JZRER

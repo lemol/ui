@@ -223,7 +223,7 @@ a list that does not move rather than one that never appears. The picker's
 pointer and the prompt's ink wait for `:enabled`: they sit in the later
 sub-layer, and unconditional they would beat the disabled cursor and ink.
 
-Forty-eight tokens in `field/tokens.ts`, six of them motion in three pairs:
+Forty-nine tokens in `field/tokens.ts`, six of them motion in three pairs:
 the picker's entry and exit (`ui-field-picker-transition-*`), the shake a
 server-invalid control plays as it is inserted (`ui-field-error-*`), and the
 search clear button's opacity dissolve (`ui-field-clear-*`). Field styles no focus ring, as

@@ -404,6 +404,8 @@ const pickerRules = {
     boxShadow: "var(--ui-field-picker-shadow)",
     padding: "var(--ui-field-picker-pad)",
     marginBlock: "var(--ui-field-picker-gap)",
+    maxInlineSize:
+      "min(var(--ui-field-picker-max-inline-size), calc(100% - var(--ui-field-picker-gap) * 2))",
     transition: `opacity ${pickerTiming}, translate ${pickerTiming}, overlay ${pickerDuration} allow-discrete, display ${pickerDuration} allow-discrete`,
   },
   "&:not(:open)::picker(select)": { opacity: 0, translate: pickerEnter },
@@ -416,6 +418,10 @@ const pickerRules = {
     paddingBlock: "var(--ui-field-option-pad-y)",
     borderRadius: "var(--ui-field-option-radius)",
     cursor: "pointer",
+    maxInlineSize: "100%",
+    minInlineSize: "0",
+    whiteSpace: "normal",
+    overflowWrap: "anywhere",
   },
   "& option:hover, & option:focus-visible": {
     background: "var(--ui-field-option-bg-hover)",

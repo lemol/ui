@@ -59,6 +59,17 @@ for (const width of [1440, 390]) {
       expect(await option.evaluate((element) => element.scrollWidth <= element.clientWidth)).toBe(
         true,
       )
+
+      // The open picker stays inside the viewport at this width.
+      const viewportWidth = await page.evaluate(() => window.innerWidth)
+      const pickerBox = await option.evaluate((element) => {
+        const rect = element.getBoundingClientRect()
+
+        return { left: rect.left, right: rect.right }
+      })
+
+      expect(pickerBox.left).toBeGreaterThanOrEqual(0)
+      expect(pickerBox.right).toBeLessThanOrEqual(viewportWidth + 1)
     })
   })
 }

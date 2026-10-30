@@ -66,10 +66,14 @@ const keywords = new Set([
   "0",
   // The chosen value in the closed select: a button that takes the select's
   // type and ink, and one line cut with an ellipsis, icons inline beside it.
+  // The open list's rows wrap instead: normal flow and anywhere breaking so a
+  // long option stays inside the capped picker.
   "inherit",
   "block",
   "hidden",
   "nowrap",
+  "normal",
+  "anywhere",
   "ellipsis",
   "inline",
   "middle",
@@ -101,7 +105,7 @@ const offendersIn = (styles: string): string[] =>
       .replace(/var\(--[\w-]+\)/g, "")
       .replace(/\b(opacity|translate|overlay|display|allow-discrete)\b/g, "")
       .replace(/\* -1\b|\b0\b/g, "")
-      .replace(/calc|[()+\-*/\s,]/g, "")
+      .replace(/min|calc|[()+\-*/\s,%\d]/g, "")
 
     return rest !== ""
   })
@@ -942,6 +946,43 @@ describe("Field, as a select", () => {
     // The reset zeroes every --dur-* token under prefers-reduced-motion, so a
     // duration read from one is a list that arrives still.
     expect(fieldTokens["ui-field-picker-transition-duration"]).toStartWith("var(--dur-")
+  })
+
+  it("caps the open picker's inline size at the viewport's available space, on a token", async () => {
+    // At 390px the longest option forced a ~730px picker past the viewport.
+    // The cap is min(token, available space) like Popover's surface, so a
+    // skin retunes the bound without restating the property.
+    const picker = pickerBlockOf(
+      await renderToHtml(
+        <Field control="select" label="Plan" name="plan">
+          {plans}
+        </Field>,
+      ),
+    )
+
+    expect(ruleIn(picker, "&::picker(select)")).toContain(
+      "max-inline-size: min(var(--ui-field-picker-max-inline-size), calc(100% - var(--ui-field-picker-gap) * 2));",
+    )
+    expect(fieldTokens["ui-field-picker-max-inline-size"]).toBe("var(--overlay-max)")
+  })
+
+  it("wraps long options inside the capped picker", async () => {
+    // Wrapping keeps scrollWidth <= clientWidth, which the browser test
+    // asserts on the open option; an ellipsis there would overflow instead.
+    const picker = pickerBlockOf(
+      await renderToHtml(
+        <Field control="select" label="Plan" name="plan">
+          {plans}
+        </Field>,
+      ),
+    )
+
+    const option = ruleIn(picker, "& option")
+
+    expect(option).toContain("max-inline-size: 100%;")
+    expect(option).toContain("min-inline-size: 0;")
+    expect(option).toContain("white-space: normal;")
+    expect(option).toContain("overflow-wrap: anywhere;")
   })
 
   it("shakes a server-invalid control on insertion, on tokens reduced motion zeroes", async () => {

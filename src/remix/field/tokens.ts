@@ -72,7 +72,10 @@ export const fieldTokens = {
   "ui-field-chevron-space": "var(--sp-6)",
 
   // The customizable select's list, where the engine draws one: a popover's
-  // surface, so its defaults are the popover's own primitives.
+  // surface, so its defaults are the popover's own primitives. The max width
+  // caps the picker at the viewport's available space, kept as a token so a
+  // skin retunes it without restating the property.
+  "ui-field-picker-max-inline-size": "var(--overlay-max)",
   "ui-field-picker-bg": "var(--surface-raised)",
   "ui-field-picker-ink": "var(--ink)",
   "ui-field-picker-border": "var(--hairline)",

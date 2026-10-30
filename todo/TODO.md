@@ -5,6 +5,7 @@
 ## M2 — Catalogue
 
 - [ ] [52 - Dialog's and Switch's hard-coded-value sieves catch literals inside calc()](./m2-catalogue/52-dialog-and-switch-sieves-catch-literals-inside-calc.md)
+- [ ] [53 - SegmentedControl's hard-coded-value sieve decomposes its calc()](./m2-catalogue/53-segmentedcontrol-s-hard-coded-value-sieve-decomposes-its.md)
 
 
 

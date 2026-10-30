@@ -32,6 +32,36 @@ const keywords = new Set([
   "var(--focus-ring-offset)",
 ])
 
+/**
+ * Own tokens and structural values only. Decompose calc() so literals and
+ * foreign tokens cannot hide beside an own token. After removing own var()s,
+ * only the inline-size's `100%` span, `* 2` doubling, `/ <count>` positive
+ * integer divisor, calc, parentheses, subtraction and whitespace may remain.
+ * Bare integer percentages are the per-index translate, not calc() literals.
+ */
+const isCleanValue = (value: string): boolean => {
+  if (keywords.has(value)) return true
+
+  if (/^var\(--ui-segmented-[\w-]+\)$/.test(value)) return true
+
+  if (/^\d+%$/.test(value)) return true
+
+  if (!value.startsWith("calc(")) return false
+
+  const references = [...value.matchAll(/var\(--([\w-]+)\)/g)]
+
+  if (references.length === 0) return false
+
+  if (!references.every((match) => match[1]?.startsWith("ui-segmented-"))) return false
+
+  const rest = value
+    .replace(/var\(--[\w-]+\)/g, "")
+    .replace(/(?<![\d.])100%|\* 2\b|\/ [1-9]\d*\b/g, "")
+    .replace(/^calc\(|[()\-\s]/g, "")
+
+  return rest === ""
+}
+
 const options = [
   { label: "Compact", value: "compact" },
   { label: "Comfortable", value: "comfortable" },
@@ -114,25 +144,21 @@ describe("SegmentedControl", () => {
       />,
     )
 
-    // The two dynamic values — the `calc()` inline-size and the per-index
-    // `translate` percentage — are checked structurally rather than as a
-    // bare var(): a calc() mixing a token with arithmetic, and an integer
-    // percentage generated from the option count.
-    const isCleanValue = (value: string): boolean => {
-      if (keywords.has(value)) return true
-
-      if (/^var\(--ui-segmented-[\w-]+\)$/.test(value)) return true
-
-      if (/^\d+%$/.test(value)) return true
-
-      if (value.startsWith("calc(") && value.includes("--ui-segmented-")) return true
-
-      return false
-    }
-
     const offenders = valuesOf(stylesOf(html)).filter((value) => !isCleanValue(value))
 
     expect(offenders).toEqual([])
+  })
+
+  it.each([
+    "calc(var(--ui-segmented-x) + 4px)",
+    "calc(var(--ui-segmented-x) * 3)",
+    "calc(var(--ui-segmented-x) + var(--other))",
+  ])("flags an offender inside calc(): %s", (value) => {
+    expect(isCleanValue(value)).toBe(false)
+  })
+
+  it("clears the indicator's own inline-size calculation", () => {
+    expect(isCleanValue("calc((100% - var(--ui-segmented-track-pad) * 2) / 3)")).toBe(true)
   })
 
   it("reads every token it declares, and declares every one it reads", async () => {

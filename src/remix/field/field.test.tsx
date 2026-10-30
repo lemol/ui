@@ -88,8 +88,10 @@ const referencesOf = (value: string): string[] =>
  * own tokens. A calc() is decomposed rather than waved through, so
  * `calc(var(--ui-field-pad-x) + 4px)` is still an offender — which matters,
  * because the select's end padding and the picker's entry offset are calc()s.
- * What may be left of one is its operators, a negation and a bare zero; of a
- * transition, the properties it names and `allow-discrete`.
+ * What may be left of one is `min`, `calc`, its operators, parentheses and
+ * commas, a `100%` span, a `* 2` doubling, a `* -1` negation and a bare zero;
+ * of a transition, the properties it names and `allow-discrete`. Any other
+ * digit or percent sign survives the sieve and makes the value an offender.
  */
 const offendersIn = (styles: string): string[] =>
   valuesOf(styles).filter((value) => {
@@ -104,8 +106,8 @@ const offendersIn = (styles: string): string[] =>
     const rest = value
       .replace(/var\(--[\w-]+\)/g, "")
       .replace(/\b(opacity|translate|overlay|display|allow-discrete)\b/g, "")
-      .replace(/\* -1\b|\b0\b/g, "")
-      .replace(/min|calc|[()+\-*/\s,%\d]/g, "")
+      .replace(/\* -1\b|\* 2\b|(?<![\d.])100%|\b0\b/g, "")
+      .replace(/min|calc|[()+\-*/\s,]/g, "")
 
     return rest !== ""
   })
@@ -346,6 +348,21 @@ describe("Field", () => {
     )
 
     expect(offendersIn(stylesOf(html))).toEqual([])
+  })
+
+  it("flags a stray literal inside a calc() and clears the picker's own value", () => {
+    const declared = (value: string): string => `.x{width: ${value};}`
+
+    expect(offendersIn(declared("calc(var(--ui-field-x) * 3)"))).toHaveLength(1)
+    expect(offendersIn(declared("calc(var(--ui-field-x) + 50%)"))).toHaveLength(1)
+    expect(offendersIn(declared("calc(var(--ui-field-x) + 4px)"))).toHaveLength(1)
+    expect(
+      offendersIn(
+        declared(
+          "min(var(--ui-field-picker-max-inline-size), calc(100% - var(--ui-field-picker-gap) * 2))",
+        ),
+      ),
+    ).toEqual([])
   })
 
   it("keeps the control's own blocks property-disjoint", async () => {

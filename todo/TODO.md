@@ -4,8 +4,6 @@
 
 ## M2 — Catalogue
 
-- [ ] [49 - A Field select's open picker fits a 390px viewport](./m2-catalogue/49-a-field-select-s-open-picker-fits-a-390px-viewport.md)
-
 
 
 

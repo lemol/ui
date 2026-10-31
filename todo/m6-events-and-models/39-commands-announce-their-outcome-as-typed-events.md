@@ -24,6 +24,17 @@ depends_on: [38]
 
 ## Comments
 
+### @claude at 2026-10-30 18:05:29 +00:00
+
+**Still held, 2026-10-30.** Swept `xonton`, `todo-md` and `analytics` app source for a consumer (tests and `proof/` excluded). None exists, so the hold stands; keep it until an app names an event.
+
+- `ui:schemechange`, `ui:densitychange`: no app invokes `--set-scheme`, `--toggle-density`, `SchemeToggle` or `DensityToggle`. xonton's `settings/settings-preview.tsx` writes the root's attributes itself, and `--set-scheme` cannot replace it: the command persists to `localStorage` at once and flips only light/dark, while the preview also offers `system` and only Save keeps a choice.
+- `ui:copied`: no app uses `--copy` or `CopyButton`. xonton calls `navigator.clipboard` directly in `chat/copy.ts` and `task/changes/review/review-ended-notice.tsx`. Adopting `--copy` would retire that code without an event.
+- `ui:toastdismiss`: todo-md triggers `--dismiss-toast` from `src/web/app/actions/public/entry.ts`; nothing there follows a dismissal.
+- Not a workaround: the `MutationObserver` in xonton's `task/diagram-host.tsx` watches `document.body` for new diagrams, not the scheme. That file does set Mermaid's theme only once, so a scheme change without a document load probably leaves later diagrams in the old theme (read from the code, not reproduced). This event would not fix it, because xonton never runs `--set-scheme`.
+
+`todo next` still lists this task as ready despite `#held`, which is likely how run 01M66QY9XB4R4H8545TA6JZRER reached it.
+
 ### @nzila at 2026-10-30 17:52:18 +00:00
 
 Abandoned by api: needs me
